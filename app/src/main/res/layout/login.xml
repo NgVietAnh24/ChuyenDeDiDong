@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Login">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_gravity="bottom"
+            android:src="@drawable/logo" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="top"
+        android:orientation="vertical"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="bottom"
+            android:text="Tên đăng nhập"
+            android:textColor="@color/textColorTitle"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtUsername"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/border_edt"
+            android:hint="Example@gmail.com"
+            android:padding="6dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="bottom"
+            android:text="Mật khẩu"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/textColorTitle"/>
+
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtPassword"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/border_edt"
+            android:padding="6dp"
+            android:hint="Mật khẩu"
+            android:inputType="textPassword"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnForgot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginRight="28dp"
+            android:background="@android:color/transparent"
+            android:text="Quên mật khẩu ?"
+            android:textColor="@color/textColorTitle" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLogin"
+            android:layout_width="87dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:textColor="@color/textColor"
+            android:textSize="11sp"
+            android:background="@drawable/rounded_btn"
+            android:text="Đăng nhập" />
+    </LinearLayout>
+
+</LinearLayout>

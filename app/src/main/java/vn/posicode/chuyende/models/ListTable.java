@@ -1,14 +1,27 @@
 package vn.posicode.chuyende.models;
 
 public class ListTable {
+    int id;
     String nameTable;
     String capacity;
     String Status;
 
-    public ListTable(String nameTable, String capacity, String status) {
+    public ListTable() {
+    }
+
+    public ListTable(int id, String nameTable, String capacity, String status) {
+        this.id = id;
         this.nameTable = nameTable;
         this.capacity = capacity;
         Status = status;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNameTable() {

@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -41,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
         connectXML();
 //        Them du lieu vao ban
         listTable = new ArrayList<>();
-        listTable.add(new ListTable("Bàn 1", "4 - 5 nguoi", "true"));
-        listTable.add(new ListTable("Bàn 2", "4 - 8 nguoi", "true"));
-        listTable.add(new ListTable("Bàn 9", "4 - 8 nguoi", "true"));
+        listTable.add(new ListTable(1,"Bàn 1", "4 - 5 nguoi", "true"));
+        listTable.add(new ListTable(2,"Bàn 2", "4 - 8 nguoi", "true"));
+        listTable.add(new ListTable(3,"Bàn 9", "4 - 8 nguoi", "true"));
 
 //       Sử dụng danh sách tìm kiêếm
         listTableSearch = new ArrayList<>(listTable);
@@ -81,6 +83,32 @@ public class MainActivity extends AppCompatActivity {
                 Search(key);
             }
         });
+//        Xu li thanh tim kiem
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+             if(charSequence.length() == 0)
+             {
+                 listTableSearch.clear();
+                 listTableSearch.addAll(listTable);
+                 table_adapter.notifyDataSetChanged();
+             }
+             else
+             {
+                 Search(charSequence.toString());
+             }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
     //    Kết nối với xml
     private void connectXML() {
@@ -93,8 +121,8 @@ public class MainActivity extends AppCompatActivity {
     }
     //    Hàm tìm kiếm
     private void Search(String key) {
-        listTableSearch.clear();
         String chuanHoaTuKhoa = chuanHoaChuoi(key.toLowerCase());
+            listTableSearch.clear();
         if (key.isEmpty()) {
             listTableSearch.addAll(listTable);
         } else {

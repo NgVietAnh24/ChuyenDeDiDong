@@ -5,16 +5,42 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center"
+    android:orientation="vertical"
     tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:layout_marginTop="15dp">
+
+        <ImageView
+            android:id="@+id/btnSkill"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/logo" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/border_edt"
+            android:hint="Tìm kiếm"
+            android:paddingLeft="10dp"
+            android:textColorHint="@color/textColorTitle" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnLogout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="Logout"
-        android:textSize="30sp"
-        android:gravity="center"/>
+        android:textSize="30sp" />
 
 </LinearLayout>

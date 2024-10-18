@@ -6,6 +6,7 @@
 <!--        android:color="#FF3700B3" />  &lt;!&ndash; Màu viền (tùy chỉnh theo ý bạn) &ndash;&gt;-->
     <corners android:radius="10dp" />  <!-- Bo tròn các góc với bán kính 16dp -->
     <!-- Padding trong nút -->
+
 <!--    <padding-->
 <!--        android:left="10dp"-->
 <!--        android:top="10dp"-->

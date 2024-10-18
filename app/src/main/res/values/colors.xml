@@ -5,5 +5,7 @@
     <color name="textColorTitle">#830F0F</color>
     <color name="borderEdt">#A01111</color>
     <color name="backgroundColorBtn">#C71818</color>
+    <color name="textRole">#808080</color>
+    <color name="item_background">#F7E9E9</color>
 
 </resources>

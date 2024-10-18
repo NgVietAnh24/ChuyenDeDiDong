@@ -1,4 +1,4 @@
-package vn.posicode.chuyende;
+package vn.posicode.chuyende.activities;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+
+import vn.posicode.chuyende.R;
 
 public class Loading extends Dialog {
     public Loading(@NonNull Context context) {

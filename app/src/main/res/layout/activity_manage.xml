@@ -1,0 +1,96 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <!-- Nút quay lại -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="fitXY"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_back_arrow"
+        android:contentDescription="Quay lại" />
+
+    <!-- Tiêu đề Quản lý -->
+    <TextView
+        android:id="@+id/titleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quản lý"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#8A2424"
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center_horizontal" />
+
+    <!-- Các mục quản lý -->
+    <TextView
+        android:id="@+id/manageAccountTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quản lý tài khoản"
+        android:textSize="18sp"
+        android:textColor="#8A2424"
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical" />
+
+    <TextView
+        android:id="@+id/manageDishTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quản lý món ăn"
+        android:textSize="18sp"
+        android:textColor="#8A2424"
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical" />
+
+    <TextView
+        android:id="@+id/manageTableTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quản lý bàn"
+        android:textSize="18sp"
+        android:textColor="#8A2424"
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical" />
+
+    <TextView
+        android:id="@+id/manageInvoiceTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quản lý hóa đơn"
+        android:textSize="18sp"
+        android:textColor="#8A2424"
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical" />
+
+    <TextView
+        android:id="@+id/statisticsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Thống kê"
+        android:textSize="18sp"
+        android:textColor="#8A2424"
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical" />
+
+    <!-- Đăng xuất -->
+    <TextView
+        android:id="@+id/logoutTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đăng xuất"
+        android:textSize="18sp"
+        android:textColor="#D43B3B"
+        android:padding="16dp"
+        android:layout_gravity="end" />
+</LinearLayout>

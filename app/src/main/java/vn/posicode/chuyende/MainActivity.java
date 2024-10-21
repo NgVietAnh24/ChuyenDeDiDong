@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -16,18 +18,41 @@ import vn.posicode.chuyende.activities.QLNhanVien;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
-    private Button btnLogout;
-    private ImageView imgSkill;
+    private TextView btnLogout, btn_ql_taikhoan;
+    private ImageView imgSkill, btnBack;
+    private DrawerLayout drawerLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        Event();
 
-        imgSkill = findViewById(R.id.btnSkill);
-        btnLogout = findViewById(R.id.btnLogout);
+        // Khởi tạo Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
 
+        // Xử lý sự kiện mở/đóng DrawerLayout
         imgSkill.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
+
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                }
+            }
+        });
+
+        btn_ql_taikhoan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, QLNhanVien.class);
@@ -35,37 +60,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btnLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mAuth.signOut();
-                // Chuyển hướng người dùng về màn hình đăng nhập (nếu cần)
-                Intent intent = new Intent(MainActivity.this, Login.class);
-                startActivity(intent);
-                finish();  // Đóng màn hình hiện tại
-            }
+        // Xử lý sự kiện đăng xuất
+        btnLogout.setOnClickListener(view -> {
+            mAuth.signOut();
+            // Chuyển người dùng về màn hình đăng nhập
+            Intent intent = new Intent(MainActivity.this, Login.class);
+            startActivity(intent);
+            finish();  // Đóng màn hình hiện tại
         });
-
-        mAuth = FirebaseAuth.getInstance();
-        String email = "anh2442004@gmail.com";
-        String passWord = "anh@123456";
-
-//        mAuth.createUserWithEmailAndPassword(email, passWord).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-//            @Override
-//            public void onComplete(@NonNull Task<AuthResult> task) {
-//                if(task.isSuccessful()){
-//                    // Sign in success, update UI with the signed-in user's information
-//                    Log.d("Main1", "createUserWithEmail:success");
-//                    FirebaseUser user = mAuth.getCurrentUser();
-//
-//                    Toast.makeText(getApplicationContext(), user.getEmail(), Toast.LENGTH_LONG).show();
-//                }else {
-//                    // If sign in fails, display a message to the user.
-//                    Log.w("Main", "createUserWithEmail:failure", task.getException());
-//                    Toast.makeText(MainActivity.this, task.getException().getMessage(),
-//                            Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
     }
+
+    public void Event() {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        imgSkill = findViewById(R.id.btnSkill);
+        btnBack = findViewById(R.id.btnBack);
+        btnLogout = findViewById(R.id.btnlogout);
+        btn_ql_taikhoan = findViewById(R.id.btn_ql_taikhoan);
+    }
+
 }

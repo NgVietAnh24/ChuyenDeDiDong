@@ -118,6 +118,14 @@ public class MainActivity extends AppCompatActivity {
         // Set click vào bàn để chỉnh sửa
         tableView.setOnClickListener(v -> selectTableForEditing(tableView, tableName, tableDescription));
 
+        // Thêm khoảng cách giữa các bàn
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, 8); // Set khoảng cách trên và dưới của mỗi bàn
+        tableView.setLayoutParams(params);
+
         // Thêm bàn vào danh sách và layout
         tableViewsList.add(tableView);
         updateTableLayout(); // Sắp xếp và hiển thị lại danh sách bàn

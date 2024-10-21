@@ -23,7 +23,7 @@
         android:text="Quản lý"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="#8A2424"
+        android:textColor="#FF0000"
         android:layout_marginTop="8dp"
         android:layout_gravity="center_horizontal" />
 
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:text="Quản lý tài khoản"
         android:textSize="18sp"
-        android:textColor="#8A2424"
+        android:textColor="#FF0000"
         android:padding="16dp"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical" />
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:text="Quản lý món ăn"
         android:textSize="18sp"
-        android:textColor="#8A2424"
+        android:textColor="#FF0000"
         android:padding="16dp"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical" />
@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:text="Quản lý bàn"
         android:textSize="18sp"
-        android:textColor="#8A2424"
+        android:textColor="#FF0000"
         android:padding="16dp"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical" />
@@ -67,7 +67,7 @@
         android:layout_height="wrap_content"
         android:text="Quản lý hóa đơn"
         android:textSize="18sp"
-        android:textColor="#8A2424"
+        android:textColor="#FF0000"
         android:padding="16dp"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical" />
@@ -78,7 +78,7 @@
         android:layout_height="wrap_content"
         android:text="Thống kê"
         android:textSize="18sp"
-        android:textColor="#8A2424"
+        android:textColor="#FF0000"
         android:padding="16dp"
         android:background="?android:attr/selectableItemBackground"
         android:gravity="center_vertical" />
@@ -90,7 +90,7 @@
         android:layout_height="wrap_content"
         android:text="Đăng xuất"
         android:textSize="18sp"
-        android:textColor="#D43B3B"
+        android:textColor="#FF0000"
         android:padding="16dp"
         android:layout_gravity="end" />
 </LinearLayout>

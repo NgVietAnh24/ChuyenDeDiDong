@@ -1,4 +1,4 @@
-package vn.posicode.chuyende.activities;
+package vn.posicode.chuyende.TrangThaiDanhSachBan;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.Menu.ManageActivity;
 
 public class TableListActivity extends AppCompatActivity {
 

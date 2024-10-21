@@ -3,6 +3,7 @@ package vn.posicode.chuyende.models;
 import java.text.DateFormat;
 
 public class NguoiDung {
+    private String uid;
     private String tenDangNhap;
     private String tenNhanVien;
     private String sDT;
@@ -24,6 +25,14 @@ public class NguoiDung {
         this.roles = roles;
         this.ngayTao = ngayTao;
         this.ngayCapNhat = ngayCapNhat;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
     public String getTenDangNhap() {
@@ -66,6 +75,22 @@ public class NguoiDung {
         NgayCap = ngayCap;
     }
 
+    public String getMatTruocCCCD() {
+        return matTruocCCCD;
+    }
+
+    public void setMatTruocCCCD(String matTruocCCCD) {
+        this.matTruocCCCD = matTruocCCCD;
+    }
+
+    public String getMatSauCCCD() {
+        return matSauCCCD;
+    }
+
+    public void setMatSauCCCD(String matSauCCCD) {
+        this.matSauCCCD = matSauCCCD;
+    }
+
     public int getRoles() {
         return roles;
     }
@@ -88,5 +113,18 @@ public class NguoiDung {
 
     public void setNgayCapNhat(String ngayCapNhat) {
         this.ngayCapNhat = ngayCapNhat;
+    }
+
+    public String getVaiTro() {
+        switch (roles) {
+            case 1:
+                return "Phục vụ";
+            case 2:
+                return "Thu ngân";
+            case 3:
+                return "Đầu bếp";
+            default:
+                return "Không xác định";
+        }
     }
 }

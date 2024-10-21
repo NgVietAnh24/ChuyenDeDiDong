@@ -14,7 +14,6 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <!-- Thông tin người dùng (Tên và Vai trò) -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"

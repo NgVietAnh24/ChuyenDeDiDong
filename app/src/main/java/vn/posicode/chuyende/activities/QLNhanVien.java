@@ -6,10 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -24,18 +24,17 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -44,6 +43,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -71,7 +71,10 @@ public class QLNhanVien extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
     private Uri imageUri;
+    private Uri imageUri1;
     private int currentImageView = 0;
+
+    private String selectedUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,7 +88,7 @@ public class QLNhanVien extends AppCompatActivity {
         storageReference = FirebaseStorage.getInstance().getReference("images");
         list = new ArrayList<>();
         // Khởi tạo Adapter và gán cho RecyclerView
-        nguoiDungAdapter = new NguoiDungAdapter(list);
+//        nguoiDungAdapter = new NguoiDungAdapter(list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(RecyclerView.VERTICAL);
         listNhanVien.setLayoutManager(layoutManager);
@@ -103,7 +106,43 @@ public class QLNhanVien extends AppCompatActivity {
                 String soDT = edtSoDT.getText().toString();
                 String soCCCD = edtSoCCCD.getText().toString();
                 String ngayCap = edtNgayCap.getText().toString();
+                String imgMatTruoc = imgMatTruocCCCD.toString();
+                String imgMatSau = imgMatSauCCCD.toString();
                 String selectedRole = spVaiTro.getSelectedItem().toString();
+                Uri img = imageUri;
+                // Ràng buộc cho các trường nhập dữ liệu
+                if (email.equals("") || name.equals("") || password.equals("") || soDT.equals("") || soCCCD.equals("") || ngayCap.equals("")) {
+                    Toast.makeText(QLNhanVien.this, "Vui lòng nhập đầy đủ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!isValidEmail(email)) {
+                    Toast.makeText(QLNhanVien.this, "Địa chỉ email không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (name.length() > 0 && !Character.isUpperCase(name.charAt(0))) {
+                    Toast.makeText(QLNhanVien.this, "Họ tên phải bắt đầu bằng chữ cái viết hoa!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (password.length() < 6 || !Character.isUpperCase(password.charAt(0))) {
+                    Toast.makeText(QLNhanVien.this, "Mật khẩu phải có ít nhất 6 kí tự và viết hoa chữ cái đầu tiên!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (soDT.length() > 11 || soDT.charAt(0) != '0') {
+                    Toast.makeText(QLNhanVien.this, "Số điện thoại không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (soCCCD.length() > 12) {
+                    Toast.makeText(QLNhanVien.this, "Số căn cước công dân không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!isValidDate(ngayCap)) {
+                    Toast.makeText(QLNhanVien.this, "Ngày cấp không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (img == null) {
+                    Toast.makeText(QLNhanVien.this, "Thiếu ảnh", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 // Lấy thời gian hiện tại và định dạng nó thành chuỗi ngày giờ theo ý muốn
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -134,14 +173,17 @@ public class QLNhanVien extends AppCompatActivity {
 
                                         // Tạo thông tin người dùng trong Firestore với UID làm ID tài liệu
                                         NguoiDung newUser = new NguoiDung(email, name, soDT, soCCCD, ngayCap, finalRole, ngayTao, ngayCapNhat);
-
+                                        newUser.setUid(uid);
                                         firestore.collection("users").document(uid)
                                                 .set(newUser)
                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
                                                         if (task.isSuccessful()) {
+                                                            // Gọi uploadImageToFirebaseStorage ở đây
+                                                            uploadImageToFirebaseStorage(uid);
                                                             docDulieu();
+                                                            resetInputFields();
                                                             Toast.makeText(QLNhanVien.this, "Thêm thành công ☑️", Toast.LENGTH_SHORT).show();
                                                         } else {
                                                             Log.d(TAG, "Error adding document", task.getException());
@@ -149,14 +191,118 @@ public class QLNhanVien extends AppCompatActivity {
                                                     }
                                                 });
                                     }
+
                                 } else {
                                     Toast.makeText(QLNhanVien.this, "Đăng ký thất bại", Toast.LENGTH_SHORT).show();
                                     Log.d(TAG, "Error registering user", task.getException());
                                 }
                             }
                         });
+
+//                uploadImageToFirebaseStorage();
             }
         });
+
+        btnSua.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String email = edtTenDangNhap.getText().toString();
+                String name = edtTenNhanVien.getText().toString();
+//                String password = edtMatKhau.getText().toString();
+                String soDT = edtSoDT.getText().toString();
+                String soCCCD = edtSoCCCD.getText().toString();
+                String ngayCap = edtNgayCap.getText().toString();
+                String selectedRole = spVaiTro.getSelectedItem().toString();
+                Uri img = imageUri;
+
+                // Kiểm tra dữ liệu nhập
+                if (email.equals("") || name.equals("") || soDT.equals("") || soCCCD.equals("") || ngayCap.equals("")) {
+                    Toast.makeText(QLNhanVien.this, "Vui lòng nhập đầy đủ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Kiểm tra tính hợp lệ của các trường nhập
+                if (!isValidEmail(email)) {
+                    Toast.makeText(QLNhanVien.this, "Địa chỉ email không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (name.length() > 0 && !Character.isUpperCase(name.charAt(0))) {
+                    Toast.makeText(QLNhanVien.this, "Họ tên phải bắt đầu bằng chữ cái viết hoa!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+//                if (password.length() < 6 || !Character.isUpperCase(password.charAt(0))) {
+//                    Toast.makeText(QLNhanVien.this, "Mật khẩu phải có ít nhất 6 kí tự và viết hoa chữ cái đầu tiên!", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
+                if (soDT.length() > 11 || soDT.charAt(0) != '0') {
+                    Toast.makeText(QLNhanVien.this, "Số điện thoại không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (soCCCD.length() > 12) {
+                    Toast.makeText(QLNhanVien.this, "Số căn cước công dân không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!isValidDate(ngayCap)) {
+                    Toast.makeText(QLNhanVien.this, "Ngày cấp không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+
+                String currentUserId = selectedUser;  // Đây là ID người dùng được chọn để sửa
+
+                // Lấy thời gian hiện tại và định dạng nó thành chuỗi ngày giờ theo ý muốn
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                String ngayCapNhat = sdf.format(new Date());
+
+                // Chuẩn bị các trường cập nhật
+                int role = 0;
+                if (selectedRole.equals("Phục vụ")) {
+                    role = 1;
+                } else if (selectedRole.equals("Thu ngân")) {
+                    role = 2;
+                } else if (selectedRole.equals("Đầu bếp")) {
+                    role = 3;
+                }
+
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("tenDangNhap", email);
+                updates.put("tenNhanVien", name);
+                updates.put("sDT", soDT);
+                updates.put("soCCCD", soCCCD);
+                updates.put("ngayCap", ngayCap);
+                updates.put("roles", role);
+                updates.put("ngayCapNhat", ngayCapNhat);
+
+                // Cập nhật thông tin vào Firestore
+                firestore.collection("users").document(currentUserId)
+                        .update(updates)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(QLNhanVien.this, "Cập nhật thành công ☑️", Toast.LENGTH_SHORT).show();
+                                docDulieu(); // Tải lại dữ liệu lên giao diện sau khi cập nhật
+                                resetInputFields(); // Xóa dữ liệu trong các ô nhập liệu
+                            } else {
+                                Toast.makeText(QLNhanVien.this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
+                                Log.d(TAG, "Error updating document", task.getException());
+                            }
+                        });
+
+                // Nếu có thay đổi ảnh, cập nhật hình ảnh lên Firebase Storage
+                if (img != null) {
+                    uploadImageToFirebaseStorage(currentUserId);
+                }
+            }
+        });
+
+
+        nguoiDungAdapter = new NguoiDungAdapter(list, new NguoiDungAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(NguoiDung user) {
+                displayUserData(user); // Hiển thị dữ liệu của người dùng
+            }
+        });
+
+        listNhanVien.setAdapter(nguoiDungAdapter);
 
 
         // Tạo danh sách dữ liệu cho Spinner
@@ -196,6 +342,65 @@ public class QLNhanVien extends AppCompatActivity {
 
     }
 
+    private void resetInputFields() {
+        edtTenDangNhap.setText("");
+        edtTenNhanVien.setText("");
+        edtMatKhau.setEnabled(true);
+        edtSoDT.setText("");
+        edtSoCCCD.setText("");
+        edtNgayCap.setText("");
+        imgMatTruocCCCD.setImageResource(R.drawable.add_card);
+        imgMatSauCCCD.setImageResource(R.drawable.add_card);
+        spVaiTro.setSelection(0);
+    }
+
+
+    private boolean isValidEmail(String email) {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    public static boolean isValidDate(String dateStr) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        sdf.setLenient(false);
+
+        try {
+            // Thử parse chuỗi ngày
+            sdf.parse(dateStr);
+            return true; // Ngày hợp lệ
+        } catch (ParseException e) {
+            return false; // Ngày không hợp lệ
+        }
+    }
+
+    // Hiển thị dữ liệu của người dùng được chọn vào các trường nhập liệu
+    private void displayUserData(NguoiDung user) {
+        selectedUser = user.getUid();
+
+        edtTenDangNhap.setText(user.getTenDangNhap());
+        edtTenNhanVien.setText(user.getTenNhanVien());
+        edtMatKhau.setEnabled(false);
+        edtSoDT.setText(user.getsDT());
+        edtSoCCCD.setText(user.getSoCCCD());
+        edtNgayCap.setText(user.getNgayCap());
+
+        // Tải ảnh mặt trước và mặt sau từ URL trong Firestore và hiển thị vào ImageView
+        if (user.getMatTruocCCCD() != null) {
+            Glide.with(this).load(user.getMatTruocCCCD()).into(imgMatTruocCCCD);
+        } else {
+            imgMatTruocCCCD.setImageResource(R.drawable.add_card);
+        }
+        if (user.getMatSauCCCD() != null) {
+            Glide.with(this).load(user.getMatSauCCCD()).into(imgMatSauCCCD);
+        } else {
+            imgMatSauCCCD.setImageResource(R.drawable.add_card);
+        }
+
+        // Chọn vai trò từ Spinner
+        ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spVaiTro.getAdapter();
+        int spinnerPosition = adapter.getPosition(user.getVaiTro());
+        spVaiTro.setSelection(spinnerPosition);
+    }
+
 
     private void showImageSourceDialog(int imageViewIndex) {
         currentImageView = imageViewIndex; // Ghi lại ImageView hiện tại
@@ -215,8 +420,7 @@ public class QLNhanVien extends AppCompatActivity {
     }
 
 
-
-    // Chọn ảnh từ thư viện
+    //TODO Chọn ảnh từ thư viện
     private void chooseImageFromGallery() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -230,37 +434,38 @@ public class QLNhanVien extends AppCompatActivity {
         startActivityForResult(intent, CAMERA_REQUEST);
     }
 
-    // Xử lý kết quả trả về
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
                 imageUri = data.getData();
-                uploadImageToFirebaseStorage();
-                if (imageUri != null) {
+                imageUri1 = data.getData();
+
+                if (imageUri != null || imageUri1 != null) {
                     if (currentImageView == 1) {
                         imgMatTruocCCCD.setImageURI(imageUri); // Hiển thị ảnh từ thư viện cho imageView1
                     } else {
-                        imgMatSauCCCD.setImageURI(imageUri); // Hiển thị ảnh từ thư viện cho imageView2
+                        imgMatSauCCCD.setImageURI(imageUri1); // Hiển thị ảnh từ thư viện cho imageView2
                     }
                 }
             } else if (requestCode == CAMERA_REQUEST && data != null) {
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
                 imageUri = getImageUriFromBitmap(photo);
-                uploadImageToFirebaseStorage();
-                if (imageUri != null) {
+                imageUri1 = getImageUriFromBitmap(photo);
+                if (imageUri != null || imageUri1 != null) {
                     if (currentImageView == 1) {
-                        imgMatTruocCCCD.setImageURI(imageUri); // Hiển thị ảnh từ thư viện cho imageView1
+                        imgMatTruocCCCD.setImageURI(imageUri); // Hiển thị ảnh từ camera cho imageView1
                     } else {
-                        imgMatSauCCCD.setImageURI(imageUri); // Hiển thị ảnh từ thư viện cho imageView2
+                        imgMatSauCCCD.setImageURI(imageUri1); // Hiển thị ảnh từ camera cho imageView2
                     }
                 }
             }
         }
     }
 
-    // Chuyển Bitmap sang Uri
+
+    //TODO Chuyển Bitmap sang Uri
     private Uri getImageUriFromBitmap(Bitmap bitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
@@ -268,40 +473,76 @@ public class QLNhanVien extends AppCompatActivity {
         return Uri.parse(path);
     }
 
-    private void uploadImageToFirebaseStorage() {
+    private void uploadImageToFirebaseStorage(String userId) {
+        // Kiểm tra từng ảnh một và upload nếu không null
         if (imageUri != null) {
-            // Khởi tạo Firebase Storage
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference storageRef = storage.getReference();
+            // Ảnh mặt trước
+            StorageReference frontImageRef = storageReference.child("images/" + userId + "_front.jpg");
+            uploadImage(frontImageRef, userId, true); // Gọi hàm upload cho ảnh mặt trước
+        }
 
-            // Tạo tên file unique cho ảnh
-            StorageReference fileRef = storageRef.child("images/" + System.currentTimeMillis() + ".jpg");
-
-            // Upload ảnh
-            fileRef.putFile(imageUri)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // Lấy URL của ảnh sau khi upload thành công
-                            fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    String imageUrl = uri.toString();
-                                    // URL của ảnh đã upload: imageUrl
-                                    Toast.makeText(QLNhanVien.this, "Upload thành công", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(QLNhanVien.this, "Upload thất bại", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+        if (imageUri1 != null) {
+            // Ảnh mặt sau
+            StorageReference backImageRef = storageReference.child("images/" + userId + "_back.jpg");
+            uploadImage(backImageRef, userId, false); // Gọi hàm upload cho ảnh mặt sau
         } else {
             Toast.makeText(this, "Không có ảnh được chọn", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void uploadImage(StorageReference fileRef, String userId, boolean isFrontImage) {
+        Uri uploadUri = isFrontImage ? imageUri : imageUri1; // Chọn URI dựa trên ảnh trước hay sau
+        NguoiDung user = new NguoiDung(); // Tạo một object NguoiDung
+
+        // Upload ảnh
+        fileRef.putFile(uploadUri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Lấy URL của ảnh sau khi upload thành công
+                        fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String imageUrl = uri.toString();
+
+                                // Cập nhật URL vào object NguoiDung trước khi lưu vào Firestore
+                                if (isFrontImage) {
+                                    // Cập nhật URL ảnh mặt trước trong object NguoiDung
+                                    user.setMatTruocCCCD(imageUrl);
+
+                                    // Lưu ảnh mặt trước vào Firestore
+                                    firestore.collection("users").document(userId)
+                                            .update("matTruocCCCD", user.getMatTruocCCCD()) // Sử dụng giá trị từ class NguoiDung
+                                            .addOnSuccessListener(aVoid -> {
+                                                Toast.makeText(QLNhanVien.this, "Upload ảnh mặt trước thành công", Toast.LENGTH_SHORT).show();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Toast.makeText(QLNhanVien.this, "Upload ảnh mặt trước thất bại", Toast.LENGTH_SHORT).show();
+                                            });
+                                } else {
+                                    // Cập nhật URL ảnh mặt sau trong object NguoiDung
+                                    user.setMatSauCCCD(imageUrl);
+
+                                    // Lưu ảnh mặt sau vào Firestore
+                                    firestore.collection("users").document(userId)
+                                            .update("matSauCCCD", user.getMatSauCCCD()) // Sử dụng giá trị từ class NguoiDung
+                                            .addOnSuccessListener(aVoid -> {
+                                                Toast.makeText(QLNhanVien.this, "Upload ảnh mặt sau thành công", Toast.LENGTH_SHORT).show();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Toast.makeText(QLNhanVien.this, "Upload ảnh mặt sau thất bại", Toast.LENGTH_SHORT).show();
+                                            });
+                                }
+                            }
+                        });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(QLNhanVien.this, "Upload thất bại", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 
@@ -348,7 +589,7 @@ public class QLNhanVien extends AppCompatActivity {
 
     }
 
-    private void docDulieu() {
+    public void docDulieu() {
         firestore.collection("users")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {

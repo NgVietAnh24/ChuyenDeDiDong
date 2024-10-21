@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import vn.posicode.chuyende.MainActivity;
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapters.NguoiDungAdapter;
 import vn.posicode.chuyende.models.NguoiDung;
@@ -106,8 +107,6 @@ public class QLNhanVien extends AppCompatActivity {
                 String soDT = edtSoDT.getText().toString();
                 String soCCCD = edtSoCCCD.getText().toString();
                 String ngayCap = edtNgayCap.getText().toString();
-                String imgMatTruoc = imgMatTruocCCCD.toString();
-                String imgMatSau = imgMatSauCCCD.toString();
                 String selectedRole = spVaiTro.getSelectedItem().toString();
                 Uri img = imageUri;
                 // Ràng buộc cho các trường nhập dữ liệu
@@ -208,7 +207,6 @@ public class QLNhanVien extends AppCompatActivity {
             public void onClick(View view) {
                 String email = edtTenDangNhap.getText().toString();
                 String name = edtTenNhanVien.getText().toString();
-//                String password = edtMatKhau.getText().toString();
                 String soDT = edtSoDT.getText().toString();
                 String soCCCD = edtSoCCCD.getText().toString();
                 String ngayCap = edtNgayCap.getText().toString();
@@ -322,6 +320,8 @@ public class QLNhanVien extends AppCompatActivity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(QLNhanVien.this, MainActivity.class);
+                startActivity(intent);
                 finish();
             }
         });
@@ -345,6 +345,7 @@ public class QLNhanVien extends AppCompatActivity {
     private void resetInputFields() {
         edtTenDangNhap.setText("");
         edtTenNhanVien.setText("");
+        edtMatKhau.setText("");
         edtMatKhau.setEnabled(true);
         edtSoDT.setText("");
         edtSoCCCD.setText("");
@@ -439,30 +440,35 @@ public class QLNhanVien extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
-                imageUri = data.getData();
-                imageUri1 = data.getData();
+                // Lấy URI ảnh từ thư viện
+                Uri selectedImageUri = data.getData();
 
-                if (imageUri != null || imageUri1 != null) {
-                    if (currentImageView == 1) {
-                        imgMatTruocCCCD.setImageURI(imageUri); // Hiển thị ảnh từ thư viện cho imageView1
-                    } else {
-                        imgMatSauCCCD.setImageURI(imageUri1); // Hiển thị ảnh từ thư viện cho imageView2
-                    }
+                if (currentImageView == 1) {
+                    // Nếu là ImageView của mặt trước CCCD
+                    imageUri = selectedImageUri; // Cập nhật cho mặt trước
+                    imgMatTruocCCCD.setImageURI(imageUri); // Hiển thị ảnh
+                } else if (currentImageView == 2) {
+                    // Nếu là ImageView của mặt sau CCCD
+                    imageUri1 = selectedImageUri; // Cập nhật cho mặt sau
+                    imgMatSauCCCD.setImageURI(imageUri1); // Hiển thị ảnh
                 }
             } else if (requestCode == CAMERA_REQUEST && data != null) {
+                // Lấy ảnh từ camera dưới dạng Bitmap
                 Bitmap photo = (Bitmap) data.getExtras().get("data");
-                imageUri = getImageUriFromBitmap(photo);
-                imageUri1 = getImageUriFromBitmap(photo);
-                if (imageUri != null || imageUri1 != null) {
-                    if (currentImageView == 1) {
-                        imgMatTruocCCCD.setImageURI(imageUri); // Hiển thị ảnh từ camera cho imageView1
-                    } else {
-                        imgMatSauCCCD.setImageURI(imageUri1); // Hiển thị ảnh từ camera cho imageView2
-                    }
+
+                if (currentImageView == 1) {
+                    // Nếu là ImageView của mặt trước CCCD
+                    imageUri = getImageUriFromBitmap(photo); // Cập nhật cho mặt trước
+                    imgMatTruocCCCD.setImageURI(imageUri); // Hiển thị ảnh
+                } else if (currentImageView == 2) {
+                    // Nếu là ImageView của mặt sau CCCD
+                    imageUri1 = getImageUriFromBitmap(photo); // Cập nhật cho mặt sau
+                    imgMatSauCCCD.setImageURI(imageUri1); // Hiển thị ảnh
                 }
             }
         }
     }
+
 
 
     //TODO Chuyển Bitmap sang Uri
@@ -492,7 +498,7 @@ public class QLNhanVien extends AppCompatActivity {
 
     private void uploadImage(StorageReference fileRef, String userId, boolean isFrontImage) {
         Uri uploadUri = isFrontImage ? imageUri : imageUri1; // Chọn URI dựa trên ảnh trước hay sau
-        NguoiDung user = new NguoiDung(); // Tạo một object NguoiDung
+        NguoiDung user = new NguoiDung();
 
         // Upload ảnh
         fileRef.putFile(uploadUri)
@@ -507,10 +513,8 @@ public class QLNhanVien extends AppCompatActivity {
 
                                 // Cập nhật URL vào object NguoiDung trước khi lưu vào Firestore
                                 if (isFrontImage) {
-                                    // Cập nhật URL ảnh mặt trước trong object NguoiDung
                                     user.setMatTruocCCCD(imageUrl);
 
-                                    // Lưu ảnh mặt trước vào Firestore
                                     firestore.collection("users").document(userId)
                                             .update("matTruocCCCD", user.getMatTruocCCCD()) // Sử dụng giá trị từ class NguoiDung
                                             .addOnSuccessListener(aVoid -> {
@@ -547,10 +551,10 @@ public class QLNhanVien extends AppCompatActivity {
 
 
     private void ghiDulieu() {
-        CollectionReference users = firestore.collection("users");
+        CollectionReference users = firestore.collection("nguoidung");
 
         Map<String, Object> user = new HashMap<>();
-        user.put("TenDangNhap", "Anh2442004@gmail.com");
+        user.put("TenDangNhap", "Anh244@gmail.com");
         user.put("TenNhanVien", "Nguyễn Việt Anh");
         user.put("SoDT", "035637012");
         user.put("SoCCCD", "037204000021");
@@ -571,7 +575,7 @@ public class QLNhanVien extends AppCompatActivity {
 //        user.put("born", 1815);
 
 // Add a new document with a generated ID
-        firestore.collection("users")
+        firestore.collection("nguoidungs")
                 .add(user)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override

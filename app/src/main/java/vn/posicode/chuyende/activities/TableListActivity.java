@@ -2,84 +2,108 @@ package vn.posicode.chuyende.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.TextView;
-import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ArrayList;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import vn.posicode.chuyende.R;
 
 public class TableListActivity extends AppCompatActivity {
 
-    private static final String PREFS_NAME = "TablePrefs";
-    private static final String TABLE_COUNT_KEY = "table_count";
-    private static final String TABLE_NAME_KEY_PREFIX = "table_name_";
-    private static final String TABLE_DESC_KEY_PREFIX = "table_desc_";
+    private FirebaseFirestore firestore; // Firestore instance
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table_list);
-        loadTableData();
 
+        // Khởi tạo Firebase
+        FirebaseApp.initializeApp(this);
+
+        // Khởi tạo Firestore
+        firestore = FirebaseFirestore.getInstance();
+
+        // Tải danh sách bàn từ Firestore
+        //loadTableData();
+
+        // Xử lý sự kiện nút Quay lại
         ImageButton backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(v -> {
-            finish(); // Kết thúc hoạt động hiện tại và quay lại màn hình trước đó
-        });
+        backButton.setOnClickListener(v -> finish());
 
-        // Nhận dữ liệu từ Intent
-        Intent intent = getIntent();
-        String tableName = intent.getStringExtra("tableName");
-        String tableDescription = intent.getStringExtra("tableDescription");
-
-        // Nếu có dữ liệu (tableName và tableDescription không null)
-        if (tableName != null && tableDescription != null) {
-            addTableToLayout(tableName, tableDescription);
-        }
-
-        // Ánh xạ nút quản lý (ImageButton) và xử lý sự kiện khi người dùng nhấn
-        ImageButton manageButton = findViewById(R.id.backButton); // Đổi id này thành id của nút bạn cần dùng
+        // Xử lý sự kiện nút Quản lý (Chuyển đến màn hình ManageActivity)
+        ImageButton manageButton = findViewById(R.id.backButton);
         manageButton.setOnClickListener(v -> {
-            // Mở màn hình quản lý khi nhấn nút
-            Intent intent1 = new Intent(TableListActivity.this, ManageActivity.class);
-            startActivity(intent1);
+            Intent intent = new Intent(TableListActivity.this, ManageActivity.class);
+            startActivity(intent);
         });
     }
 
+    // Hàm tải danh sách bàn từ Firestore và sắp xếp
     private void loadTableData() {
         LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
         tableListLayout.removeAllViews(); // Xóa danh sách hiện có trước khi tải dữ liệu mới
 
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        int tableCount = sharedPreferences.getInt(TABLE_COUNT_KEY, 0);
+        // Lấy dữ liệu từ Firestore
+        firestore.collection("table1")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<DocumentSnapshot> tableList = new ArrayList<>();
 
-        // Hiển thị từng bàn đã lưu
-        for (int i = 0; i < tableCount; i++) {
-            String tableName = sharedPreferences.getString(TABLE_NAME_KEY_PREFIX + i, "");
-            String tableDescription = sharedPreferences.getString(TABLE_DESC_KEY_PREFIX + i, "");
+                        // Duyệt qua các document lấy từ Firestore và thêm vào danh sách
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            tableList.add(document);
+                        }
 
-            if (!tableName.isEmpty() && !tableDescription.isEmpty()) {
-                addTableToLayout(tableName, tableDescription); // Hiển thị bàn trong layout
-            }
-        }
+                        // Sắp xếp danh sách theo tên hoặc số bàn
+                        Collections.sort(tableList, new Comparator<DocumentSnapshot>() {
+                            @Override
+                            public int compare(DocumentSnapshot t1, DocumentSnapshot t2) {
+                                // Lấy tên bàn và tách số từ tên, ví dụ: "Table 1", "Table 2"
+                                String tableName1 = t1.getString("name").replaceAll("[^0-9]", "");
+                                String tableName2 = t2.getString("name").replaceAll("[^0-9]", "");
+
+                                // So sánh số thứ tự bàn
+                                return Integer.compare(Integer.parseInt(tableName1), Integer.parseInt(tableName2));
+                            }
+                        });
+
+                        // Hiển thị từng bàn đã sắp xếp
+                        for (DocumentSnapshot document : tableList) {
+                            String tableName = document.getString("name");
+                            String tableDescription = document.getString("description");
+
+                            if (tableName != null && tableDescription != null) {
+                                addTableToLayout(tableName, tableDescription); // Thêm bàn vào layout
+                            }
+                        }
+                    }
+                });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadTableData(); // Tải lại dữ liệu khi quay lại màn hình TableListActivity
-    }
-
+    // Hàm thêm bàn vào layout
     private void addTableToLayout(String tableName, String tableDescription) {
         LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
 
-        // Sử dụng layout table_item_tablelist.xml thay vì table_item.xml
+        // Kiểm tra xem hàm có bị gọi nhiều lần không
+        Log.d("DEBUG", "Adding table: " + tableName);
+
+        // Sử dụng layout table_item_tablelist.xml để hiển thị từng bàn
         View tableView = getLayoutInflater().inflate(R.layout.table_item_tablelist, null);
 
         TextView tableNameTextView = tableView.findViewById(R.id.tableNameTextView);
@@ -103,5 +127,12 @@ public class TableListActivity extends AppCompatActivity {
 
         // Thêm bàn vào layout
         tableListLayout.addView(tableView);
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadTableData(); // Tải lại dữ liệu khi quay lại màn hình TableListActivity
     }
 }

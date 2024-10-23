@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -23,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -66,8 +69,9 @@ public class QLNhanVien extends AppCompatActivity {
     private RecyclerView listNhanVien;
     private Spinner spVaiTro;
     private AppCompatButton btnThem, btnSua;
-    private ImageView imgMatTruocCCCD, imgMatSauCCCD, btnBack;
+    private ImageView imgMatTruocCCCD, imgMatSauCCCD, btnBack, imgEye;
     private TextInputEditText edtTenDangNhap, edtTenNhanVien, edtMatKhau, edtSoDT, edtSoCCCD, edtNgayCap;
+    private SwipeRefreshLayout refreshLayout;
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
@@ -75,6 +79,7 @@ public class QLNhanVien extends AppCompatActivity {
     private Uri imageUri1;
     private int currentImageView = 0;
 
+    private boolean isPasswordVisible = false;
     private String selectedUser;
 
     @Override
@@ -86,7 +91,7 @@ public class QLNhanVien extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
-        storageReference = FirebaseStorage.getInstance().getReference("images");
+        storageReference = storage.getReference("images");
         list = new ArrayList<>();
         // Khởi tạo Adapter và gán cho RecyclerView
 //        nguoiDungAdapter = new NguoiDungAdapter(list);
@@ -197,15 +202,12 @@ public class QLNhanVien extends AppCompatActivity {
                                 }
                             }
                         });
-
-//                uploadImageToFirebaseStorage();
             }
         });
 
         btnSua.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String email = edtTenDangNhap.getText().toString();
                 String name = edtTenNhanVien.getText().toString();
                 String soDT = edtSoDT.getText().toString();
                 String soCCCD = edtSoCCCD.getText().toString();
@@ -214,24 +216,15 @@ public class QLNhanVien extends AppCompatActivity {
                 Uri img = imageUri;
 
                 // Kiểm tra dữ liệu nhập
-                if (email.equals("") || name.equals("") || soDT.equals("") || soCCCD.equals("") || ngayCap.equals("")) {
+                if (name.equals("") || soDT.equals("") || soCCCD.equals("") || ngayCap.equals("")) {
                     Toast.makeText(QLNhanVien.this, "Vui lòng nhập đầy đủ!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
                 // Kiểm tra tính hợp lệ của các trường nhập
-                if (!isValidEmail(email)) {
-                    Toast.makeText(QLNhanVien.this, "Địa chỉ email không hợp lệ!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 if (name.length() > 0 && !Character.isUpperCase(name.charAt(0))) {
                     Toast.makeText(QLNhanVien.this, "Họ tên phải bắt đầu bằng chữ cái viết hoa!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-//                if (password.length() < 6 || !Character.isUpperCase(password.charAt(0))) {
-//                    Toast.makeText(QLNhanVien.this, "Mật khẩu phải có ít nhất 6 kí tự và viết hoa chữ cái đầu tiên!", Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
                 if (soDT.length() > 11 || soDT.charAt(0) != '0') {
                     Toast.makeText(QLNhanVien.this, "Số điện thoại không hợp lệ!", Toast.LENGTH_SHORT).show();
                     return;
@@ -263,7 +256,6 @@ public class QLNhanVien extends AppCompatActivity {
                 }
 
                 Map<String, Object> updates = new HashMap<>();
-                updates.put("tenDangNhap", email);
                 updates.put("tenNhanVien", name);
                 updates.put("sDT", soDT);
                 updates.put("soCCCD", soCCCD);
@@ -339,11 +331,34 @@ public class QLNhanVien extends AppCompatActivity {
                 showImageSourceDialog(2);
             }
         });
+        // refresh lại dữ liệu
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                docDulieu();
+                refreshLayout.setRefreshing(false);
+            }
+        });
+
+        refreshLayout.setColorSchemeResources(
+                R.color.textColorTitle,
+                R.color.textColor,
+                R.color.textRole
+        );
+
+        imgEye.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                togglePasswordVisibility();
+            }
+        });
+
 
     }
 
-    private void resetInputFields() {
+    public void resetInputFields() {
         edtTenDangNhap.setText("");
+        edtTenDangNhap.setEnabled(true);
         edtTenNhanVien.setText("");
         edtMatKhau.setText("");
         edtMatKhau.setEnabled(true);
@@ -376,8 +391,8 @@ public class QLNhanVien extends AppCompatActivity {
     // Hiển thị dữ liệu của người dùng được chọn vào các trường nhập liệu
     private void displayUserData(NguoiDung user) {
         selectedUser = user.getUid();
-
         edtTenDangNhap.setText(user.getTenDangNhap());
+        edtTenDangNhap.setEnabled(false);
         edtTenNhanVien.setText(user.getTenNhanVien());
         edtMatKhau.setEnabled(false);
         edtSoDT.setText(user.getsDT());
@@ -470,7 +485,6 @@ public class QLNhanVien extends AppCompatActivity {
     }
 
 
-
     //TODO Chuyển Bitmap sang Uri
     private Uri getImageUriFromBitmap(Bitmap bitmap) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -492,7 +506,7 @@ public class QLNhanVien extends AppCompatActivity {
             StorageReference backImageRef = storageReference.child("images/" + userId + "_back.jpg");
             uploadImage(backImageRef, userId, false); // Gọi hàm upload cho ảnh mặt sau
         } else {
-            Toast.makeText(this, "Không có ảnh được chọn", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Không có ảnh được chọn", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -604,7 +618,6 @@ public class QLNhanVien extends AppCompatActivity {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 NguoiDung userData = document.toObject(NguoiDung.class);
                                 list.add(userData);
-
                             }
                             Log.d(TAG, "Getting documents: ");
                             nguoiDungAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu mới
@@ -614,6 +627,23 @@ public class QLNhanVien extends AppCompatActivity {
                     }
                 });
     }
+
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            // Ẩn mật khẩu
+            edtMatKhau.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            imgEye.setImageResource(R.drawable.eye_hide); // Hình mắt đóng
+        } else {
+            // Hiển thị mật khẩu
+            edtMatKhau.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            imgEye.setImageResource(R.drawable.eye_show); // Hình mắt mở
+        }
+        isPasswordVisible = !isPasswordVisible;
+
+        // Đưa con trỏ về cuối trường nhập mật khẩu
+        edtMatKhau.setSelection(edtMatKhau.getText().length());
+    }
+
 
     public void Event() {
         listNhanVien = findViewById(R.id.listNhanVien);
@@ -631,5 +661,7 @@ public class QLNhanVien extends AppCompatActivity {
         edtNgayCap = findViewById(R.id.iEdtNgayCap);
         imgMatSauCCCD = findViewById(R.id.imgMatSauCCCD);
         imgMatTruocCCCD = findViewById(R.id.imgMatTruocCCCD);
+        refreshLayout = findViewById(R.id.swipeRefreshLayout);
+        imgEye = findViewById(R.id.imgEye);
     }
 }

@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">ChuyenDe</string>
+    <string-array name="category_types">
+        <item>Món ăn</item>
+        <item>Đồ uống</item>
+        <item>Tráng miệng</item>
+    </string-array>
+
 </resources>

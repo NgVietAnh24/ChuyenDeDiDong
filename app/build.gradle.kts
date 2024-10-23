@@ -40,7 +40,8 @@ dependencies {
     // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth:20.5.0")
+    implementation("com.google.firebase:firebase-auth:21.0.1")
+    implementation ("com.google.android.gms:play-services-auth:19.0.0")
     implementation("com.google.firebase:firebase-firestore")
     implementation ("com.airbnb.android:lottie:6.1.0")
     implementation ("com.github.bumptech.glide:glide:4.14.2")

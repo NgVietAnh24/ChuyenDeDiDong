@@ -46,7 +46,7 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
     FirebaseStorage storage;
 
     private OnItemClickListener onItemClickListener;
-//    private int selectedPosition = RecyclerView.NO_POSITION;
+    private int selectedPosition = RecyclerView.NO_POSITION;
 
     public interface OnItemClickListener {
         void onItemClick(NguoiDung user);
@@ -77,7 +77,7 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
             holder.tvRole.setText("Phục vụ");
         } else if (user.getRoles() == 2) {
             holder.tvRole.setText("Thu ngân");
-        } else {
+        } else if (user.getRoles() == 3) {
             holder.tvRole.setText("Đầu bếp");
         }
         holder.tvNgayTao.setText(user.getNgayTao());
@@ -94,6 +94,15 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
 //                selectedPosition = pos;
 //                notifyDataSetChanged();
                 onItemClickListener.onItemClick(user);
+//                holder.itemView.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.textColor));
+//
+//                // Sau khi xử lý xong (ví dụ, lưu vào database), đổi lại màu mặc định
+//                view.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        holder.itemView.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.item_background));
+//                    }
+//                }, 2000); // Thay đổi lại màu sau 2 giây
             }
         });
 

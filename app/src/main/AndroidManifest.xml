@@ -22,7 +22,7 @@
         android:theme="@style/Theme.ChuyenDe">
 
         <activity
-            android:name=".activities.Splash"
+            android:name=".activities.QLNhanVien"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -47,9 +47,9 @@
         <activity
             android:name=".activities.HomeThuNgan"
             android:exported="false" />
-        <activity
-            android:name=".activities.QLNhanVien"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".activities.QLNhanVien"-->
+<!--            android:exported="false" />-->
     </application>
 
 </manifest>

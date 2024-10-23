@@ -25,9 +25,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
@@ -40,9 +43,10 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
     FirebaseFirestore firestore;
     FirebaseAuth mAuth;
     FirebaseUser user;
+    FirebaseStorage storage;
 
     private OnItemClickListener onItemClickListener;
-    private int selectedPosition = RecyclerView.NO_POSITION;
+//    private int selectedPosition = RecyclerView.NO_POSITION;
 
     public interface OnItemClickListener {
         void onItemClick(NguoiDung user);
@@ -53,7 +57,7 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
         this.onItemClickListener = listener;
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-
+        storage = FirebaseStorage.getInstance();
     }
 
     @NonNull
@@ -96,7 +100,12 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
         holder.btnXoa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showDeleteConfirmationDialog(user.getUid(), holder.itemView.getContext()); // Truyền context
+                if(user.getRoles() != 0){
+                    showDeleteConfirmationDialog(user.getUid(), holder.itemView.getContext());
+                    ((QLNhanVien) view.getContext()).resetInputFields();
+                }else {
+                    Toast.makeText(view.getContext(),"Không được phép xóa quản lý ⚠️", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -144,36 +153,84 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
 
     private void deleteUser(String uid, Context context) {
         user = mAuth.getCurrentUser();
-        firestore.collection("users").document(uid)
-                .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        user.delete()
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-                                        Toast.makeText(context, "Xóa thành công ☑️", Toast.LENGTH_SHORT).show();
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.e("NguoiDungAdapter", "Error deleting user from Auth", e);
-                                    }
-                                });
-                        // Cập nhật danh sách người dùng
-                        ((QLNhanVien) context).docDulieu();
-                    }
 
+        // Lấy thông tin người dùng từ Firestore
+        firestore.collection("users").document(uid)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            // Lấy đường dẫn hình ảnh từ Firestore
+                            String frontImageUri = documentSnapshot.getString("matTruocCCCD");
+                            String backImageUri = documentSnapshot.getString("matSauCCCD");
+
+                            // Xóa hình ảnh từ Storage
+                            if (frontImageUri != null) {
+                                deleteImageFromFirebase(frontImageUri, "Mặt trước", context);
+                            }
+                            if (backImageUri != null) {
+                                deleteImageFromFirebase(backImageUri, "Mặt sau", context);
+                            }
+
+                            // Xóa người dùng khỏi Firestore
+                            firestore.collection("users").document(uid)
+                                    .delete()
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            user.delete()
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void unused) {
+                                                            Toast.makeText(context, "Xóa thành công ☑️", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Log.e("NguoiDungAdapter", "Error deleting user from Auth", e);
+                                                        }
+                                                    });
+                                            // Cập nhật danh sách người dùng
+                                            ((QLNhanVien) context).docDulieu();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Toast.makeText(context, "Xóa thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context, "Xóa thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Lỗi khi lấy thông tin người dùng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-
     }
+
+    private void deleteImageFromFirebase(String imageUri, String imageType, Context context) {
+        StorageReference imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUri);
+
+        // Thực hiện việc xóa ảnh
+        imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+//                Toast.makeText(context, "Đã xóa " + imageType + " thành công", Toast.LENGTH_SHORT).show();
+                Log.d("image", "Đã xóa " + imageType + " thành công");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+//                Log.e("NguoiDungAdapter", "Error deleting " + imageType + " from Storage", exception);
+                Log.d("image", "Đã xóa " + imageType + " thành công");
+            }
+        });
+    }
+
 
 }

@@ -5,10 +5,14 @@ import static android.content.ContentValues.TAG;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,8 +36,11 @@ public class Login extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore firestore;
     private TextInputEditText edtUsername, edtPassword;
-    private Button btnLogin, btnForgot;
+    private Button btnLogin;
+    private TextView  btnForgot;
     private Loading loading;
+    private ImageView imgEye;
+    private boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,7 +68,6 @@ public class Login extends AppCompatActivity {
                     return;
                 }
 
-                // Đăng nhập người dùng
                 loading.show();
                 mAuth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(Login.this, new OnCompleteListener<AuthResult>() {
@@ -124,6 +131,14 @@ public class Login extends AppCompatActivity {
             }
         });
 
+        imgEye.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                togglePasswordVisibility();
+            }
+        });
+
+
         btnForgot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -131,6 +146,22 @@ public class Login extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            // Ẩn mật khẩu
+            edtPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            imgEye.setImageResource(R.drawable.eye_hide); // Hình mắt đóng
+        } else {
+            // Hiển thị mật khẩu
+            edtPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            imgEye.setImageResource(R.drawable.eye_show); // Hình mắt mở
+        }
+        isPasswordVisible = !isPasswordVisible;
+
+        // Đưa con trỏ về cuối trường nhập mật khẩu
+        edtPassword.setSelection(edtPassword.getText().length());
     }
 
     public boolean isValidEmail(String email) {
@@ -142,5 +173,6 @@ public class Login extends AppCompatActivity {
         edtPassword = findViewById(R.id.edtPassword);
         btnLogin = findViewById(R.id.btnLogin);
         btnForgot = findViewById(R.id.btnForgot);
+        imgEye = findViewById(R.id.imgEye);
     }
 }

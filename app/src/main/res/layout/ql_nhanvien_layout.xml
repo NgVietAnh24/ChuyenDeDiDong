@@ -74,7 +74,9 @@
             android:layout_height="wrap_content"
             android:text="Mật khẩu"
             android:textColor="@color/textColorTitle" />
-
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/iEdtMatKhau"
             android:layout_width="match_parent"
@@ -83,7 +85,14 @@
             android:hint="Nhập mật khẩu"
             android:inputType="textPassword"
             android:padding="10dp" />
-
+            <ImageView
+                android:id="@+id/imgEye"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/eye_hide"
+                android:layout_gravity="center|end"
+                android:paddingRight="10dp"/>
+        </FrameLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -245,11 +254,16 @@
             android:text="Danh sách nhân viên"
             android:textColor="@color/textColorTitle"
             android:textStyle="bold" />
-
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listNhanVien"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 
 

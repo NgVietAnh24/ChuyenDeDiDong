@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -36,17 +37,16 @@ public class MainActivity extends AppCompatActivity {
     private List<Food> foodList;
     private int selectedPosition = -1;
     private List<String> categoryList;
-
+  private String image;
     private static final int PICK_IMAGE_REQUEST = 1;
-    private Uri imageUri;  // Để lưu trữ URI của ảnh đã chọn
-    private ImageView imageView;  // ImageView để hiển thị ảnh
-
+    private Uri imageUri;
+    private ImageView imageView;
 
     private EditText editTextTenMonAn, editTextGia;
     private Spinner spinnerDanhMuc;
     private Button buttonAdd, buttonEdit, buttonDelete;
-    private ImageView upload,optionsButton;
-    private ArrayAdapter<String> adapterSpinner; // Khai báo adapterSpinner ở đây
+    private ImageView upload, optionsButton;
+    private ArrayAdapter<String> adapterSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,32 +55,22 @@ public class MainActivity extends AppCompatActivity {
 
         // Khởi tạo Spinner
         spinnerDanhMuc = findViewById(R.id.spinnerDanhMuc);
-
-        // Tạo danh sách danh mục
         categoryList = new ArrayList<>();
         categoryList.add("Món khai vị");
         categoryList.add("Món chính");
         categoryList.add("Món tráng miệng");
 
-        // Thiết lập adapter cho Spinner
         adapterSpinner = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryList);
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerDanhMuc.setAdapter(adapterSpinner);
 
-        // Khởi tạo RecyclerView
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Dummy data
         foodList = new ArrayList<>();
-//        String image = "C:\\Users\\tranv\\OneDrive\\Hình ảnh\\banhmi1.png";
-
-
-//        foodList.add(new Food("Bánh mì thịt bò", "80", image));
-        adapter = new FoodAdapter(foodList);
+        adapter = new FoodAdapter(this,foodList);
         recyclerView.setAdapter(adapter);
 
-        // Khởi tạo các thành phần giao diện
         editTextTenMonAn = findViewById(R.id.editTextTenMonAn);
         editTextGia = findViewById(R.id.editTextGia);
         buttonAdd = findViewById(R.id.buttonAdd);
@@ -88,18 +78,17 @@ public class MainActivity extends AppCompatActivity {
         buttonDelete = findViewById(R.id.buttonDelete);
         upload = findViewById(R.id.upload);
 
-        // Thiết lập sự kiện cho nút Thêm
+        // Thêm món ăn
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String tenMonAn = editTextTenMonAn.getText().toString();
                 String gia = editTextGia.getText().toString();
-                String selectedCategory = spinnerDanhMuc.getSelectedItem().toString(); // Lấy danh mục đã chọn
-                String image = "";
+                String selectedCategory = spinnerDanhMuc.getSelectedItem().toString();
+//                String image = "";
 
                 if (!tenMonAn.isEmpty() && !gia.isEmpty()) {
-                    // Thêm món ăn vào danh sách
-                    foodList.add(new Food(tenMonAn, gia, image)); // Thay thế bằng ảnh món ăn
+                    foodList.add(new Food(tenMonAn, gia, image));
                     adapter.notifyDataSetChanged();
                     Toast.makeText(MainActivity.this, "Thêm món ăn thành công", Toast.LENGTH_SHORT).show();
                 } else {
@@ -108,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Xử lý sự kiện cho nút Sửa
+        // Sửa món ăn
         buttonEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
                     String tenMonAnMoi = editTextTenMonAn.getText().toString();
                     String giaMoi = editTextGia.getText().toString();
 
-                    // Kiểm tra và cập nhật thông tin
                     if (!tenMonAnMoi.isEmpty()) {
                         food.setName(tenMonAnMoi);
                     }
@@ -133,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Xử lý sự kiện cho nút Xóa
+        // Xóa món ăn
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,15 +129,16 @@ public class MainActivity extends AppCompatActivity {
                     foodList.remove(selectedPosition);
                     adapter.notifyItemRemoved(selectedPosition);
                     Toast.makeText(MainActivity.this, "Xóa món ăn thành công", Toast.LENGTH_SHORT).show();
-                    selectedPosition = -1; // Reset vị trí được chọn
-                    editTextTenMonAn.setText(""); // Xóa nội dung EditText
-                    editTextGia.setText(""); // Xóa nội dung EditText
+                    selectedPosition = -1;
+                    editTextTenMonAn.setText("");
+                    editTextGia.setText("");
                 } else {
                     Toast.makeText(MainActivity.this, "Chọn món ăn để xóa", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
+        // Chức năng tải ảnh lên
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,53 +146,69 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Thiết lập listener cho adapter
         adapter.setOnItemClickListener(new FoodAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                selectedPosition = position; // Lưu vị trí được chọn
+                selectedPosition = position;
                 Food food = foodList.get(position);
                 editTextTenMonAn.setText(food.getName());
                 editTextGia.setText(food.getPrice());
             }
         });
 
-        // Xử lý sự kiện cho nút Back
+        // Xử lý nút quay lại
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+                finish();
             }
         });
 
-        // Xử lý sự kiện cho nút Options
+
+
+
+        // Xử lý nút Options
         optionsButton = findViewById(R.id.btnoptions);
         optionsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Tạo PopupMenu
                 PopupMenu popupMenu = new PopupMenu(MainActivity.this, optionsButton);
                 popupMenu.getMenuInflater().inflate(R.menu.options_menu, popupMenu.getMenu());
 
+                // Thiết lập sự kiện khi chọn menu
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        // Sử dụng if-else thay cho switch-case
+                        if (item.getItemId() == R.id.categoryID) {
+                            Toast.makeText(MainActivity.this, "Quản lý danh mục", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(MainActivity.this, CategoryActivity.class);
+                            startActivity(intent);
+                            // Xử lý chức năng quản lý danh mục ở đây
+                            return true;
+                        } else if (item.getItemId() == R.id.category_itemID) {
+                            Toast.makeText(MainActivity.this, "Quản lý danh mục con", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(MainActivity.this, CategoryItemActivity.class);
+                            startActivity(intent);
+                            // Xử lý chức năng quản lý danh mục con ở đây
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                });
+
+                popupMenu.show();
             }
         });
 
 
         // Khởi tạo ImageView
         imageView = findViewById(R.id.upload);
-
-        // Khởi tạo sự kiện click cho nút chọn ảnh (upload)
-        ImageView upload = findViewById(R.id.upload);
-        upload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                chooseImageFromGallery();  // Gọi hàm chọn ảnh
-            }
-        });
     }
 
-    // Phương thức chọn ảnh từ thư viện
     private void chooseImageFromGallery() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -211,25 +216,25 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Chọn ảnh"), PICK_IMAGE_REQUEST);
     }
 
-    // Nhận kết quả trả về khi chọn ảnh
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+//            imageUri = data.getData();
+//            imageView.setImageURI(imageUri);
+//            Glide.with(this).load(imageUri).into(imageView);
+//        }
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            imageUri = data.getData();  // Lấy URI của ảnh đã chọn
-            Food food = new Food();
-            imageView.setImageURI(imageUri);
-            // Sử dụng Glide để tải ảnh vào ImageView
-            if(food.getImage() != null){
-                Glide.with(this).load(food.getImage()).into(imageView);
+            imageUri = data.getData(); // Lấy URI của bức ảnh đã chọn
+            String imageUrl = imageUri.toString(); // Chuyển đổi URI thành chuỗi URL
+            Log.d("Selected Image URI", imageUrl); // Ghi log URL để kiểm tra
 
-            }else {
-                Log.d("anh", "Hien thi anh" );
-            }
-        }else {
-            Log.d("anh","Khong hien thi anh");
+            // Lưu URL vào biến image (để sử dụng sau này)
+            image = imageUrl;
+
+            // Hiển thị ảnh lên ImageView
+            imageView.setImageURI(imageUri);
+            Glide.with(this).load(imageUri).into(imageView);
         }
     }
-
-
 }

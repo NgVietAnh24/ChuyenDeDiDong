@@ -1,9 +1,7 @@
 package vn.posicode.chuyende.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +10,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.InputStream;
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 import vn.posicode.chuyende.R;
@@ -21,7 +20,14 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
 
     private List<Food> foodList;
     private OnItemClickListener onItemClickListener; // Thêm interface listener
-    Context context;
+    private Context context; // Để Glide sử dụng context
+
+    // Constructor
+    public FoodAdapter(Context context, List<Food> foodList) {
+        this.context = context; // Lưu lại context
+        this.foodList = foodList;
+    }
+
     // Tạo interface để xử lý sự kiện click
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -30,11 +36,6 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
     // Thêm setter cho listener
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
-    }
-
-    // Constructor
-    public FoodAdapter( List<Food> foodList) {
-        this.foodList = foodList;
     }
 
     @Override
@@ -48,20 +49,23 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         Food food = foodList.get(position);
         holder.foodName.setText(food.getName());
         holder.foodPrice.setText("$" + food.getPrice());  // Có thể định dạng lại giá trị tiền tệ nếu cần
-//        holder.foodImage.setImageResource(food.getImage());
-//        Glide.with(context)
-//                .load(food.getImage()) // Đảm bảo imagePath là đường dẫn ảnh dạng chuỗi
-//                .into(holder.foodImage);
+
         String imageUrl = food.getImage(); // Lấy URL hình ảnh từ getImage()
+        Log.d("FoodAdapter", "Image URL: " + imageUrl);
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
-            // Sử dụng AsyncTask để tải ảnh từ URL
-            new DownloadImageTask(holder.foodImage).execute(imageUrl);
+            // Sử dụng Glide để tải ảnh từ URL
+            Glide.with(context)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.banhmi)  // Hiển thị ảnh mặc định khi đang tải
+                    .error(R.drawable.anhloi)   // Hiển thị ảnh lỗi khi không tải được ảnh
+                    .into(holder.foodImage);
         } else {
             // Đặt hình ảnh mặc định nếu không có URL
             holder.foodImage.setImageResource(R.drawable.banhmi);
         }
-//         Thêm sự kiện click cho từng item
+
+        // Thêm sự kiện click cho từng item
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,28 +92,4 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
             foodPrice = itemView.findViewById(R.id.textViewPrice);
         }
     }
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView imageView;
-
-        public DownloadImageTask(ImageView imageView) {
-            this.imageView = imageView;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String url = urls[0];
-            Bitmap bitmap = null;
-            try {
-                InputStream in = new java.net.URL(url).openStream();
-                bitmap = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return bitmap;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            imageView.setImageBitmap(result);
-        }
-    }
-
 }

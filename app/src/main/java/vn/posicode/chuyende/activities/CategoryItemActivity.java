@@ -1,10 +1,10 @@
-package vn.posicode.chuyende;
+package vn.posicode.chuyende.activities;
+
+import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.view.View;
+
+import vn.posicode.chuyende.R;
 
 public class CategoryItemActivity extends AppCompatActivity {
 

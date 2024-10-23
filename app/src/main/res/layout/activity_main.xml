@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".MainActivity">
+    tools:context=".activities.MainActivity">
 
 
     <LinearLayout
@@ -34,8 +34,7 @@
             android:textColor="#A01111" />
 
         <ImageView
-            android:id="@+id/options"
-
+            android:id="@+id/btnoptions"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/options"
@@ -53,8 +52,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingBottom="16dp"
         android:clipToPadding="false"
+        android:paddingBottom="16dp"
 
         />
 
@@ -70,8 +69,8 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginRight="18dp"
-            android:src="@drawable/upload"
-            android:background="@drawable/vien_image" />
+            android:background="@drawable/vien_image"
+            android:src="@drawable/upload" />
 
         <LinearLayout
             android:layout_width="0dp"

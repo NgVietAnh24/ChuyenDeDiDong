@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import vn.posicode.chuyende.QuanLyBan.MainActivity;
+import vn.posicode.chuyende.QuanLyHoaDon.InvoiceListActivity;
 import vn.posicode.chuyende.R;
 
 public class ManageActivity extends AppCompatActivity {
@@ -54,5 +55,16 @@ public class ManageActivity extends AppCompatActivity {
         manageInvoiceTextView.setPaintFlags(manageInvoiceTextView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         statisticsTextView.setPaintFlags(statisticsTextView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         logoutTextView.setPaintFlags(logoutTextView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+
+        // Quản lý hóa đơn
+        manageInvoiceTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Chuyển đến màn hình danh sách hóa đơn (InvoiceListActivity)
+                Intent intent = new Intent(ManageActivity.this, InvoiceListActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }

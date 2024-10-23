@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center_horizontal">
+
+    <!-- Nút quay lại -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_back_arrow"
+        android:contentDescription="Quay lại" />
+
+    <!-- Tiêu đề hóa đơn -->
+    <TextView
+        android:id="@+id/invoiceTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chi tiết hóa đơn 1"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#FF0000"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal" />
+
+    <!-- Thời gian hóa đơn -->
+    <TextView
+        android:id="@+id/invoiceTimeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thời gian: 12:00"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center_horizontal" />
+
+    <!-- Bảng chi tiết món ăn -->
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1"
+        android:layout_marginTop="16dp">
+
+        <!-- Hàng tiêu đề -->
+        <TableRow>
+            <TextView
+                android:text="Tên món"
+                android:textStyle="bold"
+                android:padding="8dp" />
+            <TextView
+                android:text="Số lượng"
+                android:textStyle="bold"
+                android:gravity="right"
+                android:padding="8dp" />
+            <TextView
+                android:text="Giá"
+                android:textStyle="bold"
+                android:gravity="right"
+                android:padding="8dp" />
+        </TableRow>
+
+        <!-- Hàng chi tiết 1 -->
+        <TableRow>
+            <TextView
+                android:text="Bánh mì bò"
+                android:padding="8dp" />
+            <TextView
+                android:text="1"
+                android:gravity="right"
+                android:padding="8dp" />
+            <TextView
+                android:text="4$"
+                android:gravity="right"
+                android:padding="8dp" />
+        </TableRow>
+
+        <!-- Hàng chi tiết 2 -->
+        <TableRow>
+            <TextView
+                android:text="Bánh mì heo quay"
+                android:padding="8dp" />
+            <TextView
+                android:text="2"
+                android:gravity="right"
+                android:padding="8dp" />
+            <TextView
+                android:text="8$"
+                android:gravity="right"
+                android:padding="8dp" />
+        </TableRow>
+
+        <!-- Hàng chi tiết 3 -->
+        <TableRow>
+            <TextView
+                android:text="Nước dừa"
+                android:padding="8dp" />
+            <TextView
+                android:text="1"
+                android:gravity="right"
+                android:padding="8dp" />
+            <TextView
+                android:text="2$"
+                android:gravity="right"
+                android:padding="8dp" />
+        </TableRow>
+    </TableLayout>
+
+    <!-- Tổng tiền và tiền thu -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tổng tiền: 14$"
+        android:textColor="#FF0000"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="end" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tiền thu: 20$"
+        android:textColor="#FF0000"
+        android:textSize="16sp"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="end" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tiền dư: 6$"
+        android:textColor="#FF0000"
+        android:textSize="16sp"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="end" />
+
+    <!-- Thời gian tạo hóa đơn -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="12:00      24/09/2024"
+        android:layout_marginTop="32dp"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>

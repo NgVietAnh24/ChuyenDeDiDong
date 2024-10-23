@@ -88,17 +88,20 @@ public class TableListActivity extends AppCompatActivity {
                         for (DocumentSnapshot document : tableList) {
                             String tableName = document.getString("name");
                             String tableDescription = document.getString("description");
+                            String tableStatus = document.getString("status"); // Lấy trạng thái bàn
 
-                            if (tableName != null && tableDescription != null) {
-                                addTableToLayout(tableName, tableDescription); // Thêm bàn vào layout
+                            if (tableName != null && tableDescription != null && tableStatus != null) {
+                                addTableToLayout(tableName, tableDescription, tableStatus); // Thêm bàn vào layout
                             }
                         }
+                    } else {
+                        Log.e("TableListActivity", "Lỗi khi tải dữ liệu: " + task.getException().getMessage());
                     }
                 });
     }
 
     // Hàm thêm bàn vào layout
-    private void addTableToLayout(String tableName, String tableDescription) {
+    private void addTableToLayout(String tableName, String tableDescription, String tableStatus) {
         LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
 
         // Kiểm tra xem hàm có bị gọi nhiều lần không
@@ -115,8 +118,19 @@ public class TableListActivity extends AppCompatActivity {
         tableNameTextView.setText(tableName);
         tableDescriptionTextView.setText(tableDescription);
 
-        // Thiết lập hình tròn màu xám cho bàn
-        tableStatusImage.setImageResource(R.drawable.circle_grey); // Sử dụng hình tròn màu xám
+        // Thiết lập hình ảnh dựa trên trạng thái bàn
+        switch (tableStatus) {
+            case "Đã đặt":
+                tableStatusImage.setImageResource(R.drawable.circle_yellow);
+                break;
+            case "Đang sử dụng":
+                tableStatusImage.setImageResource(R.drawable.circle_red);
+                break;
+            case "Có sẵn":
+            default:
+                tableStatusImage.setImageResource(R.drawable.circle_grey);
+                break;
+        }
 
         // Thêm khoảng cách giữa các bàn
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -129,7 +143,6 @@ public class TableListActivity extends AppCompatActivity {
         // Thêm bàn vào layout
         tableListLayout.addView(tableView);
     }
-
 
     @Override
     protected void onResume() {

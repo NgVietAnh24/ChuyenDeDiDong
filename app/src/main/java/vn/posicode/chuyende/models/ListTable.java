@@ -13,7 +13,7 @@ public class ListTable {
         this.id = id;
         this.nameTable = nameTable;
         this.capacity = capacity;
-        Status = status;
+        this.Status = status;
     }
 
     public int getId() {
@@ -45,6 +45,6 @@ public class ListTable {
     }
 
     public void setStatus(String status) {
-        Status = status;
+        this.Status = status;
     }
 }

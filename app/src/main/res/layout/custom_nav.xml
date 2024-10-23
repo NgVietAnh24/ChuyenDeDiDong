@@ -48,7 +48,7 @@
             />
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="0.5dp"
             android:background="@color/light_pink"
             />
         <TextView
@@ -60,7 +60,7 @@
             />
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="0.5dp"
             android:background="@color/light_pink"
             />
         <TextView
@@ -72,7 +72,7 @@
             />
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="0.5dp"
             android:background="@color/light_pink"
             />
         <TextView
@@ -84,7 +84,7 @@
             />
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="0.5dp"
             android:background="@color/light_pink"
             />
         <TextView
@@ -96,7 +96,7 @@
             />
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="0.5dp"
             android:background="@color/light_pink"
             />
         <TextView

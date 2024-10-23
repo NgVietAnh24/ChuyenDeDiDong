@@ -113,7 +113,8 @@ public class QLNhanVien extends AppCompatActivity {
                 String soCCCD = edtSoCCCD.getText().toString();
                 String ngayCap = edtNgayCap.getText().toString();
                 String selectedRole = spVaiTro.getSelectedItem().toString();
-                Uri img = imageUri;
+                Uri imgMatTruoc = imageUri;
+                Uri imgMatSau = imageUri1;
                 // Ràng buộc cho các trường nhập dữ liệu
                 if (email.equals("") || name.equals("") || password.equals("") || soDT.equals("") || soCCCD.equals("") || ngayCap.equals("")) {
                     Toast.makeText(QLNhanVien.this, "Vui lòng nhập đầy đủ!", Toast.LENGTH_SHORT).show();
@@ -140,10 +141,10 @@ public class QLNhanVien extends AppCompatActivity {
                     return;
                 }
                 if (!isValidDate(ngayCap)) {
-                    Toast.makeText(QLNhanVien.this, "Ngày cấp không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(QLNhanVien.this, "Không đúng định dạng dd/MM/yyyy !", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (img == null) {
+                if (imgMatTruoc == null || imgMatSau == null) {
                     Toast.makeText(QLNhanVien.this, "Thiếu ảnh", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -162,6 +163,8 @@ public class QLNhanVien extends AppCompatActivity {
                     role = 2;
                 } else if (selectedRole.equals("Đầu bếp")) {
                     role = 3;
+                } else if (selectedRole.equals("Quản lý")) {
+                    role = 0;
                 }
 
                 // Đăng ký người dùng vào Firebase Authentication
@@ -234,7 +237,7 @@ public class QLNhanVien extends AppCompatActivity {
                     return;
                 }
                 if (!isValidDate(ngayCap)) {
-                    Toast.makeText(QLNhanVien.this, "Ngày cấp không hợp lệ!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(QLNhanVien.this, "Không đúng định dạng dd/MM/yyyy !", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -247,12 +250,15 @@ public class QLNhanVien extends AppCompatActivity {
 
                 // Chuẩn bị các trường cập nhật
                 int role = 0;
+
                 if (selectedRole.equals("Phục vụ")) {
                     role = 1;
                 } else if (selectedRole.equals("Thu ngân")) {
                     role = 2;
                 } else if (selectedRole.equals("Đầu bếp")) {
                     role = 3;
+                } else if (selectedRole.equals("Quản lý")) {
+                    role = 0;
                 }
 
                 Map<String, Object> updates = new HashMap<>();
@@ -261,8 +267,8 @@ public class QLNhanVien extends AppCompatActivity {
                 updates.put("soCCCD", soCCCD);
                 updates.put("ngayCap", ngayCap);
                 updates.put("roles", role);
+                updates.put("vaiTro", selectedRole);
                 updates.put("ngayCapNhat", ngayCapNhat);
-
                 // Cập nhật thông tin vào Firestore
                 firestore.collection("users").document(currentUserId)
                         .update(updates)
@@ -297,6 +303,7 @@ public class QLNhanVien extends AppCompatActivity {
 
         // Tạo danh sách dữ liệu cho Spinner
         ArrayList<String> spArray = new ArrayList<>();
+        spArray.add("Quản lý");
         spArray.add("Phục vụ");
         spArray.add("Thu ngân");
         spArray.add("Đầu bếp");
@@ -377,6 +384,7 @@ public class QLNhanVien extends AppCompatActivity {
 
     public static boolean isValidDate(String dateStr) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
         sdf.setLenient(false);
 
         try {
@@ -412,9 +420,20 @@ public class QLNhanVien extends AppCompatActivity {
         }
 
         // Chọn vai trò từ Spinner
-        ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spVaiTro.getAdapter();
-        int spinnerPosition = adapter.getPosition(user.getVaiTro());
-        spVaiTro.setSelection(spinnerPosition);
+        if(user.getVaiTro() != "Quản lý") {
+            ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spVaiTro.getAdapter();
+            int spinnerPosition = adapter.getPosition(user.getVaiTro());
+            spVaiTro.setSelection(spinnerPosition);
+            spVaiTro.setEnabled(true);
+            spVaiTro.setAlpha(1f);
+//        Log.d("Role","Vai tro: "+ user.getVaiTro());
+        }else {
+            ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spVaiTro.getAdapter();
+            int spinnerPosition = adapter.getPosition(user.getVaiTro());
+            spVaiTro.setSelection(spinnerPosition);
+            spVaiTro.setEnabled(false);
+            spVaiTro.setAlpha(0.5f);
+        }
     }
 
 

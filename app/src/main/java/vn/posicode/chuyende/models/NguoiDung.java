@@ -117,6 +117,8 @@ public class NguoiDung {
 
     public String getVaiTro() {
         switch (roles) {
+            case 0:
+                return "Quản lý";
             case 1:
                 return "Phục vụ";
             case 2:

@@ -36,22 +36,22 @@ public class ListTable_Adapter extends RecyclerView.Adapter<ListTable_Adapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ListTable_Adapter.ViewHolder holder, int position) {
         ListTable tables = list_table.get(position);
-        holder.tv_nameTable.setText(tables.getNameTable());
-        holder.tv_capacity.setText(tables.getCapacity());
+        holder.tv_nameTable.setText(tables.getName());
+        holder.tv_capacity.setText(tables.getDescription());
       //  holder.rad_status.setChecked(Boolean.parseBoolean(String.valueOf(tables.getStatus())));
        String status = tables.getStatus();
         //Khoi tao mau cho trang thai
        // holder.rad_status.setButtonTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.rad_status.getContext(), R.color.grey)));
        switch (status){
-           case "trống":
+           case "Trống":
                holder.rad_status.setButtonTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.rad_status.getContext(), R.color.grey)));
                holder.clickStatus = 0; // khoi tao gia tri voi so lan click dua vao trang thai cua ban
                break;
-           case "đang ngồi":
+           case "Đang sử dụng":
                holder.rad_status.setButtonTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.rad_status.getContext(), R.color.yellow)));
                holder.clickStatus = 1;
                break;
-           case "đặt trước":
+           case "Đã đặt":
                holder.rad_status.setButtonTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.rad_status.getContext(), R.color.red)));
                holder.clickStatus = 2;
                break;
@@ -70,16 +70,16 @@ public class ListTable_Adapter extends RecyclerView.Adapter<ListTable_Adapter.Vi
                 switch (holder.clickStatus % 3) {
                     case 1:
                         holder.rad_status.setButtonTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.rad_status.getContext(), R.color.yellow)));
-                        tables.setStatus("đang ngồi");
+                        tables.setStatus("Đang sử dụng");
 
                         break;
                     case 2:
                         holder.rad_status.setButtonTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.rad_status.getContext(), R.color.red)));
-                        tables.setStatus("đặt trước");
+                        tables.setStatus("Đã đặt");
                         break;
                     case 0:
                         holder.rad_status.setButtonTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.rad_status.getContext(), R.color.grey)));
-                        tables.setStatus("trống");
+                        tables.setStatus("Trống");
                         break;
                 }
             }

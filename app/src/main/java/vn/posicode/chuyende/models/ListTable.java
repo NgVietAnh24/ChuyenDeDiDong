@@ -2,18 +2,18 @@ package vn.posicode.chuyende.models;
 
 public class ListTable {
     int id;
-    String nameTable;
-    String capacity;
-    String Status;
+    String name;
+    String description;
+    String status;
 
     public ListTable() {
     }
 
-    public ListTable(int id, String nameTable, String capacity, String status) {
+    public ListTable(int id, String name, String description, String status) {
         this.id = id;
-        this.nameTable = nameTable;
-        this.capacity = capacity;
-        this.Status = status;
+        this.name = name;
+        this.description = description;
+        this.status = status;
     }
 
     public int getId() {
@@ -24,27 +24,27 @@ public class ListTable {
         this.id = id;
     }
 
-    public String getNameTable() {
-        return nameTable;
+    public String getName() {
+        return name;
     }
 
-    public void setNameTable(String nameTable) {
-        this.nameTable = nameTable;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getCapacity() {
-        return capacity;
+    public String getDescription() {
+        return description;
     }
 
-    public void setCapacity(String capacity) {
-        this.capacity = capacity;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getStatus() {
-        return Status;
+        return status;
     }
 
     public void setStatus(String status) {
-        this.Status = status;
+        this.status = status;
     }
 }

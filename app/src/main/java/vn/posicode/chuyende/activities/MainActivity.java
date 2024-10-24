@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -31,6 +32,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 
 import java.text.Normalizer;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnShowTool, btnBack, btnSearch;
     private EditText edtSearch;
     private DatabaseReference dbRef;
+    private TextView tv_null;
     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
     @Override
@@ -63,39 +66,8 @@ public class MainActivity extends AppCompatActivity {
         listTable = new ArrayList<>();
         listTableSearch = new ArrayList<>(listTable);
         docDuLieu();
-        //Khoi tao FireBase Database
-//        dbRef = FirebaseDatabase.getInstance().getReference("");
-//        //Doc du lieu tu realtime
-//        dbRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                listTable.clear();
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                    ListTable table = snapshot.getValue(ListTable.class);
-//                    if (table != null) {
-//                        listTable.add(table);
-//                    }
-//                }
-//                listTableSearch.clear();
-//                listTableSearch.addAll(listTable);
-//                table_adapter.notifyDataSetChanged();
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
 
 
-//        Them du lieu vao ban
-//        listTable = new ArrayList<>();
-//        listTable.add(new ListTable(1,"Bàn 1", "4 - 5 nguoi", true));
-//        listTable.add(new ListTable(2,"Bàn 2", "4 - 8 nguoi", true));
-//        listTable.add(new ListTable(3,"Bàn 9", "4 - 8 nguoi", true));
-
-//       Sử dụng danh sách tìm kiêếm
-        //   listTableSearch = new ArrayList<>(listTable);
         table_adapter = new ListTable_Adapter(listTableSearch);
         LinearLayoutManager linearLayout = new LinearLayoutManager(this);
         linearLayout.setOrientation(RecyclerView.VERTICAL);
@@ -153,8 +125,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-//Ghi du lieu vao firestore
 
+    //Ghi du lieu vao firestore
+/*
     private void ghiDulieu() {
         Map<String, Object> listTable = new HashMap<>();
         listTable.put("nameTable", "Ban 2");
@@ -177,10 +150,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
+*/
     //    Doc du lieu tu firestore
     private void docDuLieu() {
-        firestore.collection("tables01").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firestore.collection("table1").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -189,9 +162,8 @@ public class MainActivity extends AppCompatActivity {
                         ListTable table = document.toObject(ListTable.class);
                         listTable.add(table);
                     }
-                    listTableSearch.clear();
-                    listTableSearch.addAll(listTable);
-                    table_adapter.notifyDataSetChanged();
+//                    Sap xep theo ten ban
+                    sapXepTheoTenBan();
                 } else {
                     Log.d(TAG, "Lỗi khi lấy tài liệu: ", task.getException());
                 }
@@ -207,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnSearch = findViewById(R.id.btnSearch);
         edtSearch = findViewById(R.id.edtSearch);
+        tv_null = findViewById(R.id.tv_null);
     }
 
     //    Hàm tìm kiếm
@@ -218,11 +191,19 @@ public class MainActivity extends AppCompatActivity {
         } else {
             for (ListTable table : listTable
             ) {
-                String chuanHoaTenBan = chuanHoaChuoi(table.getNameTable().toLowerCase());
+                String chuanHoaTenBan = chuanHoaChuoi(table.getName().toLowerCase());
                 if (chuanHoaTenBan.contains(chuanHoaTuKhoa)) {
                     listTableSearch.add(table);
                 }
             }
+        }
+//        Kiem tra ket qua tim kiem
+        if (listTableSearch.isEmpty()) {
+            tv_null.setVisibility(View.VISIBLE);
+            recyclerView_table.setVisibility(View.GONE);
+        } else {
+            tv_null.setVisibility(View.GONE);
+            recyclerView_table.setVisibility(View.VISIBLE);
         }
         table_adapter.notifyDataSetChanged();
     }
@@ -232,5 +213,17 @@ public class MainActivity extends AppCompatActivity {
         String normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(normalized).replaceAll("").replaceAll("đ", "d").replaceAll("Đ", "D");
+    }
+//    Hàm sắp xếp tên ban tang dan
+
+    private void sapXepTheoTenBan() {
+        Collections.sort(listTable, (table1, table2) -> {
+            String name1 = chuanHoaChuoi(table1.getName().toLowerCase());
+            String name2 = chuanHoaChuoi(table2.getName().toLowerCase());
+            return name1.compareTo(name2);
+        });
+        listTableSearch.clear();
+        listTableSearch.addAll(listTable);
+        table_adapter.notifyDataSetChanged();
     }
 }

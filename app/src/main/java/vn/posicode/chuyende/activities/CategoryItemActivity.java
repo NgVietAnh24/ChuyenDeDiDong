@@ -33,7 +33,7 @@ public class CategoryItemActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.category_item); // Đảm bảo layout này chỉ chứa các thành phần cần thiết
+        setContentView(R.layout.category_item);
 
         // Khởi tạo các biến
         editTextCategoryName = findViewById(R.id.editTextCategoryName);
@@ -42,6 +42,7 @@ public class CategoryItemActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         listViewCategories = findViewById(R.id.listViewCategories); // Khởi tạo ListView
 
+        // Khởi tạo danh sách và adapter
         categoryList = new ArrayList<>();
         categoryAdapter = new CategoryAdapter(this, categoryList);
         listViewCategories.setAdapter(categoryAdapter); // Thiết lập adapter cho ListView
@@ -58,7 +59,7 @@ public class CategoryItemActivity extends AppCompatActivity {
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
                 R.array.category_types, android.R.layout.simple_spinner_item);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategoryType.setAdapter(spinnerAdapter);
+        spinnerCategoryType.setAdapter(spinnerAdapter); // Gán adapter cho Spinner
 
 
 

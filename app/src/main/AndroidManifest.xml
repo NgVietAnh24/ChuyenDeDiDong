@@ -21,11 +21,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+<!--        Khai báo màn hình Danh mục con-->
         <activity android:name=".activities.CategoryItemActivity" />
+
+<!--        Khai báo màn hình danh mục-->
         <activity android:name=".activities.CategoryActivity" />
 
     </application>
+<!--    Quyền truy cập để đọc dữ liệu từ bộ nhớ ngoài của thiết bị-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+<!--    Quyền truy cập Internet-->
     <uses-permission android:name="android.permission.INTERNET"/>
 
 </manifest>

@@ -7,6 +7,7 @@
     android:layout_marginBottom="12dp"
     android:background="#FFF0F0">
 
+<!--    ImageView ảnh-->
     <ImageView
         android:id="@+id/imageViewFood"
         android:layout_width="100dp"

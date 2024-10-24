@@ -25,7 +25,7 @@ public class CategoryActivity extends AppCompatActivity {
     private ListView listViewCategories; // Thêm ListView
 
     private List<String> categoryList; // Danh sách các danh mục
-    private CategoryAdapter categoryAdapter;
+    private CategoryAdapter categoryAdapter; // Adapter cho ListView
     private int selectedPosition = -1; // Biến để lưu vị trí danh mục được chọn
 
     @Override
@@ -40,6 +40,7 @@ public class CategoryActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
         listViewCategories = findViewById(R.id.listViewCategories); // Khởi tạo ListView
 
+        // Khởi tạo danh sách và adapter
         categoryList = new ArrayList<>();
         categoryAdapter = new CategoryAdapter(this, categoryList);
         listViewCategories.setAdapter(categoryAdapter); // Thiết lập adapter cho ListView

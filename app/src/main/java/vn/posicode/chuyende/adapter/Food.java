@@ -8,6 +8,7 @@ public class Food {
     public Food() {
     }
 
+    //Constructor có tham số
     public Food(String name, String price, String image) {
         this.name = name;
         this.price = price;

@@ -7,7 +7,8 @@
     android:id="@+id/category"
     android:gravity="center_horizontal">
 
-    <!-- Toolbar with back button and title -->
+
+    <!-- Thanh công cụ có nút quay lại và tiêu đề -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,7 +16,7 @@
         android:gravity="center_vertical"
         android:padding="8dp">
 
-        <!-- Back button -->
+        <!-- Nút quay lại -->
         <ImageButton
             android:id="@+id/backButton"
             android:layout_width="wrap_content"
@@ -24,7 +25,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_gravity="start" />
 
-        <!-- Screen Title -->
+
+        <!-- Tiêu đề màn hình -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -36,7 +38,8 @@
             android:textColor="#D32F2F" />
     </LinearLayout>
 
-    <!-- Category input section -->
+
+    <!-- Phần nhập danh mục -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -68,7 +71,8 @@
             android:gravity="center_horizontal" />
     </LinearLayout>
 
-    <!-- Buttons: Save and Edit -->
+
+    <!-- Nút: Lưu và chỉnh sửa -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -99,10 +103,12 @@
             android:layout_gravity="center" />
     </LinearLayout>
 
-    <!-- ListView to display categories -->
+
+    <!-- ListView để hiển thị danh mục -->
     <ListView
         android:id="@+id/listViewCategories"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp" />
+
 </LinearLayout>

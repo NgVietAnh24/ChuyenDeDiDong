@@ -18,14 +18,14 @@ import vn.posicode.chuyende.R;
 
 public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder> {
 
-    private List<Food> foodList;
-    private OnItemClickListener onItemClickListener; // Thêm interface listener
-    private Context context; // Để Glide sử dụng context
+    private List<Food> foodList; // Danh sách các món ăn sẽ hiển thị
+    private OnItemClickListener onItemClickListener; // Listener để xử lý sự kiện click
+    private Context context; // Context để sử dụng trong Glide
 
     // Constructor
     public FoodAdapter(Context context, List<Food> foodList) {
         this.context = context; // Lưu lại context
-        this.foodList = foodList;
+        this.foodList = foodList; // Lưu danh sách món ăn
     }
 
     // Tạo interface để xử lý sự kiện click
@@ -40,18 +40,20 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
 
     @Override
     public FoodViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        // Tạo ViewHolder mới bằng cách inflating layout item_food
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_food, parent, false);
         return new FoodViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(FoodViewHolder holder, int position) {
+       // Gán dữ liệu cho ViewHolder tại vị trí tương ứng
         Food food = foodList.get(position);
         holder.foodName.setText(food.getName());
         holder.foodPrice.setText("$" + food.getPrice());  // Có thể định dạng lại giá trị tiền tệ nếu cần
 
         String imageUrl = food.getImage(); // Lấy URL hình ảnh từ getImage()
-        Log.d("FoodAdapter", "Image URL: " + imageUrl);
+        Log.d("FoodAdapter", "Image URL: " + imageUrl);// Ghi log URL hình ảnh
 
         if (imageUrl != null && !imageUrl.isEmpty()) {
             // Sử dụng Glide để tải ảnh từ URL
@@ -59,7 +61,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
                     .load(imageUrl)
                     .placeholder(R.drawable.banhmi)  // Hiển thị ảnh mặc định khi đang tải
                     .error(R.drawable.anhloi)   // Hiển thị ảnh lỗi khi không tải được ảnh
-                    .into(holder.foodImage);
+                    .into(holder.foodImage); // Đặt hình ảnh vào ImageView
         } else {
             // Đặt hình ảnh mặc định nếu không có URL
             holder.foodImage.setImageResource(R.drawable.banhmi);
@@ -78,12 +80,13 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
 
     @Override
     public int getItemCount() {
+        // Trả về số lượng món ăn trong danh sách
         return foodList.size();
     }
 
     public static class FoodViewHolder extends RecyclerView.ViewHolder {
-        ImageView foodImage;
-        TextView foodName, foodPrice;
+        ImageView foodImage; // ImageView để hiển thị hình ảnh món ăn
+        TextView foodName, foodPrice; // TextView để hiển thị tên món ăn và  giá món ăn
 
         public FoodViewHolder(View itemView) {
             super(itemView);

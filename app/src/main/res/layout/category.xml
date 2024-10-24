@@ -9,7 +9,6 @@
 
     <!-- Toolbar with back button and title -->
     <LinearLayout
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -46,8 +45,6 @@
         android:paddingBottom="16dp"
         android:gravity="center">
 
-        <!-- Category name input -->
-        <!-- Category name input -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +54,6 @@
             android:textStyle="bold"
             android:layout_marginBottom="8dp"
             android:gravity="start" />
-
 
         <EditText
             android:id="@+id/editTextCategoryName"
@@ -102,4 +98,11 @@
             android:textColor="@android:color/white"
             android:layout_gravity="center" />
     </LinearLayout>
+
+    <!-- ListView to display categories -->
+    <ListView
+        android:id="@+id/listViewCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp" />
 </LinearLayout>

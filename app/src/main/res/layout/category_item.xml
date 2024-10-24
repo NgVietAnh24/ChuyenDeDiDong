@@ -73,7 +73,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Nhập tên danh mục"
+                android:hint="Nhập tên danh mục con"
                 android:background="@drawable/vien_edittext"
                 android:padding="12dp"
                 android:fontFamily="sans-serif-medium"

@@ -46,7 +46,10 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
     FirebaseStorage storage;
 
     private OnItemClickListener onItemClickListener;
-    private int selectedPosition = RecyclerView.NO_POSITION;
+    public int selectedPosition = -1;
+    private  int selectedPos = -1;
+    private int backColor;
+    private NguoiDungAdapter.ViewHolder prev;
 
     public interface OnItemClickListener {
         void onItemClick(NguoiDung user);
@@ -82,38 +85,50 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
         }
         holder.tvNgayTao.setText(user.getNgayTao());
         holder.tvNgayCapNhat.setText(user.getNgayCapNhat());
-//        if (position == selectedPosition) {
-//            holder.itemView.setBackgroundColor(Color.LTGRAY);
-//        } else {
-//            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.item_background));
-//        }
-//        int pos = position;
+        int pos = position;
+        // Kiểm tra trạng thái chọn để cập nhật màu nền
+        if (position == selectedPosition) {
+            holder.itemLayout.setBackground(ContextCompat.getDrawable(holder.itemLayout.getContext(), R.drawable.item_background_selector));
+        } else {
+            holder.itemLayout.setBackground(ContextCompat.getDrawable(holder.itemLayout.getContext(), R.drawable.item_background));
+        }
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                selectedPosition = pos;
-//                notifyDataSetChanged();
-                onItemClickListener.onItemClick(user);
-//                holder.itemView.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.textColor));
-//
-//                // Sau khi xử lý xong (ví dụ, lưu vào database), đổi lại màu mặc định
-//                view.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        holder.itemView.setBackgroundColor(ContextCompat.getColor(view.getContext(), R.color.item_background));
-//                    }
-//                }, 2000); // Thay đổi lại màu sau 2 giây
+                int previousPosition = selectedPosition;
+
+                // If the same item is clicked again, deselect it
+                if (selectedPosition == pos) {
+                    selectedPosition = -1; // Deselect
+                    ((QLNhanVien) view.getContext()).resetInputFields();
+                    ((QLNhanVien) view.getContext()).btnThem.setAlpha(1f);
+                    ((QLNhanVien) view.getContext()).btnThem.setEnabled(true);
+                } else {
+                    // Select new position and set UI changes accordingly
+                    selectedPosition = pos;
+                    ((QLNhanVien) view.getContext()).btnThem.setEnabled(false);
+                    ((QLNhanVien) view.getContext()).btnThem.setAlpha(0.5f);
+                    onItemClickListener.onItemClick(user); // Callback to display user data
+                }
+
+                // Update previous and new positions
+                if (previousPosition != -1) {
+                    notifyItemChanged(previousPosition);
+                }
+                notifyItemChanged(selectedPosition);
             }
         });
+
 
         holder.btnXoa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(user.getRoles() != 0){
+                if (user.getRoles() != 0) {
                     showDeleteConfirmationDialog(user.getUid(), holder.itemView.getContext());
                     ((QLNhanVien) view.getContext()).resetInputFields();
-                }else {
-                    Toast.makeText(view.getContext(),"Không được phép xóa quản lý ⚠️", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(view.getContext(), "Không được phép xóa quản lý ⚠️", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -127,11 +142,13 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        LinearLayout itemLayout;
         TextView tvName, tvRole, tvNgayTao, tvNgayCapNhat;
         Button btnXoa;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            itemLayout = itemView.findViewById(R.id.itemLayout);
             tvName = itemView.findViewById(R.id.tvTen);
             tvRole = itemView.findViewById(R.id.tvVaiTro);
             tvNgayTao = itemView.findViewById(R.id.tvNgayTao);
@@ -240,6 +257,9 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
             }
         });
     }
+
+
+
 
 
 }

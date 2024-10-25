@@ -1,5 +1,6 @@
 package vn.posicode.chuyende.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -45,7 +46,7 @@ public class CategoryActivity extends AppCompatActivity {
         categoryAdapter = new CategoryAdapter(this, categoryList);
         listViewCategories.setAdapter(categoryAdapter); // Thiết lập adapter cho ListView
 
-        // Thiết lập sự kiện cho nút Lưu
+       //  Thiết lập sự kiện cho nút Lưu
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,6 +70,11 @@ public class CategoryActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+
+
+
 
         // Thiết lập sự kiện cho nút Sửa
         buttonEdit.setOnClickListener(new View.OnClickListener() {

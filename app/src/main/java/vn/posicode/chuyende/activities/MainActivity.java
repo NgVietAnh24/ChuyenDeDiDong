@@ -1,6 +1,8 @@
 package vn.posicode.chuyende.activities;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,12 +17,22 @@ import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,39 +42,36 @@ import vn.posicode.chuyende.adapter.Food;
 import vn.posicode.chuyende.adapter.FoodAdapter;
 
 public class MainActivity extends AppCompatActivity {
-    FirebaseFirestore firestore; // Firebase Firestore instance để quản lý dữ liệu
+    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
 
     private RecyclerView recyclerView;
-    private FoodAdapter adapter; // Adapter để liên kết dữ liệu với RecyclerView
+    private FoodAdapter adapter;
     private List<Food> foodList;
     private int selectedPosition = -1;
-    private List<String> categoryList; // Danh sách các danh mục món ăn
-  private String image;
-    private static final int PICK_IMAGE_REQUEST = 1; // Mã yêu cầu cho việc chọn hình ảnh
-    private Uri imageUri; // URI của hình ảnh đã chọn
+    private List<String> categoryList;
+    private String image;
+    private static final int PICK_IMAGE_REQUEST = 1;
+    private Uri imageUri;
     private ImageView imageView;
 
     private EditText editTextTenMonAn, editTextGia;
     private Spinner spinnerDanhMuc;
     private Button buttonAdd, buttonEdit, buttonDelete;
-    private ImageView upload, optionsButton;  // Các nút để tải hình ảnh và mở menu tùy chọn
-    private ArrayAdapter<String> adapterSpinner; // Adapter cho Spinner danh mục
+    private ImageView upload, optionsButton;
+    private ArrayAdapter<String> adapterSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Khởi tạo Spinner
+        // Khởi tạo danh mục
         spinnerDanhMuc = findViewById(R.id.spinnerDanhMuc);
         categoryList = new ArrayList<>();
         categoryList.add("Món khai vị");
         categoryList.add("Món chính");
         categoryList.add("Món tráng miệng");
 
-
-
-        // Tạo adapter cho Spinner
         adapterSpinner = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryList);
         adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerDanhMuc.setAdapter(adapterSpinner);
@@ -71,181 +80,196 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Khởi tạo danh sách món ăn và adapter
         foodList = new ArrayList<>();
-        adapter = new FoodAdapter(this,foodList);
+        docDuLieu(); // Đọc dữ liệu từ Firestore
+        adapter = new FoodAdapter(this, foodList);
         recyclerView.setAdapter(adapter);
 
-        // Khởi tạo các thành phần giao diện
+        // Khởi tạo các view
         editTextTenMonAn = findViewById(R.id.editTextTenMonAn);
-        editTextGia = findViewById(R.id.editTextGia);
         buttonAdd = findViewById(R.id.buttonAdd);
+        editTextGia = findViewById(R.id.editTextGia);
         buttonEdit = findViewById(R.id.buttonEdit);
         buttonDelete = findViewById(R.id.buttonDelete);
         upload = findViewById(R.id.upload);
+        imageView = findViewById(R.id.upload); // Đảm bảo bạn đã khởi tạo đúng ImageView
 
         // Thêm món ăn
-        buttonAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String tenMonAn = editTextTenMonAn.getText().toString();
-                String gia = editTextGia.getText().toString();
-                String selectedCategory = spinnerDanhMuc.getSelectedItem().toString();
-//                String image = "";
+        buttonAdd.setOnClickListener(v -> {
+            String tenMonAn = editTextTenMonAn.getText().toString();
+            String gia = editTextGia.getText().toString();
+            String selectedCategory = spinnerDanhMuc.getSelectedItem().toString();
 
-                // Kiểm tra xem tên món ăn và giá có hợp lệ không
-                if (!tenMonAn.isEmpty() && !gia.isEmpty()) {
-                    foodList.add(new Food(tenMonAn, gia, image));// Thêm món ăn vào danh sách
-                    adapter.notifyDataSetChanged();  // Cập nhật RecyclerView
-                    Toast.makeText(MainActivity.this, "Thêm món ăn thành công", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Vui lòng nhập đủ thông tin", Toast.LENGTH_SHORT).show();
-                }
+            if (!tenMonAn.isEmpty() && !gia.isEmpty()) {
+                Food newFood = new Food(tenMonAn, gia, image);
+                foodList.add(newFood);
+                ghiDuLieu(newFood); // Ghi dữ liệu vào Firestore
+                adapter.notifyDataSetChanged();
+                Toast.makeText(MainActivity.this, "Thêm món ăn thành công", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Vui lòng nhập đủ thông tin", Toast.LENGTH_SHORT).show();
             }
         });
 
         // Sửa món ăn
-        buttonEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (selectedPosition >= 0) { // Kiểm tra có món ăn nào được chọn không
-                    Food food = foodList.get(selectedPosition);
-                    String tenMonAnMoi = editTextTenMonAn.getText().toString(); // Lấy tên mới từ EditText
-                    String giaMoi = editTextGia.getText().toString(); // Lấy giá mới từ EditText
+        buttonEdit.setOnClickListener(v -> {
+            if (selectedPosition >= 0) {
+                Food food = foodList.get(selectedPosition);
+                String tenMonAnMoi = editTextTenMonAn.getText().toString();
+                String giaMoi = editTextGia.getText().toString();
 
-                    // Cập nhật tên và giá nếu không rỗng
-                    if (!tenMonAnMoi.isEmpty()) {
-                        food.setName(tenMonAnMoi);
-                    }
-                    if (!giaMoi.isEmpty()) {
-                        food.setPrice(giaMoi);
-                    }
-
-                    adapter.notifyItemChanged(selectedPosition); // Cập nhật RecyclerView
-                    Toast.makeText(MainActivity.this, "Sửa món ăn thành công", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Chọn món ăn để sửa", Toast.LENGTH_SHORT).show();
+                if (!tenMonAnMoi.isEmpty()) {
+                    food.setName(tenMonAnMoi);
                 }
+                if (!giaMoi.isEmpty()) {
+                    food.setPrice(giaMoi);
+                }
+                if (image != null && !image.isEmpty()) {
+                    food.setImage(image);
+                }
+
+                // Cập nhật Firestore
+                updateFoodInFirestore(food);
+                adapter.notifyItemChanged(selectedPosition);
+                Toast.makeText(MainActivity.this, "Sửa món ăn thành công", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Chọn món ăn để sửa", Toast.LENGTH_SHORT).show();
             }
         });
 
         // Xóa món ăn
-        buttonDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (selectedPosition >= 0) { // Kiểm tra có món ăn nào được chọn không
-                    foodList.remove(selectedPosition); // Xóa món ăn khỏi danh sách
-                    adapter.notifyItemRemoved(selectedPosition); // Cập nhật RecyclerView
-                    Toast.makeText(MainActivity.this, "Xóa món ăn thành công", Toast.LENGTH_SHORT).show();
-                    selectedPosition = -1; // Đặt lại vị trí được chọn
-                    editTextTenMonAn.setText(""); // Xóa nội dung EditText tên món ăn
-                    editTextGia.setText(""); // Xóa nội dung EditText giá món ăn
-                } else {
-                    Toast.makeText(MainActivity.this, "Chọn món ăn để xóa", Toast.LENGTH_SHORT).show();
-                }
+        buttonDelete.setOnClickListener(v -> {
+            if (selectedPosition >= 0) {
+                Food food = foodList.get(selectedPosition);
+                deleteFoodFromFirestore(food); // Xóa từ Firestore
+                foodList.remove(selectedPosition);
+                adapter.notifyItemRemoved(selectedPosition);
+                Toast.makeText(MainActivity.this, "Xóa món ăn thành công", Toast.LENGTH_SHORT).show();
+                selectedPosition = -1;
+                editTextTenMonAn.setText("");
+                editTextGia.setText("");
+                imageView.setImageDrawable(null); // Xóa ảnh
+            } else {
+                Toast.makeText(MainActivity.this, "Chọn món ăn để xóa", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Chức năng tải ảnh lên
-        upload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                chooseImageFromGallery(); // Mở gallery để chọn hình ảnh
-            }
-        });
+        // Chọn ảnh
+        upload.setOnClickListener(v -> chooseImageFromGallery());
 
-        // Xử lý sự kiện click vào món ăn trong RecyclerView
-        adapter.setOnItemClickListener(new FoodAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-                selectedPosition = position;
-                Food food = foodList.get(position);
-                editTextTenMonAn.setText(food.getName());
-                editTextGia.setText(food.getPrice());
+        // Xử lý sự kiện chọn món ăn
+        adapter.setOnItemClickListener(position -> {
+            selectedPosition = position;
+            Food food = foodList.get(position);
+            editTextTenMonAn.setText(food.getName());
+            editTextGia.setText(food.getPrice());
+
+            if (food.getImage() != null && !food.getImage().isEmpty()) {
+                Uri imageUri = Uri.parse(food.getImage());
+                Glide.with(MainActivity.this).load(imageUri).into(imageView); // Hiển thị ảnh
+            } else {
+                imageView.setImageDrawable(null); // Nếu không có ảnh, xóa ảnh
             }
         });
 
         // Xử lý nút quay lại
         ImageButton backButton = findViewById(R.id.backButton);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-                finish();
-            }
+        backButton.setOnClickListener(v -> {
+            onBackPressed();
+            finish();
         });
 
-
-
-
-        // Xử lý nút Options
+        // Xử lý menu tùy chọn
         optionsButton = findViewById(R.id.btnoptions);
-        optionsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PopupMenu popupMenu = new PopupMenu(MainActivity.this, optionsButton); // Tạo menu tùy chọn
-                popupMenu.getMenuInflater().inflate(R.menu.options_menu, popupMenu.getMenu()); // Nạp menu từ tài nguyên
+        optionsButton.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(MainActivity.this, optionsButton);
+            popupMenu.getMenuInflater().inflate(R.menu.options_menu, popupMenu.getMenu());
 
-                // Thiết lập sự kiện khi chọn menu
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        // Sử dụng if-else thay cho switch-case
-                        if (item.getItemId() == R.id.categoryID) {
-                            Toast.makeText(MainActivity.this, "Quản lý danh mục", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(MainActivity.this, CategoryActivity.class);
-                            startActivity(intent);
-                            // Xử lý chức năng quản lý danh mục ở đây
-                            return true;
-                        } else if (item.getItemId() == R.id.category_itemID) {
-                            Toast.makeText(MainActivity.this, "Quản lý danh mục con", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(MainActivity.this, CategoryItemActivity.class);
-                            startActivity(intent);
-                            // Xử lý chức năng quản lý danh mục con ở đây
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                });
+            popupMenu.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.categoryID) {
+                    Toast.makeText(MainActivity.this, "Quản lý danh mục", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this, CategoryActivity.class);
+                    startActivity(intent);
+                    return true;
+                } else if (item.getItemId() == R.id.category_itemID) {
+                    Toast.makeText(MainActivity.this, "Quản lý danh mục con", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this, CategoryItemActivity.class);
+                    startActivity(intent);
+                    return true;
+                }
+                return false;
+            });
 
-                popupMenu.show(); // Hiển thị menu
-            }
+            popupMenu.show();
         });
-
-
-        // Khởi tạo ImageView để hiển thị hình ảnh đã chọn
-        imageView = findViewById(R.id.upload);
     }
 
-    // Mở gallery để chọn hình ảnh
     private void chooseImageFromGallery() {
         Intent intent = new Intent();
-        intent.setType("image/*"); // Chọn tất cả các loại hình ảnh
-        intent.setAction(Intent.ACTION_GET_CONTENT); // Hành động lấy nội dung
-        startActivityForResult(Intent.createChooser(intent, "Chọn ảnh"), PICK_IMAGE_REQUEST);  // Mở activity chọn hình ảnh
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+        startActivityForResult(Intent.createChooser(intent, "Chọn ảnh"), PICK_IMAGE_REQUEST);
     }
 
-    // Xử lý kết quả trả về từ activity chọn hình ảnh
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-//            imageUri = data.getData();
-//            imageView.setImageURI(imageUri);
-//            Glide.with(this).load(imageUri).into(imageView);
-//        }
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            imageUri = data.getData(); // Lấy URI của bức ảnh đã chọn
-            String imageUrl = imageUri.toString(); // Chuyển đổi URI thành chuỗi URL
-            Log.d("Selected Image URI", imageUrl); // Ghi log URL để kiểm tra
-
-            // Lưu URL vào biến image (để sử dụng sau này)
-            image = imageUrl;
-
-            // Hiển thị ảnh lên ImageView
-            imageView.setImageURI(imageUri);  // Hiển thị hình ảnh trên ImageView
-            Glide.with(this).load(imageUri).into(imageView); // Tải hình ảnh bằng Glide
+            imageUri = data.getData();
+            // Quản lý hình ảnh lâu dài
+            getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            image = imageUri.toString();
+            Glide.with(this).load(imageUri).into(imageView); // Hiển thị ảnh
         }
+    }
+
+    // Ghi dữ liệu
+    private void ghiDuLieu(Food foodItem) {
+        // Kiểm tra quyền Internet
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
+            // Ghi dữ liệu vào Firestore
+            Log.d("Firebase", "Ghi dữ liệu: " + foodItem.getName() + ", " + foodItem.getPrice() + ", " + foodItem.getImage());
+
+            firestore.collection("foods").add(foodItem)
+                    .addOnSuccessListener(documentReference -> Log.d("Firebase", "DocumentSnapshot added with ID: " + documentReference.getId()))
+                    .addOnFailureListener(e -> Log.e("Firebase Error", "Error adding document", e));
+        } else {
+            Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Cập nhật món ăn trong Firestore
+    private void updateFoodInFirestore(Food food) {
+        // Tìm ID của món ăn đã chọn (bạn cần thêm logic để lấy ID này khi đọc dữ liệu)
+        // Đây là ví dụ, bạn cần thay đổi theo thực tế
+        // Nếu bạn lưu ID trong Food, bạn có thể truy cập như food.getId()
+        // Hoặc bạn có thể thêm một trường id trong Food và lưu nó cùng với dữ liệu
+    }
+
+    // Xóa món ăn từ Firestore
+    private void deleteFoodFromFirestore(Food food) {
+        // Tìm ID của món ăn đã chọn (bạn cần thêm logic để lấy ID này khi đọc dữ liệu)
+        // Đây là ví dụ, bạn cần thay đổi theo thực tế
+        // Nếu bạn lưu ID trong Food, bạn có thể truy cập như food.getId()
+        // Hoặc bạn có thể thêm một trường id trong Food và lưu nó cùng với dữ liệu
+    }
+
+    // Đọc dữ liệu
+    private void docDuLieu() {
+        firestore.collection("foods").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    foodList.clear();  // Xóa dữ liệu cũ
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Food foodItems = document.toObject(Food.class);
+                        foodList.add(foodItems);
+                    }
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Log.d("ErrorRead", "Lỗi khi lấy dữ liệu: ", task.getException());
+                }
+            }
+        });
     }
 }

@@ -47,8 +47,9 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:21.0.1")
     implementation ("com.google.firebase:firebase-firestore:24.0.0")
     implementation ("com.google.android.gms:play-services-auth:20.2.0")
-        implementation ("com.google.firebase:firebase-auth:latest_version")
-        implementation ("com.google.firebase:firebase-firestore:latest_version")
-
-
+    implementation ("com.google.firebase:firebase-auth:latest_version")
+    implementation ("com.google.firebase:firebase-firestore:latest_version")
+    implementation ("androidx.cardview:cardview:1.0.0")
+    implementation  ("androidx.appcompat:appcompat:1.4.0")
+    implementation ("androidx.recyclerview:recyclerview:1.2.1")
 }

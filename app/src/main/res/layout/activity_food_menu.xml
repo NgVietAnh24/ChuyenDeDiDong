@@ -117,9 +117,8 @@
                     android:id="@+id/food_image"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/sample_food_image"
                     android:layout_marginEnd="8dp"
-                    android:contentDescription="Food Image"/>
+                    android:src="@drawable/sample_food_image" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -131,7 +130,7 @@
                         android:id="@+id/food_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hamburger"
+                        android:text="Tên món ăn"
                         android:textColor="@color/black"
                         android:textSize="16sp" />
 
@@ -139,7 +138,7 @@
                         android:id="@+id/food_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$10"
+                        android:text="$0"
                         android:textColor="@color/red"
                         android:textSize="14sp" />
                 </LinearLayout>

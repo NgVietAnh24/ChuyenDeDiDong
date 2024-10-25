@@ -1,20 +1,41 @@
 package vn.posicode.chuyende.adapter;
 
 public class Food {
+    private String id;
     private String name;
     private String price;
     private String image;
 
+    // Constructor không tham số (Firebase cần sử dụng)
     public Food() {
+        // Constructor mặc định để Firebase sử dụng khi deserializing
     }
 
-    //Constructor có tham số
+    // Constructor rút gọn (không bao gồm id)
     public Food(String name, String price, String image) {
         this.name = name;
         this.price = price;
         this.image = image;
     }
 
+    // Constructor đầy đủ (bao gồm id)
+    public Food(String id, String name, String price, String image) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.image = image;
+    }
+
+    // Getter và Setter cho id
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    // Getter và Setter cho name
     public String getName() {
         return name;
     }
@@ -23,6 +44,7 @@ public class Food {
         this.name = name;
     }
 
+    // Getter và Setter cho price
     public String getPrice() {
         return price;
     }
@@ -31,6 +53,7 @@ public class Food {
         this.price = price;
     }
 
+    // Getter và Setter cho image
     public String getImage() {
         return image;
     }
@@ -38,5 +61,4 @@ public class Food {
     public void setImage(String image) {
         this.image = image;
     }
-
 }

@@ -2,6 +2,7 @@ package vn.posicode.chuyende.activities;
 
 import static android.content.ContentValues.TAG;
 
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -68,10 +70,11 @@ public class QLNhanVien extends AppCompatActivity {
     private NguoiDungAdapter nguoiDungAdapter;
     private RecyclerView listNhanVien;
     private Spinner spVaiTro;
-    private AppCompatButton btnThem, btnSua;
+    public AppCompatButton btnThem, btnSua;
     private ImageView imgMatTruocCCCD, imgMatSauCCCD, btnBack, imgEye;
     private TextInputEditText edtTenDangNhap, edtTenNhanVien, edtMatKhau, edtSoDT, edtSoCCCD, edtNgayCap;
     private SwipeRefreshLayout refreshLayout;
+    private LinearLayout itemLayout;
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
@@ -218,12 +221,11 @@ public class QLNhanVien extends AppCompatActivity {
                 String selectedRole = spVaiTro.getSelectedItem().toString();
                 Uri img = imageUri;
 
-                // Kiểm tra dữ liệu nhập
+                // Kiểm tra các điều kiện hợp lệ cho dữ liệu
                 if (name.equals("") || soDT.equals("") || soCCCD.equals("") || ngayCap.equals("")) {
                     Toast.makeText(QLNhanVien.this, "Vui lòng nhập đầy đủ!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                // Kiểm tra tính hợp lệ của các trường nhập
                 if (name.length() > 0 && !Character.isUpperCase(name.charAt(0))) {
                     Toast.makeText(QLNhanVien.this, "Họ tên phải bắt đầu bằng chữ cái viết hoa!", Toast.LENGTH_SHORT).show();
                     return;
@@ -241,16 +243,11 @@ public class QLNhanVien extends AppCompatActivity {
                     return;
                 }
 
-
-                String currentUserId = selectedUser;  // Đây là ID người dùng được chọn để sửa
-
-                // Lấy thời gian hiện tại và định dạng nó thành chuỗi ngày giờ theo ý muốn
+                String currentUserId = selectedUser;
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                 String ngayCapNhat = sdf.format(new Date());
 
-                // Chuẩn bị các trường cập nhật
                 int role = 0;
-
                 if (selectedRole.equals("Phục vụ")) {
                     role = 1;
                 } else if (selectedRole.equals("Thu ngân")) {
@@ -269,21 +266,24 @@ public class QLNhanVien extends AppCompatActivity {
                 updates.put("roles", role);
                 updates.put("vaiTro", selectedRole);
                 updates.put("ngayCapNhat", ngayCapNhat);
-                // Cập nhật thông tin vào Firestore
+
                 firestore.collection("users").document(currentUserId)
                         .update(updates)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 Toast.makeText(QLNhanVien.this, "Cập nhật thành công ☑️", Toast.LENGTH_SHORT).show();
-                                docDulieu(); // Tải lại dữ liệu lên giao diện sau khi cập nhật
-                                resetInputFields(); // Xóa dữ liệu trong các ô nhập liệu
+                                docDulieu();
+                                resetInputFields();
+
+                                // Đặt lại vị trí đã chọn và cập nhật RecyclerView để đổi màu về mặc định
+                                nguoiDungAdapter.selectedPosition = -1;
+                                nguoiDungAdapter.notifyDataSetChanged();
                             } else {
                                 Toast.makeText(QLNhanVien.this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
                                 Log.d(TAG, "Error updating document", task.getException());
                             }
                         });
 
-                // Nếu có thay đổi ảnh, cập nhật hình ảnh lên Firebase Storage
                 if (img != null) {
                     uploadImageToFirebaseStorage(currentUserId);
                 }
@@ -294,7 +294,7 @@ public class QLNhanVien extends AppCompatActivity {
         nguoiDungAdapter = new NguoiDungAdapter(list, new NguoiDungAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(NguoiDung user) {
-                displayUserData(user); // Hiển thị dữ liệu của người dùng
+                displayUserData(user);// Hiển thị dữ liệu của người dùng
             }
         });
 
@@ -375,6 +375,7 @@ public class QLNhanVien extends AppCompatActivity {
         imgMatTruocCCCD.setImageResource(R.drawable.add_card);
         imgMatSauCCCD.setImageResource(R.drawable.add_card);
         spVaiTro.setSelection(0);
+
     }
 
 
@@ -420,14 +421,14 @@ public class QLNhanVien extends AppCompatActivity {
         }
 
         // Chọn vai trò từ Spinner
-        if(user.getVaiTro() != "Quản lý") {
+        if (user.getVaiTro() != "Quản lý") {
             ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spVaiTro.getAdapter();
             int spinnerPosition = adapter.getPosition(user.getVaiTro());
             spVaiTro.setSelection(spinnerPosition);
             spVaiTro.setEnabled(true);
             spVaiTro.setAlpha(1f);
 //        Log.d("Role","Vai tro: "+ user.getVaiTro());
-        }else {
+        } else {
             ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) spVaiTro.getAdapter();
             int spinnerPosition = adapter.getPosition(user.getVaiTro());
             spVaiTro.setSelection(spinnerPosition);

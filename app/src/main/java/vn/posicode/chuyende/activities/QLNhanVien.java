@@ -56,7 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import vn.posicode.chuyende.MainActivity;
+import vn.posicode.chuyende.HomeQuanLy;
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapters.NguoiDungAdapter;
 import vn.posicode.chuyende.models.NguoiDung;
@@ -74,7 +74,6 @@ public class QLNhanVien extends AppCompatActivity {
     private ImageView imgMatTruocCCCD, imgMatSauCCCD, btnBack, imgEye;
     private TextInputEditText edtTenDangNhap, edtTenNhanVien, edtMatKhau, edtSoDT, edtSoCCCD, edtNgayCap;
     private SwipeRefreshLayout refreshLayout;
-    private LinearLayout itemLayout;
 
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
@@ -102,6 +101,7 @@ public class QLNhanVien extends AppCompatActivity {
         layoutManager.setOrientation(RecyclerView.VERTICAL);
         listNhanVien.setLayoutManager(layoutManager);
         listNhanVien.setAdapter(nguoiDungAdapter);
+        Log.d("JJ","getData: " + list);
 //        ghiDulieu();
 
         docDulieu();
@@ -319,7 +319,7 @@ public class QLNhanVien extends AppCompatActivity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(QLNhanVien.this, MainActivity.class);
+                Intent intent = new Intent(QLNhanVien.this, HomeQuanLy.class);
                 startActivity(intent);
                 finish();
             }
@@ -638,6 +638,7 @@ public class QLNhanVien extends AppCompatActivity {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 NguoiDung userData = document.toObject(NguoiDung.class);
                                 list.add(userData);
+                                Log.d("VVV", "getData: " + list.add(userData));
                             }
                             Log.d(TAG, "Getting documents: ");
                             nguoiDungAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu mới

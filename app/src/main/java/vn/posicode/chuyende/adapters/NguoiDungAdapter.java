@@ -19,16 +19,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -47,9 +43,6 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
 
     private OnItemClickListener onItemClickListener;
     public int selectedPosition = -1;
-    private  int selectedPos = -1;
-    private int backColor;
-    private NguoiDungAdapter.ViewHolder prev;
 
     public interface OnItemClickListener {
         void onItemClick(NguoiDung user);

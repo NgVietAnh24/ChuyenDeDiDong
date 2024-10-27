@@ -4,8 +4,7 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" />  <!-- Đặt thành false nếu camera không bắt buộc -->
-
+        android:required="false" /> <!-- Đặt thành false nếu camera không bắt buộc -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -20,18 +19,21 @@
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.ChuyenDe">
-
         <activity
-            android:name=".activities.Splash"
+            android:name=".activities.QLBan"
+            android:exported="false" />
+        <activity
+            android:name=".HomeQuanLy"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".HomeQuanLy"-->
+<!--            android:exported="false" />-->
         <activity
             android:name=".activities.ForgotPassword"
             android:exported="false" />

@@ -4,7 +4,6 @@ import static android.content.ContentValues.TAG;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
@@ -22,14 +21,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import vn.posicode.chuyende.MainActivity;
+import vn.posicode.chuyende.HomeQuanLy;
 import vn.posicode.chuyende.R;
 
 public class Login extends AppCompatActivity {
@@ -94,7 +92,7 @@ public class Login extends AppCompatActivity {
                                                             // Điều hướng người dùng dựa trên role
                                                             switch (role) {
                                                                 case 0:
-                                                                    startActivity(new Intent(Login.this, MainActivity.class));
+                                                                    startActivity(new Intent(Login.this, HomeQuanLy.class));
                                                                     break;
                                                                 case 1:
                                                                     startActivity(new Intent(Login.this, HomeNhanVien.class));
@@ -107,7 +105,7 @@ public class Login extends AppCompatActivity {
                                                                     break;
                                                                 default:
                                                                     // Vai trò không xác định, quay về màn hình chính
-                                                                    startActivity(new Intent(Login.this, MainActivity.class));
+                                                                    startActivity(new Intent(Login.this, HomeQuanLy.class));
                                                                     break;
                                                             }
                                                         } else {

@@ -5,19 +5,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.List;
 
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.activities.CategoryModel;
 
-public class CategoryAdapter extends ArrayAdapter<String> {
+public class CategoryAdapter extends ArrayAdapter<CategoryModel> {
     private final Context context; // Đối tượng Context
-    private final List<String> categories; // Danh sách các danh mục
+    private final List<CategoryModel> categories; // Danh sách các danh mục
 
     // Constructor
-    public CategoryAdapter(Context context, List<String> categories) {
+    public CategoryAdapter(Context context, List<CategoryModel> categories) {
         super(context, R.layout.item_category, categories); // Gọi đến constructor của ArrayAdapter
         this.context = context;  // Lưu context
         this.categories = categories;   // Lưu danh sách danh mục
@@ -31,12 +31,13 @@ public class CategoryAdapter extends ArrayAdapter<String> {
             convertView = inflater.inflate(R.layout.item_category, parent, false);
         }
 
-        TextView textViewCategoryName = convertView.findViewById(R.id.textViewCategoryName); // Khởi tạo TextView
-        textViewCategoryName.setText(categories.get(position)); // Hiển thị tên danh mục
+        // Lấy đối tượng CategoryModel tại vị trí `position`
+        CategoryModel category = categories.get(position);
+
+        // Khởi tạo TextView và hiển thị tên danh mục
+        TextView textViewCategoryName = convertView.findViewById(R.id.textViewCategoryName);
+        textViewCategoryName.setText(category.getName());
 
         return convertView;
     }
-
-
-
 }

@@ -1,6 +1,5 @@
 package vn.posicode.chuyende.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -10,10 +9,20 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.CategoryAdapter;
@@ -23,72 +32,54 @@ public class CategoryActivity extends AppCompatActivity {
     private EditText editTextCategoryName;
     private Button buttonSave, buttonEdit;
     private ImageButton backButton;
-    private ListView listViewCategories; // Thêm ListView
+    private ListView listViewCategories;
 
-    private List<String> categoryList; // Danh sách các danh mục
-    private CategoryAdapter categoryAdapter; // Adapter cho ListView
-    private int selectedPosition = -1; // Biến để lưu vị trí danh mục được chọn
+    private List<CategoryModel> categoryList;
+    private CategoryAdapter categoryAdapter;
+    private int selectedPosition = -1;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.category); // Đảm bảo layout này chỉ chứa các thành phần cần thiết
+        setContentView(R.layout.category);
 
-        // Khởi tạo các biến
+        db = FirebaseFirestore.getInstance();
+
         editTextCategoryName = findViewById(R.id.editTextCategoryName);
         buttonSave = findViewById(R.id.buttonSave);
         buttonEdit = findViewById(R.id.buttonEdit);
         backButton = findViewById(R.id.backButton);
-        listViewCategories = findViewById(R.id.listViewCategories); // Khởi tạo ListView
+        listViewCategories = findViewById(R.id.listViewCategories);
 
-        // Khởi tạo danh sách và adapter
         categoryList = new ArrayList<>();
         categoryAdapter = new CategoryAdapter(this, categoryList);
-        listViewCategories.setAdapter(categoryAdapter); // Thiết lập adapter cho ListView
+        listViewCategories.setAdapter(categoryAdapter);
 
-       //  Thiết lập sự kiện cho nút Lưu
+        loadCategories();
+
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String categoryName = editTextCategoryName.getText().toString().trim();
 
                 if (!categoryName.isEmpty()) {
-                    if (selectedPosition >= 0) {
-                        // Nếu có danh mục đang được chọn, thay thế tên
-                        categoryList.set(selectedPosition, categoryName);
-                        Toast.makeText(CategoryActivity.this, "Đã sửa danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
-                        selectedPosition = -1; // Đặt lại vị trí đã chọn
-                    } else {
-                        // Nếu không có danh mục nào được chọn, thêm mới
-                        categoryList.add(categoryName); // Thêm tên danh mục vào danh sách
-                        Toast.makeText(CategoryActivity.this, "Đã lưu danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
-                    }
-                    categoryAdapter.notifyDataSetChanged(); // Cập nhật danh sách
-                    editTextCategoryName.setText(""); // Xóa ô nhập
+                    addCategory(categoryName);
+                    editTextCategoryName.setText("");
                 } else {
                     Toast.makeText(CategoryActivity.this, "Vui lòng nhập tên danh mục", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-
-
-
-
-
-        // Thiết lập sự kiện cho nút Sửa
         buttonEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (selectedPosition >= 0) {
                     String categoryName = editTextCategoryName.getText().toString().trim();
                     if (!categoryName.isEmpty()) {
-                        // Cập nhật danh mục đã chọn
-                        categoryList.set(selectedPosition, categoryName);
-                        categoryAdapter.notifyDataSetChanged(); // Cập nhật danh sách
-                        Toast.makeText(CategoryActivity.this, "Đã sửa danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
-                        editTextCategoryName.setText(""); // Xóa ô nhập
-                        selectedPosition = -1; // Đặt lại vị trí đã chọn
+                        updateCategory(selectedPosition, categoryName);
+                        editTextCategoryName.setText("");
                     } else {
                         Toast.makeText(CategoryActivity.this, "Vui lòng nhập tên danh mục", Toast.LENGTH_SHORT).show();
                     }
@@ -98,22 +89,90 @@ public class CategoryActivity extends AppCompatActivity {
             }
         });
 
-        // Thiết lập sự kiện cho nút quay lại
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed(); // Quay lại Activity trước
+                onBackPressed();
             }
         });
 
-        // Thiết lập sự kiện khi người dùng chọn danh mục từ danh sách
         listViewCategories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Lưu vị trí danh mục được chọn
                 selectedPosition = position;
-                editTextCategoryName.setText(categoryList.get(position)); // Hiển thị tên danh mục được chọn
+                editTextCategoryName.setText(categoryList.get(position).getName());
             }
         });
+    }
+
+    // Hàm thêm danh mục mới
+    private void addCategory(String categoryName) {
+        Map<String, Object> category = new HashMap<>();
+        category.put("name", categoryName);
+
+        db.collection("categories")
+                .add(category)
+                .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentReference> task) {
+                        if (task.isSuccessful()) {
+                            String documentId = task.getResult().getId();
+                            CategoryModel newCategory = new CategoryModel(documentId, categoryName);
+                            categoryList.add(newCategory);
+                            categoryAdapter.notifyDataSetChanged();
+                            Toast.makeText(CategoryActivity.this, "Đã lưu danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(CategoryActivity.this, "Lỗi khi lưu danh mục", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    // Hàm cập nhật danh mục
+    private void updateCategory(int position, String categoryName) {
+        CategoryModel category = categoryList.get(position);
+        String documentId = category.getId();
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", categoryName);
+
+        db.collection("categories")
+                .document(documentId)
+                .update(updates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            category.setName(categoryName);
+                            categoryAdapter.notifyDataSetChanged();
+                            Toast.makeText(CategoryActivity.this, "Đã sửa danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(CategoryActivity.this, "Lỗi khi sửa danh mục", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    // Hàm đọc dữ liệu từ Firestore
+    private void loadCategories() {
+        db.collection("categories")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            categoryList.clear();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String documentId = document.getId();
+                                String categoryName = document.getString("name");
+                                CategoryModel category = new CategoryModel(documentId, categoryName);
+                                categoryList.add(category);
+                            }
+                            categoryAdapter.notifyDataSetChanged();
+                        } else {
+                            Toast.makeText(CategoryActivity.this, "Lỗi khi tải danh mục", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 }

@@ -26,7 +26,7 @@ public class CategoryItemActivity extends AppCompatActivity {
     private ImageButton backButton;
     private ListView listViewCategories; // Thêm ListView
     private Spinner spinnerCategoryType; // Khai báo Spinner
-    private List<String> categoryList; // Danh sách các danh mục
+    private List<CategoryModel> categoryList; // Danh sách các danh mục
     private CategoryAdapter categoryAdapter;
     private int selectedPosition = -1; // Biến để lưu vị trí danh mục được chọn
 
@@ -74,12 +74,14 @@ public class CategoryItemActivity extends AppCompatActivity {
                 if (!categoryName.isEmpty()) {
                     if (selectedPosition >= 0) {
                         // Nếu có danh mục đang được chọn, thay thế tên
-                        categoryList.set(selectedPosition, categoryName);
+                        categoryList.get(selectedPosition).setName(categoryName); // Cập nhật tên trong đối tượng
                         Toast.makeText(CategoryItemActivity.this, "Đã sửa danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
                         selectedPosition = -1; // Đặt lại vị trí đã chọn
                     } else {
                         // Nếu không có danh mục nào được chọn, thêm mới
-                        categoryList.add(categoryName); // Thêm tên danh mục vào danh sách
+                        CategoryModel newCategory = new CategoryModel(); // Tạo một đối tượng mới
+                        newCategory.setName(categoryName);
+                        categoryList.add(newCategory); // Thêm đối tượng vào danh sách
                         Toast.makeText(CategoryItemActivity.this, "Đã lưu danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
                     }
                     categoryAdapter.notifyDataSetChanged(); // Cập nhật danh sách
@@ -90,6 +92,29 @@ public class CategoryItemActivity extends AppCompatActivity {
             }
         });
 
+// Thiết lập sự kiện cho nút Sửa
+        buttonEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (selectedPosition >= 0) {
+                    String categoryName = editTextCategoryName.getText().toString().trim();
+                    if (!categoryName.isEmpty()) {
+                        // Cập nhật danh mục đã chọn
+                        categoryList.get(selectedPosition).setName(categoryName); // Cập nhật tên trong đối tượng
+                        Toast.makeText(CategoryItemActivity.this, "Đã sửa danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
+                        categoryAdapter.notifyDataSetChanged(); // Cập nhật danh sách
+                        editTextCategoryName.setText(""); // Xóa ô nhập
+                        selectedPosition = -1; // Đặt lại vị trí đã chọn
+                    } else {
+                        Toast.makeText(CategoryItemActivity.this, "Vui lòng nhập tên danh mục", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(CategoryItemActivity.this, "Vui lòng chọn danh mục để sửa", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
         // Thiết lập sự kiện cho nút Sửa
         buttonEdit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,7 +123,7 @@ public class CategoryItemActivity extends AppCompatActivity {
                     String categoryName = editTextCategoryName.getText().toString().trim();
                     if (!categoryName.isEmpty()) {
                         // Cập nhật danh mục đã chọn
-                        categoryList.set(selectedPosition, categoryName);
+                        categoryList.get(selectedPosition).setName(categoryName); // Cập nhật tên trong đối tượng
                         Toast.makeText(CategoryItemActivity.this, "Đã sửa danh mục: " + categoryName, Toast.LENGTH_SHORT).show();
                         categoryAdapter.notifyDataSetChanged(); // Cập nhật danh sách
                         editTextCategoryName.setText(""); // Xóa ô nhập
@@ -126,7 +151,7 @@ public class CategoryItemActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Lưu vị trí danh mục được chọn
                 selectedPosition = position;
-                editTextCategoryName.setText(categoryList.get(position)); // Hiển thị tên danh mục được chọn
+                editTextCategoryName.setText((CharSequence) categoryList.get(position)); // Hiển thị tên danh mục được chọn
             }
         });
     }

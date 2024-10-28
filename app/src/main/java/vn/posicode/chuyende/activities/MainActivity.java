@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -54,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference dbRef;
     private TextView tv_null;
     FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-
+//    Khai bao phan tu nav
+    private TextView tv_ql_taikhoan, tv_ql_monan, tv_ql_ban, tv_ql_hoadon, tv_thongke, tv_logout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,6 +95,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+//      Xu li phan tu trong nav
+tv_ql_taikhoan.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        Toast.makeText(MainActivity.this,"Quan li tai khoan",Toast.LENGTH_SHORT).show();
+    }
+});
+
+
 //        Tim kiem theo ten ban
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,26 +145,26 @@ public class MainActivity extends AppCompatActivity {
         listTable.put("capacity", "2 - 5 nguoi");
         listTable.put("Status", "đang ngồi");
 
-        firestore.collection("tables01")
-                .add(listTable)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("BBB", "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("FirestoreFailure", "Error adding document", e);
-                        e.printStackTrace();
-                    }
-                });
+            firestore.collection("tables01")
+                    .add(listTable)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Log.d("BBB", "DocumentSnapshot added with ID: " + documentReference.getId());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w("FirestoreFailure", "Error adding document", e);
+                            e.printStackTrace();
+                        }
+                    });
     }
 */
     //    Doc du lieu tu firestore
     private void docDuLieu() {
-        firestore.collection("table1").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        firestore.collection("tables").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
@@ -180,6 +191,13 @@ public class MainActivity extends AppCompatActivity {
         btnSearch = findViewById(R.id.btnSearch);
         edtSearch = findViewById(R.id.edtSearch);
         tv_null = findViewById(R.id.tv_null);
+        tv_ql_taikhoan = findViewById(R.id.tv_ql_taikhoan);
+        tv_ql_monan = findViewById(R.id.tv_ql_monan);
+        tv_ql_ban = findViewById(R.id.tv_ql_ban);
+        tv_ql_hoadon = findViewById(R.id.tv_ql_hoadon);
+        tv_thongke = findViewById(R.id.tv_thongke);
+        tv_logout = findViewById(R.id.tv_logout);
+
     }
 
     //    Hàm tìm kiếm

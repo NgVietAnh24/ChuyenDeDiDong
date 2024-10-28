@@ -58,8 +58,11 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spinnerDanhMuc;
     private Button buttonAdd, buttonEdit, buttonDelete;
     private ImageView upload, imageView;
-    private ArrayAdapter<String> adapterSpinner;
-    private List<String> categoryList;
+
+
+    //Hien thi du lieu len spinner
+    private ArrayAdapter<CategoryModel> adapterSpinner;
+    private List<CategoryModel> categoryList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,16 +99,31 @@ public class MainActivity extends AppCompatActivity {
         // Xử lý menu tùy chọn
         optionsButton.setOnClickListener(v -> showOptionsMenu());
     }
-
+//lay du lieu tu firebase them vao spinner
     private void setupSpinner() {
-        categoryList = new ArrayList<>();
-        categoryList.add("Món khai vị");
-        categoryList.add("Món chính");
-        categoryList.add("Món tráng miệng");
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            categoryList = new ArrayList<>();
+            // Lấy dữ liệu từ Firestore
+            db.collection("categories")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                               //lay id
+                                String category_id = document.getId();
+                                String categoryName = document.getString("name"); // Giả sử trường tên là "name"
 
-        adapterSpinner = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryList);
-        adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerDanhMuc.setAdapter(adapterSpinner);
+                                categoryList.add(new CategoryModel(category_id,categoryName));
+                            }
+
+                            // Thiết lập adapter sau khi lấy dữ liệu thành công
+                            adapterSpinner = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryList);
+                            adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinnerDanhMuc.setAdapter(adapterSpinner);
+                        } else {
+                            Log.w("Firestore", "Lỗi khi lấy dữ liệu danh mục", task.getException());
+                        }
+                    });
     }
 
     private void setupRecyclerView() {
@@ -164,11 +182,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addFood() {
+
         String tenMonAn = editTextTenMonAn.getText().toString();
         String gia = editTextGia.getText().toString();
 
+        //lay id cua spinner
+        CategoryModel category = (CategoryModel) spinnerDanhMuc.getSelectedItem();
+        String category_id = category.getId();
+
+
         if (!tenMonAn.isEmpty() && !gia.isEmpty()) {
-            Food newFood = new Food(tenMonAn, gia, image);
+            Food newFood = new Food(tenMonAn,gia,image,category_id);
+
             foodList.add(newFood);
             saveFoodToFirestore(newFood);
             adapter.notifyDataSetChanged();
@@ -182,7 +207,20 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
             firestore.collection(FOODS_COLLECTION).add(foodItem)
                     .addOnSuccessListener(documentReference -> {
-                        foodItem.setId(documentReference.getId());
+
+                     //set id duoc tao tu dong tu firebase
+                        String generatedId = documentReference.getId();
+                        foodItem.setId(generatedId);
+
+   //cap nhat lai id vua duoc set
+                        documentReference.update("id", generatedId)
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(MainActivity.this, "Lưu thành công với ID: " + generatedId, Toast.LENGTH_SHORT).show();
+                                    Log.d("Firestore", "DocumentSnapshot successfully written with ID: " + generatedId);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.w("Firestore", "Error updating document with ID", e);
+                                });
                         Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
                     })
                     .addOnFailureListener(e -> {

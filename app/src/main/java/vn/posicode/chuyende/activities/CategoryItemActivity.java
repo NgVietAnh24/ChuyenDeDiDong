@@ -81,19 +81,23 @@ public class CategoryItemActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String categoryName = editTextCategoryName.getText().toString().trim();
-                if (!categoryName.isEmpty()) {
+                String parentCategoryName = spinnerCategoryType.getSelectedItem().toString(); // Lấy tên danh mục cha từ Spinner
+
+                if (!categoryName.isEmpty() && parentCategoryName != null) {
+                    // Kết hợp tên danh mục cha và con
+                    String fullCategoryName = parentCategoryName + "                                              " + categoryName;
+
                     if (selectedPosition >= 0) {
-                        // Nếu có danh mục đang được chọn, gọi hàm sửa
-                        updateCategory(selectedPosition, categoryName);
+                        updateCategory(selectedPosition, fullCategoryName);
                     } else {
-                        // Nếu không có danh mục nào được chọn, gọi hàm thêm mới
-                        addCategory(categoryName);
+                        addCategory(fullCategoryName);
                     }
                 } else {
-                    Toast.makeText(CategoryItemActivity.this, "Vui lòng nhập tên danh mục", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CategoryItemActivity.this, "Vui lòng nhập tên danh mục và chọn danh mục cha", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
 
         // Thiết lập sự kiện cho nút Sửa
         buttonEdit.setOnClickListener(new View.OnClickListener() {

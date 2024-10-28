@@ -42,7 +42,7 @@ public class CategoryItemActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private ArrayAdapter<String> arrayAdapter;
     private List<String> categoryNames = new ArrayList<>();;
-
+    private List<String> itemNames = new ArrayList<>(); // Dữ liệu cho ListView
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +73,7 @@ public class CategoryItemActivity extends AppCompatActivity {
 
         // Gọi loadCategories để tải danh mục
         loadCategories();
+        loadCategoriesItem();
       //  loadCategories(); // Đọc danh mục từ Firestore
 
         // Thiết lập sự kiện cho nút Lưu
@@ -136,6 +137,59 @@ public class CategoryItemActivity extends AppCompatActivity {
     }
 
 
+//Ham doc categoriesItem
+private void loadCategoriesItem() {
+    db.collection("categoriesItem")
+            .get()
+            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        categoryList.clear();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String documentId = document.getId();
+                            String categoryName = document.getString("name");
+                            CategoryModel category = new CategoryModel(documentId, categoryName);
+                            categoryList.add(category);
+                        }
+                        categoryAdapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(CategoryItemActivity.this, "Lỗi khi tải danh mục", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+}
+
+
+
+
+
+    // Hàm đọc danh mục từ Firestore
+    private void loadCategories() {
+        db.collection("categories")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            categoryNames.clear();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String documentId = document.getId();
+                                String categoryName = document.getString("name");
+//                                CategoryModel category = new CategoryModel(documentId, categoryName);
+//                                categoryList.add(category);
+                                if(categoryName != null)
+                                {
+                                    categoryNames.add(categoryName);
+                                }
+                            }
+                            arrayAdapter.notifyDataSetChanged();
+                        } else {
+                            Toast.makeText(CategoryItemActivity.this, "Lỗi khi tải danh mục", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
 
 
 
@@ -145,7 +199,7 @@ public class CategoryItemActivity extends AppCompatActivity {
         Map<String, Object> category = new HashMap<>();
         category.put("name", categoryName);
 
-        db.collection("categories")
+        db.collection("categoriesItem")
                 .add(category)
                 .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     @Override
@@ -172,7 +226,7 @@ public class CategoryItemActivity extends AppCompatActivity {
         Map<String, Object> updates = new HashMap<>();
         updates.put("name", categoryName);
 
-        db.collection("categories")
+        db.collection("categoriesItem")
                 .document(documentId)
                 .update(updates)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -186,33 +240,6 @@ public class CategoryItemActivity extends AppCompatActivity {
                             selectedPosition = -1; // Đặt lại vị trí đã chọn
                         } else {
                             Toast.makeText(CategoryItemActivity.this, "Lỗi khi sửa danh mục", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
-    // Hàm đọc danh mục từ Firestore
-    private void loadCategories() {
-        db.collection("categories")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            categoryNames.clear();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                String documentId = document.getId();
-                                String categoryName = document.getString("name");
-//                                CategoryModel category = new CategoryModel(documentId, categoryName);
-//                                categoryList.add(category);
-                                if(categoryName != null)
-                                {
-                                    categoryNames.add(categoryName);
-                                }
-                            }
-                            arrayAdapter.notifyDataSetChanged();
-                        } else {
-                            Toast.makeText(CategoryItemActivity.this, "Lỗi khi tải danh mục", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

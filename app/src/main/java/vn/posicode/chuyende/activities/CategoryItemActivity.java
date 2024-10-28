@@ -40,6 +40,8 @@ public class CategoryItemActivity extends AppCompatActivity {
     private CategoryAdapter categoryAdapter;
     private int selectedPosition = -1; // Biến để lưu vị trí danh mục được chọn
     private FirebaseFirestore db;
+    private ArrayAdapter<String> arrayAdapter;
+    private List<String> categoryNames = new ArrayList<>();;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +62,18 @@ public class CategoryItemActivity extends AppCompatActivity {
         listViewCategories.setAdapter(categoryAdapter); // Thiết lập adapter cho ListView
 
         spinnerCategoryType = findViewById(R.id.spinnerCategoryType); // Khởi tạo Spinner
-        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
-                R.array.category_types, android.R.layout.simple_spinner_item);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategoryType.setAdapter(spinnerAdapter); // Gán adapter cho Spinner
+//        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
+//                R.array.category_types, android.R.layout.simple_spinner_item);
+       // arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,categoryList);
+//        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //spinnerCategoryType.setAdapter(arrayAdapter); // Gán adapter cho Spinner
+        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryNames);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategoryType.setAdapter(arrayAdapter);
 
-        loadCategories(); // Đọc danh mục từ Firestore
+        // Gọi loadCategories để tải danh mục
+        loadCategories();
+      //  loadCategories(); // Đọc danh mục từ Firestore
 
         // Thiết lập sự kiện cho nút Lưu
         buttonSave.setOnClickListener(new View.OnClickListener() {
@@ -112,6 +120,10 @@ public class CategoryItemActivity extends AppCompatActivity {
             }
         });
 
+
+
+
+
         // Thiết lập sự kiện khi người dùng chọn danh mục từ danh sách
         listViewCategories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -122,6 +134,11 @@ public class CategoryItemActivity extends AppCompatActivity {
             }
         });
     }
+
+
+
+
+
 
     // Hàm thêm danh mục mới vào Firestore
     private void addCategory(String categoryName) {
@@ -182,14 +199,18 @@ public class CategoryItemActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            categoryList.clear();
+                            categoryNames.clear();
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String documentId = document.getId();
                                 String categoryName = document.getString("name");
-                                CategoryModel category = new CategoryModel(documentId, categoryName);
-                                categoryList.add(category);
+//                                CategoryModel category = new CategoryModel(documentId, categoryName);
+//                                categoryList.add(category);
+                                if(categoryName != null)
+                                {
+                                    categoryNames.add(categoryName);
+                                }
                             }
-                            categoryAdapter.notifyDataSetChanged();
+                            arrayAdapter.notifyDataSetChanged();
                         } else {
                             Toast.makeText(CategoryItemActivity.this, "Lỗi khi tải danh mục", Toast.LENGTH_SHORT).show();
                         }

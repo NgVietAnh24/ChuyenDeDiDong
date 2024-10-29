@@ -16,23 +16,6 @@ public class Food implements Parcelable {
         this.category = category;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public int getImageResId() {
-        return imageResId;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    // Thực hiện việc lưu trữ thông tin món ăn
     protected Food(Parcel in) {
         name = in.readString();
         price = in.readString();
@@ -58,10 +41,27 @@ public class Food implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(name);
-        parcel.writeString(price);
-        parcel.writeInt(imageResId);
-        parcel.writeString(category);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(price);
+        dest.writeInt(imageResId);
+        dest.writeString(category);
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public int getImageResId() {
+        return imageResId;
+    }
+
+    public String getCategory() {
+        return category;
     }
 }

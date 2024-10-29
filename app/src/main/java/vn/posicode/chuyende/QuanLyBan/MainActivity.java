@@ -3,13 +3,10 @@ package vn.posicode.chuyende.QuanLyBan;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter; // Thêm import cho ArrayAdapter
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseFirestore firestore;
     private EditText editTextTableName, editTextTableDescription;
-    private Spinner statusSpinner;
     private LinearLayout tableListLayout;
     private Button addButton, editButton;
     private View currentSelectedTable;
@@ -45,16 +41,9 @@ public class MainActivity extends AppCompatActivity {
 
         editTextTableName = findViewById(R.id.editTextTableName);
         editTextTableDescription = findViewById(R.id.editTextTableDescription);
-        statusSpinner = findViewById(R.id.statusSpinner);
         tableListLayout = findViewById(R.id.tableListLayout);
         addButton = findViewById(R.id.addButton);
         editButton = findViewById(R.id.editButton);
-
-        // Thêm adapter cho Spinner
-        String[] statuses = {"Có sẵn", "Đã đặt", "Đang sử dụng"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, statuses);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        statusSpinner.setAdapter(adapter);
 
         loadTableData();
 
@@ -68,27 +57,57 @@ public class MainActivity extends AppCompatActivity {
     private void addTable() {
         String tableName = editTextTableName.getText().toString().trim();
         String tableDescription = editTextTableDescription.getText().toString().trim();
-        String tableStatus = statusSpinner.getSelectedItem() != null ? statusSpinner.getSelectedItem().toString() : null;
 
-        if (tableName.isEmpty() || tableDescription.isEmpty() || tableStatus == null) {
+        if (tableName.isEmpty() || tableDescription.isEmpty()) {
             showToast("Vui lòng nhập đủ thông tin");
             return;
         }
 
-        saveTableToFirestore(tableName, tableDescription, tableStatus);
+        // Kiểm tra và định dạng tên bàn
+        if (!isValidTableName(tableName)) {
+            showToast("Tên bàn phải có định dạng 'Bàn X' hoặc 'Ban X' với X là số");
+            return;
+        }
+
+        // Chuẩn hóa tên bàn
+        tableName = formatTableName(tableName);
+
+        saveTableToFirestore(tableName, tableDescription);
         clearInputFields();
     }
 
-    private void saveTableToFirestore(String tableName, String tableDescription, String tableStatus) {
-        // Tạo một đối tượng Table
-        Table table = new Table(tableName, tableDescription, tableStatus);
+    private boolean isValidTableName(String tableName) {
+        // Kiểm tra tên bàn có đúng định dạng không
+        return tableName.matches("(?i)(ban|bàn)\\s*\\d+");
+    }
 
-        // Lưu dữ liệu vào Firestore
-        firestore.collection("table1")
+    private String formatTableName(String tableName) {
+        // Trích xuất số từ tên bàn
+        String number = tableName.replaceAll("[^0-9]", "");
+
+        // Định dạng lại tên bàn
+        return "Bàn " + number;
+    }
+
+    private void saveTableToFirestore(String tableName, String tableDescription) {
+        Table table = new Table(tableName, tableDescription, "Trống");
+
+        firestore.collection("tables")
                 .add(table)
                 .addOnSuccessListener(documentReference -> {
-                    String documentId = documentReference.getId();
-                    addTableToLayout(tableName, tableDescription, documentId, tableStatus);
+                    String generatedId = documentReference.getId();
+                    table.setId(generatedId);
+
+                    documentReference.update("id", generatedId)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(MainActivity.this, "Lưu thành công với ID: " + generatedId, Toast.LENGTH_SHORT).show();
+                                Log.d("Firestore", "DocumentSnapshot successfully written with ID: " + generatedId);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.w("Firestore", "Error updating document with ID", e);
+                            });
+
+                    addTableToLayout(tableName, tableDescription, generatedId);
                     showToast("Đã thêm bàn thành công");
                 })
                 .addOnFailureListener(e -> {
@@ -97,10 +116,8 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-
-
-    private void addTableToLayout(String tableName, String tableDescription, String documentId, String tableStatus) {
-        if (tableName == null || tableDescription == null || documentId == null || tableStatus == null) {
+    private void addTableToLayout(String tableName, String tableDescription, String documentId) {
+        if (tableName == null || tableDescription == null || documentId == null) {
             Log.e("MainActivity", "Không thể thêm bàn: một hoặc nhiều giá trị là null");
             return;
         }
@@ -108,28 +125,14 @@ public class MainActivity extends AppCompatActivity {
         View tableView = getLayoutInflater().inflate(R.layout.table_item, null);
         TextView tableNameTextView = tableView.findViewById(R.id.tableNameTextView);
         TextView tableDescriptionTextView = tableView.findViewById(R.id.tableDescriptionTextView);
-        ImageView tableStatusImage = tableView.findViewById(R.id.tableStatusImage);
         Button deleteButton = tableView.findViewById(R.id.deleteButton);
 
         tableNameTextView.setText(tableName);
         tableDescriptionTextView.setText(tableDescription);
 
-        switch (tableStatus) {
-            case "occupied":
-                tableStatusImage.setImageResource(R.drawable.circle_red);
-                break;
-            case "reserved":
-                tableStatusImage.setImageResource(R.drawable.circle_yellow);
-                break;
-            case "available":
-            default:
-                tableStatusImage.setImageResource(R.drawable.circle_grey);
-                break;
-        }
-
         tableView.setTag(documentId);
         deleteButton.setOnClickListener(v -> deleteTable(tableView));
-        tableView.setOnClickListener(v -> selectTableForEditing(tableView, tableName, tableDescription, tableStatus));
+        tableView.setOnClickListener(v -> selectTableForEditing(tableView, tableName, tableDescription));
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -142,23 +145,10 @@ public class MainActivity extends AppCompatActivity {
         updateTableLayout();
     }
 
-    private void selectTableForEditing(View tableView, String tableName, String tableDescription, String tableStatus) {
+    private void selectTableForEditing(View tableView, String tableName, String tableDescription) {
         currentSelectedTable = tableView;
         editTextTableName.setText(tableName);
         editTextTableDescription.setText(tableDescription);
-
-        switch (tableStatus) {
-            case "occupied":
-                statusSpinner.setSelection(0);
-                break;
-            case "reserved":
-                statusSpinner.setSelection(1);
-                break;
-            case "available":
-            default:
-                statusSpinner.setSelection(2);
-                break;
-        }
     }
 
     private void editTable() {
@@ -169,37 +159,30 @@ public class MainActivity extends AppCompatActivity {
 
         String newTableName = editTextTableName.getText().toString().trim();
         String newTableDescription = editTextTableDescription.getText().toString().trim();
-        String newTableStatus = statusSpinner.getSelectedItem().toString();
 
-        if (newTableName.isEmpty() || newTableDescription.isEmpty() || newTableStatus.isEmpty()) {
+        if (newTableName.isEmpty() || newTableDescription.isEmpty()) {
             showToast("Vui lòng nhập đủ thông tin");
             return;
         }
 
+        // Kiểm tra và định dạng tên bàn khi sửa
+        if (!isValidTableName(newTableName)) {
+            showToast("Tên bàn phải có định dạng 'Bàn X' hoặc 'Ban X' với X là số");
+            return;
+        }
+
+        newTableName = formatTableName(newTableName);
         String documentId = (String) currentSelectedTable.getTag();
 
-        firestore.collection("table1").document(documentId)
-                .update("name", newTableName, "description", newTableDescription, "status", newTableStatus)
+        String finalNewTableName = newTableName;
+        firestore.collection("tables").document(documentId)
+                .update("name", newTableName, "description", newTableDescription)
                 .addOnSuccessListener(aVoid -> {
                     TextView tableNameTextView = currentSelectedTable.findViewById(R.id.tableNameTextView);
                     TextView tableDescriptionTextView = currentSelectedTable.findViewById(R.id.tableDescriptionTextView);
-                    ImageView tableStatusImage = currentSelectedTable.findViewById(R.id.tableStatusImage);
 
-                    tableNameTextView.setText(newTableName);
+                    tableNameTextView.setText(finalNewTableName);
                     tableDescriptionTextView.setText(newTableDescription);
-
-                    switch (newTableStatus) {
-                        case "occupied":
-                            tableStatusImage.setImageResource(R.drawable.circle_red);
-                            break;
-                        case "reserved":
-                            tableStatusImage.setImageResource(R.drawable.circle_yellow);
-                            break;
-                        case "available":
-                        default:
-                            tableStatusImage.setImageResource(R.drawable.circle_grey);
-                            break;
-                    }
 
                     int index = tableViewsList.indexOf(currentSelectedTable);
                     if (index != -1) {
@@ -216,20 +199,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadTableData() {
-        firestore.collection("table1")
+        firestore.collection("tables")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        for (DocumentSnapshot document : task.getResult()) {
+                        // Tạo danh sách tạm để sắp xếp
+                        List<DocumentSnapshot> documents = new ArrayList<>(task.getResult().getDocuments());
+
+                        // Sắp xếp documents theo tên bàn
+                        Collections.sort(documents, (doc1, doc2) -> {
+                            String name1 = doc1.getString("name");
+                            String name2 = doc2.getString("name");
+
+                            if (name1 == null || name2 == null) {
+                                return 0;
+                            }
+
+                            try {
+                                String num1 = name1.replaceAll("[^0-9]", "");
+                                String num2 = name2.replaceAll("[^0-9]", "");
+
+                                if (num1.isEmpty() || num2.isEmpty()) {
+                                    return name1.compareTo(name2);
+                                }
+
+                                return Integer.compare(
+                                        Integer.parseInt(num1),
+                                        Integer.parseInt(num2)
+                                );
+                            } catch (NumberFormatException e) {
+                                return name1.compareTo(name2);
+                            }
+                        });
+
+                        // Thêm các bàn đã sắp xếp vào layout
+                        for (DocumentSnapshot document : documents) {
                             String tableName = document.getString("name");
                             String tableDescription = document.getString("description");
-                            String tableStatus = document.getString("status");
                             String documentId = document.getId();
 
-                            if (tableName != null && tableDescription != null && tableStatus != null && !tableStatus.isEmpty()) {
-                                addTableToLayout(tableName, tableDescription, documentId, tableStatus);
-                            } else {
-                                Log.e("MainActivity", "Một trong các giá trị là null hoặc rỗng: name=" + tableName + ", description=" + tableDescription + ", status=" + tableStatus);
+                            if (tableName != null && tableDescription != null) {
+                                addTableToLayout(tableName, tableDescription, documentId);
                             }
                         }
                     } else {
@@ -241,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
     private void deleteTable(View tableView) {
         String documentId = (String) tableView.getTag();
 
-        firestore.collection("table1").document(documentId)
+        firestore.collection("tables").document(documentId)
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     tableViewsList.remove(tableView);
@@ -252,6 +262,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateTableLayout() {
+        // Sắp xếp danh sách bàn theo số thứ tự
+        Collections.sort(tableViewsList, (view1, view2) -> {
+            TextView name1 = view1.findViewById(R.id.tableNameTextView);
+            TextView name2 = view2.findViewById(R.id.tableNameTextView);
+
+            String tableName1 = name1.getText().toString();
+            String tableName2 = name2.getText().toString();
+
+            // Trích xuất số từ tên bàn
+            try {
+                String num1 = tableName1.replaceAll("[^0-9]", "");
+                String num2 = tableName2.replaceAll("[^0-9]", "");
+
+                if (num1.isEmpty() || num2.isEmpty()) {
+                    return tableName1.compareTo(tableName2);
+                }
+
+                int number1 = Integer.parseInt(num1);
+                int number2 = Integer.parseInt(num2);
+
+                return Integer.compare(number1, number2);
+            } catch (NumberFormatException e) {
+                return tableName1.compareTo(tableName2);
+            }
+        });
+
+        // Cập nhật layout
         tableListLayout.removeAllViews();
         for (View tableView : tableViewsList) {
             tableListLayout.addView(tableView);
@@ -261,7 +298,6 @@ public class MainActivity extends AppCompatActivity {
     private void clearInputFields() {
         editTextTableName.setText("");
         editTextTableDescription.setText("");
-        statusSpinner.setSelection(0);
     }
 
     private void showToast(String message) {

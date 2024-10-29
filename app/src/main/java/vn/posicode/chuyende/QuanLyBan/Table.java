@@ -1,13 +1,10 @@
 package vn.posicode.chuyende.QuanLyBan;
 
 public class Table {
+    private String id;
     private String name;
     private String description;
     private String status;
-
-    public Table() {
-        // Phải có constructor mặc định để Firestore có thể khởi tạo
-    }
 
     public Table(String name, String description, String status) {
         this.name = name;
@@ -15,17 +12,35 @@ public class Table {
         this.status = status;
     }
 
+    public String getId() {
+        return id;
+    }
 
-    // Các phương thức getter và setter (nếu cần)
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getStatus() {
         return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

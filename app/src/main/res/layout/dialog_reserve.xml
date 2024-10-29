@@ -5,28 +5,22 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/dialog_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Đặt trước"
-        android:textSize="18sp"
-        android:textColor="@color/black" />
-
     <EditText
         android:id="@+id/edit_text_reservation_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nhập tên bạn" />
+        android:hint="Tên"
+        android:inputType="textPersonName"
+        android:padding="8dp" />
 
     <EditText
         android:id="@+id/edit_text_reservation_phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Số điện thoại"
-        android:inputType="phone" />
+        android:inputType="phone"
+        android:padding="8dp" />
 
-    <!-- Container for buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,17 +33,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Lưu"
-            android:layout_marginEnd="8dp"
             android:backgroundTint="@color/red"
-            android:textColor="@color/white" />
+            android:textColor="@android:color/white"
+            android:layout_marginEnd="8dp"
+            android:padding="8dp" />
 
         <Button
             android:id="@+id/button_cancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Hủy đặt"
+            android:text="Hủy"
             android:backgroundTint="@color/red"
-            android:textColor="@color/white" />
+            android:textColor="@android:color/white"
+            android:padding="8dp" />
     </LinearLayout>
 </LinearLayout>

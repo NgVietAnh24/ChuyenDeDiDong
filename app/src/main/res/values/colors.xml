@@ -5,4 +5,6 @@
     <color name="red">#D43B3B</color>
     <color name="gray">#808080</color>
     <color name="yellow">#FFD700</color>
+    <color name="table_available">#FFFFFF</color>
+    <color name="table_reserved">#FF4444</color>
 </resources>

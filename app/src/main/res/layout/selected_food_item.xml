@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height ="wrap_content"
     android:layout_margin="8dp"
     android:background="@drawable/background_card"
     android:orientation="horizontal"
@@ -57,73 +57,73 @@
         android:layout_gravity="end"
         android:gravity="end">
 
-    <Button
-        android:id="@+id/btnChonLam"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Chọn làm"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/holo_red_dark"
-        android:padding="4dp"
-        android:textSize="12sp" />
-
-    <Button
-        android:id="@+id/btnDaLay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Đã lấy"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/holo_red_dark"
-        android:layout_marginTop="4dp"
-        android:padding="4dp"
-        android:textSize="12sp" />
-
-    <Button
-        android:id="@+id/btnXoa"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Xóa"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/holo_red_dark"
-        android:padding="4dp"
-        android:textSize="12sp" />
-
-    <!-- Nút Tăng Giảm Số Lượng -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="2dp">
-
         <Button
-            android:id="@+id/btnGiam"
+            android:id="@+id/btnChonLam"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="-"
+            android:text="Chọn làm"
             android:textColor="@android:color/white"
             android:backgroundTint="@android:color/holo_red_dark"
             android:padding="4dp"
-            android:textSize="22sp" />
-
-        <TextView
-            android:id="@+id/tvSoLuong"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="1"
-            android:textSize="20sp"
-            android:textColor="@android:color/black"
-            android:layout_marginLeft="12dp"
-            android:layout_marginRight="12dp" />
+            android:textSize="12sp" />
 
         <Button
-            android:id="@+id/btnTang"
+            android:id="@+id/btnDaLay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+"
+            android:text="Đã lấy"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:layout_marginTop="4dp"
+            android:padding="4dp"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnXoa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xóa"
             android:textColor="@android:color/white"
             android:backgroundTint="@android:color/holo_red_dark"
             android:padding="4dp"
-            android:textSize="22sp" />
+            android:textSize="12sp" />
+
+        <!-- Nút Tăng Giảm Số Lượng -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="2dp">
+
+            <Button
+                android:id="@+id/btnGiam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:padding="4dp"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/tvSoLuong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"
+                android:textSize="20sp"
+                android:textColor="@android:color/black"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp" />
+
+            <Button
+                android:id="@+id/btnTang"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@android:color/holo_red_dark"
+                android:padding="4dp"
+                android:textSize="22sp" />
+        </LinearLayout>
     </LinearLayout>
-    </LinearLayout>
-    </LinearLayout>
+</LinearLayout>

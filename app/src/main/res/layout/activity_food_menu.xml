@@ -6,6 +6,32 @@
     android:background="#F9F9F9"
     android:padding="16dp">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <!-- TextView for Table Name -->
+        <TextView
+            android:id="@+id/tableNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tên Bàn"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_marginEnd="18dp"/>
+
+        <!-- TextView for Table Description -->
+        <TextView
+            android:id="@+id/tableDescriptionTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mô Tả Bàn"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"/>
+    </LinearLayout>
+
     <!-- Search Bar -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,7 +80,7 @@
             android:layout_weight="1"
             android:text="Tất cả"
             android:backgroundTint="@color/red"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:layout_marginEnd="8dp"
             android:padding="8dp"/>
 
@@ -65,7 +91,7 @@
             android:layout_weight="1"
             android:text="Món Lẩu"
             android:backgroundTint="@color/red"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:layout_marginEnd="8dp"
             android:padding="8dp"/>
 
@@ -76,10 +102,9 @@
             android:layout_weight="1"
             android:text="Món nướng"
             android:backgroundTint="@color/red"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:layout_marginEnd="8dp"
             android:padding="8dp"/>
-
 
         <Button
             android:id="@+id/btn_drinks"
@@ -88,7 +113,7 @@
             android:layout_weight="1"
             android:text="Đồ uống"
             android:backgroundTint="@color/red"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:padding="8dp"/>
     </LinearLayout>
 
@@ -104,7 +129,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
             <!-- Each Food Item -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -131,7 +155,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Tên món ăn"
-                        android:textColor="@color/black"
+                        android:textColor="@android:color/black"
                         android:textSize="16sp" />
 
                     <TextView
@@ -161,7 +185,7 @@
             android:layout_weight="1"
             android:text="Món đã chọn"
             android:backgroundTint="@color/red"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:layout_marginEnd="8dp"
             android:padding="12dp"/>
 
@@ -172,7 +196,7 @@
             android:layout_weight="1"
             android:text="Đặt trước"
             android:backgroundTint="@color/red"
-            android:textColor="@color/white"
+            android:textColor="@android:color/white"
             android:padding="12dp"/>
     </LinearLayout>
 </LinearLayout>

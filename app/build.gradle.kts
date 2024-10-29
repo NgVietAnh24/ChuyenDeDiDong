@@ -9,8 +9,8 @@ android {
 
     defaultConfig {
         applicationId = "vn.posicode.chuyende"
-        minSdk = 33
-        targetSdk = 34
+        minSdk = 30
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 
@@ -52,4 +52,6 @@ dependencies {
     implementation ("androidx.cardview:cardview:1.0.0")
     implementation  ("androidx.appcompat:appcompat:1.4.0")
     implementation ("androidx.recyclerview:recyclerview:1.2.1")
+    implementation ("com.google.android.gms:play-services-base:18.2.0")
+    implementation ("com.google.android.gms:play-services-auth:20.5.0")
 }

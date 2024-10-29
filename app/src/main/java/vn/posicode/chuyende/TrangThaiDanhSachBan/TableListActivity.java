@@ -1,6 +1,9 @@
 package vn.posicode.chuyende.TrangThaiDanhSachBan;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -8,145 +11,223 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.DanhSachMonAn.FoodMenuActivity;
 import vn.posicode.chuyende.Menu.ManageActivity;
+import vn.posicode.chuyende.R;
 
 public class TableListActivity extends AppCompatActivity {
 
-    private FirebaseFirestore firestore; // Firestore instance
+    private FirebaseFirestore firestore;
+    private BroadcastReceiver updateTableReceiver;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table_list);
 
-        // Khởi tạo Firebase
         FirebaseApp.initializeApp(this);
-
-        // Khởi tạo Firestore
         firestore = FirebaseFirestore.getInstance();
 
-        // Tải danh sách bàn từ Firestore
-        //loadTableData();
+        loadTableData();
 
-        // Xử lý sự kiện nút Quay lại
         ImageButton backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(v -> finish());
 
-        // Xử lý sự kiện nút Quản lý (Chuyển đến màn hình ManageActivity)
         ImageButton manageButton = findViewById(R.id.backButton);
         manageButton.setOnClickListener(v -> {
             Intent intent = new Intent(TableListActivity.this, ManageActivity.class);
             startActivity(intent);
         });
+
+        // Đăng ký BroadcastReceiver
+        updateTableReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals("UPDATE_TABLE_STATUS")) {
+                    String tableName = intent.getStringExtra("tableName");
+                    String status = intent.getStringExtra("status");
+                    updateTableUI(tableName, status);
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter("UPDATE_TABLE_STATUS");
+        registerReceiver(updateTableReceiver, filter);
     }
 
-    // Hàm tải danh sách bàn từ Firestore và sắp xếp
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Hủy đăng ký BroadcastReceiver
+        unregisterReceiver(updateTableReceiver);
+    }
+
     private void loadTableData() {
         LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
-        tableListLayout.removeAllViews(); // Xóa danh sách hiện có trước khi tải dữ liệu mới
 
-        // Lấy dữ liệu từ Firestore
-        firestore.collection("table1")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<DocumentSnapshot> tableList = new ArrayList<>();
+        firestore.collection("tables")
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        Log.e("TableListActivity", "Lỗi lắng nghe: ", e);
+                        return;
+                    }
 
-                        // Duyệt qua các document lấy từ Firestore và thêm vào danh sách
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            tableList.add(document);
+                    if (snapshots != null) {
+                        tableListLayout.removeAllViews();
+                        List<QueryDocumentSnapshot> tableList = new ArrayList<>();
+
+                        for (QueryDocumentSnapshot document : snapshots) {
+                            if (document.getString("name") != null) {
+                                tableList.add(document);
+                            }
                         }
 
-                        // Sắp xếp danh sách theo tên hoặc số bàn
-                        Collections.sort(tableList, new Comparator<DocumentSnapshot>() {
-                            @Override
-                            public int compare(DocumentSnapshot t1, DocumentSnapshot t2) {
-                                // Lấy tên bàn và tách số từ tên, ví dụ: "Table 1", "Table 2"
-                                String tableName1 = t1.getString("name").replaceAll("[^0-9]", "");
-                                String tableName2 = t2.getString("name").replaceAll("[^0-9]", "");
+                        Collections.sort(tableList, (t1, t2) -> {
+                            String name1 = t1.getString("name");
+                            String name2 = t2.getString("name");
 
-                                // So sánh số thứ tự bàn
-                                return Integer.compare(Integer.parseInt(tableName1), Integer.parseInt(tableName2));
+                            if (name1 == null) return -1;
+                            if (name2 == null) return 1;
+
+                            try {
+                                String num1 = name1.replaceAll("[^0-9]", "");
+                                String num2 = name2.replaceAll("[^0-9]", "");
+
+                                if (num1.isEmpty()) return -1;
+                                if (num2.isEmpty()) return 1;
+
+                                return Integer.compare(
+                                        Integer.parseInt(num1),
+                                        Integer.parseInt(num2)
+                                );
+                            } catch (NumberFormatException e1) {
+                                return name1.compareTo(name2);
                             }
                         });
 
-                        // Hiển thị từng bàn đã sắp xếp
-                        for (DocumentSnapshot document : tableList) {
+                        for (QueryDocumentSnapshot document : tableList) {
                             String tableName = document.getString("name");
                             String tableDescription = document.getString("description");
-                            String tableStatus = document.getString("status"); // Lấy trạng thái bàn
+                            String tableStatus = document.getString("status");
 
                             if (tableName != null && tableDescription != null && tableStatus != null) {
-                                addTableToLayout(tableName, tableDescription, tableStatus); // Thêm bàn vào layout
+                                addTableToLayout(tableName, tableDescription, tableStatus);
                             }
                         }
-                    } else {
-                        Log.e("TableListActivity", "Lỗi khi tải dữ liệu: " + task.getException().getMessage());
                     }
                 });
     }
 
-    // Hàm thêm bàn vào layout
     private void addTableToLayout(String tableName, String tableDescription, String tableStatus) {
         LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
-
-        // Kiểm tra xem hàm có bị gọi nhiều lần không
-        Log.d("DEBUG", "Adding table: " + tableName);
-
-        // Sử dụng layout table_item_tablelist.xml để hiển thị từng bàn
         View tableView = getLayoutInflater().inflate(R.layout.table_item_tablelist, null);
 
         TextView tableNameTextView = tableView.findViewById(R.id.tableNameTextView);
         TextView tableDescriptionTextView = tableView.findViewById(R.id.tableDescriptionTextView);
-        ImageView tableStatusImage = tableView.findViewById(R.id.tableStatusImage); // Thay RadioButton bằng ImageView
+        ImageView tableStatusImage = tableView.findViewById(R.id.tableStatusImage);
 
-        // Cài đặt tên và mô tả cho bàn
         tableNameTextView.setText(tableName);
         tableDescriptionTextView.setText(tableDescription);
 
-        // Thiết lập hình ảnh dựa trên trạng thái bàn
-        switch (tableStatus) {
-            case "Đã đặt":
-                tableStatusImage.setImageResource(R.drawable.circle_yellow);
-                break;
-            case "Đang sử dụng":
-                tableStatusImage.setImageResource(R.drawable.circle_red);
-                break;
-            case "Có sẵn":
-            default:
-                tableStatusImage.setImageResource(R.drawable.circle_grey);
-                break;
-        }
+        // Cập nhật UI dựa trên trạng thái
+        updateTableStatusUI(tableStatusImage, tableStatus);
 
-        // Thêm khoảng cách giữa các bàn
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(0, 0, 0, 8); // 8dp khoảng cách dưới
+        params.setMargins(0, 0, 0, 8);
         tableView.setLayoutParams(params);
 
-        // Thêm bàn vào layout
+// Trong TableListActivity.java, sửa lại phần setOnClickListener của tableView:
+
+        tableView.setOnClickListener(v -> {
+            firestore.collection("tables")
+                    .whereEqualTo("name", tableName)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                            String currentStatus = document.getString("status");
+                            // Sửa điều kiện kiểm tra để cho phép trạng thái "Đang sử dụng"
+                            if (currentStatus != null &&
+                                    (currentStatus.equals("Trống") ||
+                                            currentStatus.equals("Đã đặt") ||
+                                            currentStatus.equals("Đang sử dụng"))) {
+                                Intent intent = new Intent(TableListActivity.this, FoodMenuActivity.class);
+                                intent.putExtra("tableName", tableName);
+                                intent.putExtra("tableDescription", tableDescription);
+                                intent.putExtra("documentId", document.getId());
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(this,
+                                        "Không thể truy cập thông tin bàn!",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this,
+                                "Lỗi khi kiểm tra trạng thái bàn",
+                                Toast.LENGTH_SHORT).show();
+                        Log.e("TableList", "Error checking table status", e);
+                    });
+        });
+
         tableListLayout.addView(tableView);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadTableData(); // Tải lại dữ liệu khi quay lại màn hình TableListActivity
+    // Thêm phương thức mới để cập nhật UI trạng thái bàn
+    private void updateTableStatusUI(ImageView statusImage, String status) {
+        switch (status) {
+            case "Đã đặt":
+                statusImage.setImageResource(R.drawable.circle_yellow);
+                break;
+            case "Đang sử dụng":
+                statusImage.setImageResource(R.drawable.circle_red);
+                break;
+            case "Trống":
+            default:
+                statusImage.setImageResource(R.drawable.circle_grey);
+                break;
+        }
+    }
+
+    private void updateTableUI(String tableName, String status) {
+        LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
+        for (int i = 0; i < tableListLayout.getChildCount(); i++) {
+            View tableView = tableListLayout.getChildAt(i );
+            TextView tableNameTextView = tableView.findViewById(R.id.tableNameTextView);
+            if (tableNameTextView.getText().toString().equals(tableName)) {
+                ImageView tableStatusImage = tableView.findViewById(R.id.tableStatusImage);
+                switch (status) {
+                    case "Đã đặt":
+                        tableStatusImage.setImageResource(R.drawable.circle_yellow);
+                        break;
+                    case "Đang sử dụng":
+                        tableStatusImage.setImageResource(R.drawable.circle_red);
+                        break;
+                    case "Trống":
+                    default:
+                        tableStatusImage.setImageResource(R.drawable.circle_grey);
+                        break;
+                }
+                break;
+            }
+        }
     }
 }

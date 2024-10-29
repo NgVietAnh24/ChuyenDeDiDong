@@ -1,5 +1,6 @@
 package vn.posicode.chuyende.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,17 +35,31 @@ public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull BanAdapter.ViewHolder holder, int position) {
-        Ban ban = new Ban();
-        holder.tvTenBan.setText(ban.getTenBan());
-        holder.tvMoTa.setText(ban.getMoTa());
-        if(ban.getState() == 0){
-            holder.vState.setBackgroundColor(R.drawable.rounded_trang_thai);
-        }else if(ban.getState() == 1){
-            holder.vState.setBackgroundColor(R.drawable.rounded_trang_thai_da_dat);
-        }else if(ban.getState() == 2){
-            holder.vState.setBackgroundColor(R.drawable.rounded_trang_thai_da_dat);
+        Ban ban = list.get(position);
+        holder.tvTenBan.setText(ban.getName());
+        holder.tvMoTa.setText(ban.getDescription());
+
+        String state = ban.getStatus();
+        Log.d("BanAdapter", "State: " + state); // Log để kiểm tra giá trị state
+
+        if (ban.getStatus() != null) {
+           if(ban.getStatus().equals("Trống")){
+               holder.vState.setBackgroundResource(R.drawable.rounded_trang_thai);
+           }else if(ban.getStatus().equals("Đã đặt")){
+               holder.vState.setBackgroundResource(R.drawable.rounded_trang_thai_da_dat);
+           }else if(ban.getStatus().equals("Đang sử dụng")) {
+               holder.vState.setBackgroundResource(R.drawable.rounded_trang_thai_dang_su_dung);
+           }
+
+        } else {
+            // Xử lý trường hợp state là null
+            holder.vState.setBackgroundResource(R.drawable.item_background_selector); // Hoặc một màu khác phù hợp
         }
+//        Log.d("ABC","Trạng Thái: "+ban.getStatus());
     }
+
+
+
 
     @NonNull
     @Override

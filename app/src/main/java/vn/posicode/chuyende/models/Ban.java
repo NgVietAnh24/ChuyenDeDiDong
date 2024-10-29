@@ -1,115 +1,79 @@
 package vn.posicode.chuyende.models;
 
+
 public class Ban {
-    private String tid;
-    private String tenBan;
-    private String moTa;
-    private int state;
-    private int datTruocId;
+    String id;
+    String name;
+    String description;
+    String status;
 
-    public Ban(){}
-
-    public Ban(String tenBan, String moTa, int state, int datTruocId) {
-        this.tenBan = tenBan;
-        this.moTa = moTa;
-        this.state = state;
-        this.datTruocId = datTruocId;
+    public Ban() {
     }
 
-    public String getTid() {
-        return tid;
+    public Ban(String id, String name, String description, String status) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
     }
 
-    public void setTid(String tid) {
-        this.tid = tid;
+    public String getId() {
+        return id;
     }
 
-    public String getTenBan() {
-        return tenBan;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public void setTenBan(String tenBan) {
-        this.tenBan = tenBan;
+    public String getName() {
+        return name;
     }
 
-    public String getMoTa() {
-        return moTa;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setMoTa(String moTa) {
-        this.moTa = moTa;
+    public String getDescription() {
+        return description;
     }
 
-    public int getState() {
-        return state;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setState(int state) {
-        this.state = state;
+    public String getStatus() {
+        return status;
     }
 
-    public int getDatTruocId() {
-        return datTruocId;
-    }
-
-    public void setDatTruocId(int datTruocId) {
-        this.datTruocId = datTruocId;
-    }
-
-    public static String getTrangThai(Ban ban){
-        switch (ban.state){
-            case 0:
-                return "Trống";
-            case 1:
-                return "Đã đặt";
-            case 2:
-                return "Đang sử dụng";
-            default:
-                return "Không xác định";
-        }
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
 
-class TrangThai extends Ban{
-    private String tenTrangThai;
 
-    public TrangThai(String tenBan, String moTa, int state, int datTruocId, String tenTrangThai) {
-        super(tenBan, moTa, state, datTruocId);
-        this.tenTrangThai = tenTrangThai;
-    }
-
-    public String getTenTrangThai() {
-        return tenTrangThai;
-    }
-
-    public void setTenTrangThai(String tenTrangThai) {
-        this.tenTrangThai = tenTrangThai;
-    }
-}
-
-class DatTruoc extends Ban{
-    private String tenNguoiDat;
-    private String soDT;
-
-    public DatTruoc(String tenBan, String moTa, int state, int datTruocId, String tenNguoiDat, String soDT) {
-        super(tenBan, moTa, state, datTruocId);
-        this.tenNguoiDat = tenNguoiDat;
-        this.soDT = soDT;
-    }
-
-    public String getTenNguoiDat() {
-        return tenNguoiDat;
-    }
-
-    public void setTenNguoiDat(String tenNguoiDat) {
-        this.tenNguoiDat = tenNguoiDat;
-    }
-
-    public String getSoDT() {
-        return soDT;
-    }
-
-    public void setSoDT(String soDT) {
-        this.soDT = soDT;
-    }
-}
+//class DatTruoc extends Ban {
+//    private String tenNguoiDat;
+//    private String soDT;
+//
+//    public DatTruoc(String tenBan, String moTa, String state, int datTruocId, String tenNguoiDat, String soDT) {
+//        super(name, moTa, state, datTruocId);
+//        this.tenNguoiDat = tenNguoiDat;
+//        this.soDT = soDT;
+//    }
+//
+//    public String getTenNguoiDat() {
+//        return tenNguoiDat;
+//    }
+//
+//    public void setTenNguoiDat(String tenNguoiDat) {
+//        this.tenNguoiDat = tenNguoiDat;
+//    }
+//
+//    public String getSoDT() {
+//        return soDT;
+//    }
+//
+//    public void setSoDT(String soDT) {
+//        this.soDT = soDT;
+//    }
+//}

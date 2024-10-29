@@ -80,9 +80,7 @@ public class Login extends AppCompatActivity {
                                             .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                    Log.d(TAG, "Document data: ");
                                                     if (task.isSuccessful()) {
-                                                        Log.d(TAG, "Document data: ");
                                                         DocumentSnapshot document = task.getResult();
                                                         Log.d(TAG, "Document data: " + document.getData());
                                                         if (document.exists()) {
@@ -114,7 +112,7 @@ public class Login extends AppCompatActivity {
                                                         }
                                                     } else {
                                                         loading.cancel();
-                                                        Log.w(TAG, "Error getting user data", task.getException());
+                                                        Log.w(TAG, "Lỗi khi lấy dữ liệu", task.getException());
                                                     }
                                                 }
                                             });
@@ -150,11 +148,11 @@ public class Login extends AppCompatActivity {
         if (isPasswordVisible) {
             // Ẩn mật khẩu
             edtPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-            imgEye.setImageResource(R.drawable.eye_hide); // Hình mắt đóng
+            imgEye.setImageResource(R.drawable.eye_hide);
         } else {
             // Hiển thị mật khẩu
             edtPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-            imgEye.setImageResource(R.drawable.eye_show); // Hình mắt mở
+            imgEye.setImageResource(R.drawable.eye_show);
         }
         isPasswordVisible = !isPasswordVisible;
 

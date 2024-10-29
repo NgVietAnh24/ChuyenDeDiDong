@@ -1,7 +1,5 @@
 package vn.posicode.chuyende.adapters;
 
-import static android.content.ContentValues.TAG;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;

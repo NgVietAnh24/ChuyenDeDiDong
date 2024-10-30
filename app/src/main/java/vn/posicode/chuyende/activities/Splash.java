@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.activities.login_forgot.Login;
 
 public class Splash extends AppCompatActivity {
 

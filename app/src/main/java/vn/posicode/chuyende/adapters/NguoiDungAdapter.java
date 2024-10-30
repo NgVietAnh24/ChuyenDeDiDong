@@ -2,7 +2,6 @@ package vn.posicode.chuyende.adapters;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +28,7 @@ import com.google.firebase.storage.StorageReference;
 import java.util.List;
 
 import vn.posicode.chuyende.R;
-import vn.posicode.chuyende.activities.QLNhanVien;
+import vn.posicode.chuyende.activities.manages.QLNhanVien;
 import vn.posicode.chuyende.models.NguoiDung;
 
 public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.ViewHolder> {
@@ -57,7 +56,7 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_nguoidung, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_nguoi_dung, parent, false);
         return new ViewHolder(view);
     }
 

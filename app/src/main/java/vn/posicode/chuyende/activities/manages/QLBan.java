@@ -1,4 +1,4 @@
-package vn.posicode.chuyende.activities;
+package vn.posicode.chuyende.activities.manages;
 
 import android.os.Bundle;
 

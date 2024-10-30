@@ -20,10 +20,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChuyenDe">
         <activity
-            android:name=".activities.QLBan"
+            android:name=".activities.manages.QLBan"
             android:exported="false" />
         <activity
-            android:name=".HomeQuanLy"
+            android:name=".activities.Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,26 +31,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<!--        <activity-->
-<!--            android:name=".HomeQuanLy"-->
-<!--            android:exported="false" />-->
         <activity
-            android:name=".activities.ForgotPassword"
+            android:name=".HomeQuanLy"
             android:exported="false" />
         <activity
-            android:name=".activities.Login"
+            android:name=".activities.login_forgot.ForgotPassword"
             android:exported="false" />
         <activity
-            android:name=".activities.HomeNhanVien"
+            android:name=".activities.login_forgot.Login"
             android:exported="false" />
         <activity
-            android:name=".activities.HomeDauBep"
+            android:name=".activities.homes.HomeNhanVien"
             android:exported="false" />
         <activity
-            android:name=".activities.HomeThuNgan"
+            android:name=".activities.homes.HomeDauBep"
             android:exported="false" />
         <activity
-            android:name=".activities.QLNhanVien"
+            android:name=".activities.homes.HomeThuNgan"
+            android:exported="false" />
+        <activity
+            android:name=".activities.manages.QLNhanVien"
             android:exported="false" />
     </application>
 

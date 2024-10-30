@@ -2,15 +2,19 @@ package vn.posicode.chuyende.activities;
 
 import android.os.Bundle;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import vn.posicode.chuyende.R;
 
-public class HomeNhanVien extends AppCompatActivity {
+public class DatMonAn extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_nhan_vien_layout);
+        setContentView(R.layout.dat_mon_an_layout);
     }
 }

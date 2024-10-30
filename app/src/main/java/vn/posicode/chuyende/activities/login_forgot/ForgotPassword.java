@@ -1,4 +1,4 @@
-package vn.posicode.chuyende.activities;
+package vn.posicode.chuyende.activities.login_forgot;
 
 import android.content.Intent;
 import android.os.Bundle;

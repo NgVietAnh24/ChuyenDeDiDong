@@ -25,11 +25,10 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-import vn.posicode.chuyende.activities.Login;
-import vn.posicode.chuyende.activities.QLNhanVien;
+import vn.posicode.chuyende.activities.login_forgot.Login;
+import vn.posicode.chuyende.activities.manages.QLNhanVien;
 import vn.posicode.chuyende.adapters.BanAdapter;
 import vn.posicode.chuyende.models.Ban;
-import vn.posicode.chuyende.models.NguoiDung;
 
 public class HomeQuanLy extends AppCompatActivity {
     FirebaseAuth mAuth;

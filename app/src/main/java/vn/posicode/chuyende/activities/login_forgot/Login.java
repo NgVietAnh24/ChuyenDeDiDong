@@ -1,4 +1,4 @@
-package vn.posicode.chuyende.activities;
+package vn.posicode.chuyende.activities.login_forgot;
 
 import static android.content.ContentValues.TAG;
 
@@ -29,6 +29,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import vn.posicode.chuyende.HomeQuanLy;
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.activities.Loading;
+import vn.posicode.chuyende.activities.homes.HomeDauBep;
+import vn.posicode.chuyende.activities.homes.HomeNhanVien;
+import vn.posicode.chuyende.activities.homes.HomeThuNgan;
 
 public class Login extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -120,7 +124,7 @@ public class Login extends AppCompatActivity {
                                     // Đăng nhập thất bại
                                     loading.cancel();
                                     Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                    Toast.makeText(Login.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(Login.this, "Tài khoản hoặc mật khẩu không đúng!⚠️", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });

@@ -4,9 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activities.QLNhanVien">
+    tools:context=".activities.manages.QLNhanVien">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,16 +22,15 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:textStyle="bold"
-            android:text="Quản lý nhân viên"
             android:layout_marginLeft="5dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Quản lý nhân viên"
             android:textColor="@color/textColorTitle"
-            android:textSize="25sp" />
+            android:textSize="25sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Form fields -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -74,25 +72,29 @@
             android:layout_height="wrap_content"
             android:text="Mật khẩu"
             android:textColor="@color/textColorTitle" />
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/iEdtMatKhau"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/border_edt"
-            android:hint="Nhập mật khẩu"
-            android:inputType="textPassword"
-            android:padding="10dp" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/iEdtMatKhau"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border_edt"
+                android:hint="Nhập mật khẩu"
+                android:inputType="textPassword"
+                android:padding="10dp" />
+
             <ImageView
                 android:id="@+id/imgEye"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/eye_hide"
                 android:layout_gravity="center|end"
-                android:paddingRight="10dp"/>
+                android:paddingRight="10dp"
+                android:src="@drawable/eye_hide" />
         </FrameLayout>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -163,7 +165,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Images -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -212,7 +213,8 @@
     <Spinner
         android:id="@+id/spNhanVien"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -224,21 +226,21 @@
             android:id="@+id/btnThem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
             android:background="@drawable/rounded_btn"
             android:text="Thêm"
             android:textColor="@color/textColor"
-            android:textSize="14sp"
-            android:layout_marginRight="20dp"/>
+            android:textSize="14sp" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSua"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
             android:background="@drawable/rounded_btn"
             android:text="Sửa"
             android:textColor="@color/textColor"
-            android:textSize="14sp"
-            android:layout_marginLeft="20dp"/>
+            android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -254,15 +256,16 @@
             android:text="Danh sách nhân viên"
             android:textColor="@color/textColorTitle"
             android:textStyle="bold" />
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listNhanVien"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/listNhanVien"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 

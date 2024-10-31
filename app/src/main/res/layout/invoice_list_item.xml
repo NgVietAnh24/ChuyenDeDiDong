@@ -3,37 +3,65 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@color/red"
     android:padding="16dp"
-    android:gravity="center_vertical">
+    android:layout_marginBottom="8dp"
+    android:elevation="4dp"
+    android:clipToOutline="true"
+    android:gravity="center_vertical"
+    android:layout_margin="8dp"
+    android:background="@drawable/rounded_background"
+    android:descendantFocusability="blocksDescendants">
 
-    <!-- Tiêu đề hóa đơn -->
-    <TextView
-        android:id="@+id/invoiceTitleTextView"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Hóa đơn 1"
-        android:textSize="18sp"
-        android:textColor="#FFFFFF" />
+        android:orientation="vertical">
 
-    <!-- Thời gian hóa đơn -->
-    <TextView
-        android:id="@+id/invoiceTimeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="12:00"
-        android:textSize="16sp"
-        android:textColor="#FFFFFF"
-        android:layout_marginEnd="16dp" />
+        <!-- Tiêu đề hóa đơn -->
+        <TextView
+            android:id="@+id/invoiceTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hóa đơn 1"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FF0000" />
 
-    <!-- Nút xóa hóa đơn (tạm thời chưa có chức năng) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <!-- Thời gian hóa đơn -->
+            <TextView
+                android:id="@+id/invoiceTimeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12:00"
+                android:textSize="14sp"
+                android:textColor="#7D7D7D" />
+
+            <!-- Ngày hóa đơn -->
+            <TextView
+                android:id="@+id/invoiceDateTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="01/01/2023"
+                android:textSize="14sp"
+                android:textColor="#7D7D7D"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Nút xóa hóa đơn -->
     <ImageButton
         android:id="@+id/deleteButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:padding="8dp"
-        android:background="@android:color/transparent"
+        android:background="@drawable/rounded_button_red"
         android:src="@drawable/ic_close"
         android:contentDescription="Xóa hóa đơn" />
 </LinearLayout>

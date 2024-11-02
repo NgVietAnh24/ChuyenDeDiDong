@@ -7,8 +7,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -40,7 +38,7 @@ public class DanhMucAdapter extends RecyclerView.Adapter<DanhMucAdapter.ViewHold
     public void onBindViewHolder(@NonNull DanhMucAdapter.ViewHolder holder, int position) {
         DanhMuc danhMuc = list.get(position);
         holder.btnCate.setText(danhMuc.getName());
-        Log.d("A2", "onBindViewHolder: "+danhMuc.getName());
+//        Log.d("A2", "onBindViewHolder: "+danhMuc.getName());
     }
 
     @Override

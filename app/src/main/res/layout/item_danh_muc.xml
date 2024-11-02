@@ -3,7 +3,8 @@
     android:id="@+id/itemCategory"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_margin="3dp"
     android:background="@drawable/rounded_btn"
+    android:padding="5dp"
     android:text="All"
-    android:padding="10dp"
-    android:textColor="@color/textColor"/>
+    android:textColor="@color/textColor" />

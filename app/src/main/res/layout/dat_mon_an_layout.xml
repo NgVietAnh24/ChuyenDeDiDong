@@ -19,9 +19,9 @@
             android:id="@+id/btnBack"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/back"
+            android:contentDescription="Back button"
             android:scaleType="fitXY"
-            android:contentDescription="Back button" />
+            android:src="@drawable/back" />
 
         <TextView
             android:layout_width="0dp"
@@ -38,8 +38,8 @@
         android:id="@+id/linearLayoutContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/linearLayoutSearch"
@@ -53,56 +53,63 @@
                 android:id="@+id/edtSearch"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="Tìm kiếm..."
+                android:layout_gravity="center_vertical"
                 android:background="@null"
+                android:hint="Tìm kiếm..."
                 android:padding="10dp"
+                android:singleLine="true"
                 android:textColor="@color/textColorTitle"
                 android:textColorHint="#BD6060"
-                android:layout_gravity="center_vertical"
-                android:textStyle="bold"
-                android:singleLine="true" />
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listCategory"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="10dp"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listFood"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingBottom="10dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="10dp">
+        android:orientation="vertical">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnMonDaChon"
-            android:layout_width="100dp"
-            android:layout_height="35dp"
-            android:background="@drawable/rounded_btn"
-            android:text="Món đã chọn"
-            android:textColor="@color/textColor"
-            android:textSize="14sp"
-            />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listCategory"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnDatTruoc"
-            android:layout_width="87dp"
-            android:layout_height="35dp"
-            android:layout_marginLeft="60dp"
-            android:background="@drawable/rounded_btn"
-            android:text="Đặt trước"
-            android:textColor="@color/textColor"
-            android:textSize="14sp" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listFood"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="9.5"
+            android:paddingBottom="10dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnMonDaChon"
+                android:layout_width="100dp"
+                android:layout_height="35dp"
+                android:background="@drawable/rounded_btn"
+                android:text="Món đã chọn"
+                android:textColor="@color/textColor"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDatTruoc"
+                android:layout_width="87dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="60dp"
+                android:background="@drawable/rounded_btn"
+                android:text="Đặt trước"
+                android:textColor="@color/textColor"
+                android:textSize="14sp" />
+        </LinearLayout>
     </LinearLayout>
+
 
 </LinearLayout>

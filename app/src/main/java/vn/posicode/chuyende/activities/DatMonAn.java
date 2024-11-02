@@ -56,13 +56,25 @@ public class DatMonAn extends AppCompatActivity {
         //Khởi tạo từ firebase
         firestore = FirebaseFirestore.getInstance();
 
+        LinearLayoutManager layoutDanhMuc = new LinearLayoutManager(this);
+        layoutDanhMuc.setOrientation(RecyclerView.HORIZONTAL);
+        listCategory.setLayoutManager(layoutDanhMuc);
+        listDanhMuc = new ArrayList<>();
+        danhMucAdapter = new DanhMucAdapter(listDanhMuc, new DanhMucAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick (DanhMuc danhMuc) {
+
+            }
+        });
+        listCategory.setAdapter(danhMucAdapter);
+        docDulieuDanhMuc();
+
+        //
         LinearLayoutManager layoutMonAn = new LinearLayoutManager(this);
         layoutMonAn.setOrientation(RecyclerView.VERTICAL);
         listFood.setLayoutManager(layoutMonAn);
 
-        LinearLayoutManager layoutDanhMuc = new LinearLayoutManager(this);
-        layoutDanhMuc.setOrientation(RecyclerView.VERTICAL);
-        listCategory.setLayoutManager(layoutDanhMuc);
+
         //
         listMonAn = new ArrayList<>();
         monAnAdapter = new MonAnAdapter(listMonAn, new MonAnAdapter.OnItemClickListener() {
@@ -73,16 +85,8 @@ public class DatMonAn extends AppCompatActivity {
         });
         listFood.setAdapter(monAnAdapter);
 
-        listDanhMuc = new ArrayList<>();
-        danhMucAdapter = new DanhMucAdapter(listDanhMuc, new DanhMucAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick (DanhMuc danhMuc) {
 
-            }
-        });
-        listCategory.setAdapter(danhMucAdapter);
-        docDulieuDanhMuc();
-//        docDulieuMonAn();
+        docDulieuMonAn();
     }
     public void docDulieuDanhMuc() {
         firestore.collection("categories")
@@ -95,7 +99,7 @@ public class DatMonAn extends AppCompatActivity {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 DanhMuc cateData = document.toObject(DanhMuc.class);
                                 listDanhMuc.add(cateData);
-                                Log.d("VVV", "getData: " + listDanhMuc.add(cateData));
+//                                Log.d("VVV", "getData: " + listDanhMuc.add(cateData));
                             }
                             Log.d("Getd", "Getting documents: ");
                             monAnAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu mới

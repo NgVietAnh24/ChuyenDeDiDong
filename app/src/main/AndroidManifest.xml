@@ -20,10 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChuyenDe">
         <activity
-            android:name=".activities.manages.QLBan"
-            android:exported="false" />
-        <activity
-            android:name=".activities.Splash"
+            android:name=".activities.DatMonAn"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +30,9 @@
         </activity>
         <activity
             android:name=".HomeQuanLy"
+            android:exported="false" />
+        <activity
+            android:name=".activities.manages.QLBan"
             android:exported="false" />
         <activity
             android:name=".activities.login_forgot.ForgotPassword"

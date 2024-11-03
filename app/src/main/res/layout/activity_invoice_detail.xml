@@ -7,102 +7,144 @@
     android:gravity="center_horizontal"
     android:background="@android:color/white">
 
-    <!-- Nút quay lại -->
-    <ImageButton
-        android:layout_marginRight="170dp"
-        android:id="@+id/backButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:scaleType="fitXY"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_back_arrow"
-        android:contentDescription="Quay lại" />
-
-    <!-- Tiêu đề hóa đơn -->
-    <TextView
-        android:id="@+id/invoiceTitleTextView"
-        android:layout_width="wrap_content"
+    <!-- Header với nút quay lại và tiêu đề -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Chi tiết hóa đơn 1"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#FF0000"
-        android:layout_marginTop="16dp"
-        android:layout_gravity="center_horizontal" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Nút quay lại -->
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitXY"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_back_arrow"
+            android:contentDescription="Quay lại" />
+
+        <!-- Tiêu đề hóa đơn -->
+        <TextView
+            android:id="@+id/invoiceTitleTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Chi tiết hóa đơn"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#FF0000"
+            android:gravity="center" />
+
+        <Space
+            android:layout_width="40dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <!-- Bảng chi tiết món ăn -->
     <ListView
         android:id="@+id/itemsListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:dividerHeight="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:dividerHeight="8dp"
+        android:padding="8dp" />
 
-    <!-- Tổng tiền, tiền thu, tiền dư -->
-    <TextView
+    <!-- Thông tin thanh toán -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tổng tiền: 14$"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:gravity="end"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/rounded_background"
+        android:layout_marginTop="16dp">
+
+        <!-- Tổng tiền -->
+        <TextView
+            android:id="@+id/totalTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tổng tiền: 0$"
+            android:textSize="18sp"
+            android:textColor="#FF0000"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <!-- Tiền thu -->
+        <TextView
+            android:id="@+id/amountReceivedTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tiền thu: 0$"
+            android:textSize="18sp"
+            android:textColor="#FF0000"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+
+        <!-- Tiền dư -->
+        <TextView
+            android:id="@+id/changeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tiền dư: $"
+            android:textSize="18sp"
+            android:textColor="#FF0000"
+            android:gravity="end"
+            android:paddingEnd="8dp" />
+    </LinearLayout>
+
+    <!-- Nút thanh toán -->
+    <Button
+        android:id="@+id/paymentButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Thanh toán"
+        android:backgroundTint="#B71C1C"
+        android:textColor="#FFFFFF"
         android:layout_marginTop="16dp"
-        android:paddingEnd="8dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Tiền thu: 20$"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:gravity="end"
-        android:paddingEnd="8dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Tiền dư: 6$"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:gravity="end"
-        android:paddingEnd="8dp" />
+        android:padding="12dp" />
 
     <!-- Thời gian tạo hóa đơn với hình nền -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:gravity="center">
 
         <ImageView
-            android:layout_width="300dp"
-            android:layout_height="300dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:src="@drawable/ic_menu"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
             android:layout_centerInParent="true"
             android:alpha="0.2" />
 
-        <TextView
-            android:id="@+id/invoiceTimeTextView"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="12:00"
-            android:textSize="16sp"
-            android:textColor="#000000"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="110dp" />
+            android:orientation="vertical"
+            android:layout_centerInParent="true">
 
-        <TextView
-            android:id="@+id/invoiceDateTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="24/09/2024"
-            android:textSize="16sp"
-            android:textColor="#000000"
-            android:layout_below="@id/invoiceTimeTextView"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="4dp" />
+            <TextView
+                android:id="@+id/invoiceTimeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12:00"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:layout_gravity="center" />
+
+            <TextView
+                android:id="@+id/invoiceDateTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="24/09/2024"
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
     </RelativeLayout>
+
 </LinearLayout>

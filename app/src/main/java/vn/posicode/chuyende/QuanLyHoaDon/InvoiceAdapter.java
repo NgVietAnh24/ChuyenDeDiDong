@@ -8,9 +8,13 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -20,12 +24,14 @@ public class InvoiceAdapter extends ArrayAdapter<Invoice> {
     private Context context;
     private int resource;
     private List<Invoice> invoiceList;
+    private FirebaseFirestore db;
 
     public InvoiceAdapter(@NonNull Context context, int resource, @NonNull List<Invoice> objects) {
         super(context, resource, objects);
         this.context = context;
         this.resource = resource;
         this.invoiceList = objects;
+        this.db = FirebaseFirestore.getInstance();
     }
 
     @NonNull
@@ -41,25 +47,53 @@ public class InvoiceAdapter extends ArrayAdapter<Invoice> {
             TextView titleTextView = convertView.findViewById(R.id.invoiceTitleTextView);
             TextView timeTextView = convertView.findViewById(R.id.invoiceTimeTextView);
             TextView dateTextView = convertView.findViewById(R.id.invoiceDateTextView);
+            TextView tableNameTextView = convertView.findViewById(R.id.tableNameTextView);
+            TextView statusTextView = convertView.findViewById(R.id.statusTextView);
+            TextView totalTextView = convertView.findViewById(R.id.totalTextView);
             ImageButton deleteButton = convertView.findViewById(R.id.deleteButton);
 
+            // Thiết lập dữ liệu
             titleTextView.setText(invoice.getTitle());
             timeTextView.setText(invoice.getTime());
             dateTextView.setText(invoice.getDate());
+            tableNameTextView.setText("Bàn: " + (invoice.getTableName() != null ? invoice.getTableName() : "N/A"));
+            statusTextView.setText(invoice.getPaymentStatus());
+            totalTextView.setText(String.format("%.2f$", invoice.getTotal()));
 
-            deleteButton.setOnClickListener(v -> {
-                invoiceList.remove(position);
-                notifyDataSetChanged();
-            });
+            // Đổi màu trạng thái thanh toán
+            if ("Đã thanh toán".equals(invoice.getPaymentStatus())) {
+                statusTextView.setTextColor(context.getResources().getColor(R.color.green));
+            } else {
+                statusTextView.setTextColor(context.getResources().getColor(R.color.red));
+            }
 
-            deleteButton.setOnTouchListener((v, event) -> {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    v.performClick();
-                }
-                return true;
-            });
+            // Xử lý sự kiện xóa
+            deleteButton.setOnClickListener(v -> showDeleteConfirmation(invoice));
         }
 
         return convertView;
+    }
+
+    private void showDeleteConfirmation(Invoice invoice) {
+        new AlertDialog.Builder(context)
+                .setTitle("Xác nhận xóa")
+                .setMessage("Bạn có chắc chắn muốn xóa hóa đơn này?")
+                .setPositiveButton("Xóa", (dialog, which) -> deleteInvoice(invoice))
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void deleteInvoice(Invoice invoice) {
+        db.collection("invoices")
+                .document(invoice.getId())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    invoiceList.remove(invoice);
+                    notifyDataSetChanged();
+                    Toast.makeText(context, "Đã xóa hóa đơn", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(context, "Lỗi khi xóa hóa đơn", Toast.LENGTH_SHORT).show();
+                });
     }
 }

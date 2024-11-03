@@ -43,7 +43,7 @@ public class InvoiceItemAdapter extends ArrayAdapter<Invoice.InvoiceItem> {
 
             nameTextView.setText(item.getName());
             quantityTextView.setText(String.valueOf(item.getQuantity()));
-            priceTextView.setText(String.valueOf(item.getPrice()));
+            priceTextView.setText(String.format("%.2f$", item.getPrice() * item.getQuantity()));
         }
 
         return convertView;

@@ -1,5 +1,6 @@
 package vn.posicode.chuyende.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +35,8 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> 
         MonAn monAn = list.get(position);
         holder.tvTenMon.setText(monAn.getName());
         holder.tvGiaMon.setText(monAn.getPrice());
-//        holder.imgFood.setBackgroundResource(Integer.parseInt(monAn.getImage()));
+//        holder.imgFood.setBackgroundResource(Integer.valueOf(monAn.getImage()));
+//        Log.d("img", "get img: "+monAn.getImage());
 
     }
 

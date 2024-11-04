@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
     private void uploadImageToFirebaseStorage() {
         if (imageUri != null) {
             String fileName = System.currentTimeMillis() + ".jpg";
-            StorageReference ref = storageReference.child("Hinh/" + fileName);
+            StorageReference ref = storageReference.child("Food/" + fileName);
 
             ref.putFile(imageUri)
                     .addOnSuccessListener(taskSnapshot -> {

@@ -52,6 +52,9 @@
         <activity
             android:name=".activities.manages.QLNhanVien"
             android:exported="false" />
+        <activity
+            android:name=".activities.DanhSachDaChon"
+            android:exported="false" />
     </application>
 
 </manifest>

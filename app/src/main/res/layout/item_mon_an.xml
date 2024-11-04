@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.5"
             android:scaleType="fitXY"
-            android:src="@drawable/image_food"
+            android:background="@drawable/image_food"
             app:shapeAppearanceOverlay="@style/RoundedImageView" />
 
 

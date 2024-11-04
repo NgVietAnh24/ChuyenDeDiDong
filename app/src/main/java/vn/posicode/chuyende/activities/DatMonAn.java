@@ -2,8 +2,10 @@ package vn.posicode.chuyende.activities;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
@@ -87,6 +89,14 @@ public class DatMonAn extends AppCompatActivity {
 
 
         docDulieuMonAn();
+
+        btnMonDaChon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(DatMonAn.this, DanhSachDaChon.class);
+                startActivity(intent);
+            }
+        });
     }
     public void docDulieuDanhMuc() {
         firestore.collection("categories")

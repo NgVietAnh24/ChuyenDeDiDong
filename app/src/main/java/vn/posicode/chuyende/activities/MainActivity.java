@@ -33,6 +33,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private Spinner spinnerDanhMuc;
     private Button buttonAdd, buttonEdit, buttonDelete;
     private ImageView upload, imageView;
+    private StorageReference storageReference;
 
 
     //Hien thi du lieu len spinner
@@ -70,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         firestore = FirebaseFirestore.getInstance();
+        storageReference = FirebaseStorage.getInstance().getReference(); // Khởi tạo Storage reference
         initializeViews();
         setupSpinner();
         setupRecyclerView();
@@ -78,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
+        // Khởi tạo các View từ giao diện XML
         editTextTenMonAn = findViewById(R.id.editTextTenMonAn);
         editTextGia = findViewById(R.id.editTextGia);
         spinnerDanhMuc = findViewById(R.id.spinnerDanhMuc);
@@ -129,9 +134,9 @@ public class MainActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         foodList = new ArrayList<>();
         adapter = new FoodAdapter(this, foodList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
-
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));// Cài đặt layout cho RecyclerView
+        recyclerView.setAdapter(adapter); // Gắn adapter vào RecyclerView
+// Đặt sự kiện khi click vào món ăn trong danh sách
         adapter.setOnItemClickListener(position -> {
             selectedPosition = position;
             Food food = foodList.get(position);
@@ -143,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupListeners() {
         // Thêm món ăn
-        buttonAdd.setOnClickListener(v -> addFood());
+        buttonAdd.setOnClickListener(v -> addFood());// Sự kiện thêm món ăn
 
         // Sửa món ăn
         buttonEdit.setOnClickListener(v -> editFood());
@@ -155,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         upload.setOnClickListener(v -> chooseImageFromGallery());
     }
 
+    // Tải dữ liệu món ăn từ Firestore
     private void loadFoodData() {
         firestore.collection(FOODS_COLLECTION).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -171,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
+    // Hiển thị ảnh lên ImageView bằng Glide
     private void loadImage(String imageUrl) {
         if (imageUrl != null && !imageUrl.isEmpty()) {
             Uri imageUri = Uri.parse(imageUrl);
@@ -182,20 +188,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addFood() {
-
         String tenMonAn = editTextTenMonAn.getText().toString();
         String gia = editTextGia.getText().toString();
-
-        //lay id cua spinner
         CategoryModel category = (CategoryModel) spinnerDanhMuc.getSelectedItem();
         String category_id = category.getId();
 
-
         if (!tenMonAn.isEmpty() && !gia.isEmpty()) {
-            Food newFood = new Food(tenMonAn,gia,image,category_id);
-
+            if (imageUri != null) {
+                // Tải ảnh lên Firebase Storage trước khi lưu dữ liệu món ăn
+                uploadImageToFirebaseStorage();
+            }
+            Food newFood = new Food(tenMonAn, gia, image, category_id);
             foodList.add(newFood);
-            saveFoodToFirestore(newFood);
+            saveFoodToFirestore(newFood);// Lưu món ăn lên Firestore
             adapter.notifyDataSetChanged();
             showToast("Thêm món ăn thành công");
         } else {
@@ -203,6 +208,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Tải ảnh lên Firebase Storage và lấy URL ảnh sau khi tải
+    private void uploadImageToFirebaseStorage() {
+        if (imageUri != null) {
+            String fileName = System.currentTimeMillis() + ".jpg";
+            StorageReference ref = storageReference.child("Hinh/" + fileName);
+
+            ref.putFile(imageUri)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        ref.getDownloadUrl().addOnSuccessListener(uri -> {
+                            image = uri.toString();
+                            Glide.with(this).load(uri).into(imageView);
+                            showToast("Tải ảnh lên thành công!");
+                            Log.d("UploadImage", "URL của ảnh: " + image);
+                        });
+                    })
+                    .addOnFailureListener(e -> {
+                        showToast("Lỗi khi tải ảnh lên: " + e.getMessage());
+                        Log.e("UploadImage", "Lỗi khi tải ảnh lên: ", e);
+                    });
+        }
+    }
+
+
+
+
+    // Lưu đối tượng Food lên Firestore
     private void saveFoodToFirestore(Food foodItem) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED) {
             firestore.collection(FOODS_COLLECTION).add(foodItem)

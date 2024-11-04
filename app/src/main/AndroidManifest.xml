@@ -52,7 +52,7 @@
         </activity>
 
         <activity
-            android:name=".Menu.ManageActivity"
+            android:name=".Manage.ManageActivity"
             android:exported="true">
         </activity>
 

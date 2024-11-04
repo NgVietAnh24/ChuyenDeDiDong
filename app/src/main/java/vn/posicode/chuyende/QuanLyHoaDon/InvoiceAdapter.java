@@ -1,6 +1,7 @@
 package vn.posicode.chuyende.QuanLyHoaDon;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
+import vn.posicode.chuyende.ChiTietHoaDon.InvoiceDetailActivity;
 import vn.posicode.chuyende.R;
 
 public class InvoiceAdapter extends ArrayAdapter<Invoice> {
@@ -52,7 +54,6 @@ public class InvoiceAdapter extends ArrayAdapter<Invoice> {
             TextView totalTextView = convertView.findViewById(R.id.totalTextView);
             ImageButton deleteButton = convertView.findViewById(R.id.deleteButton);
 
-            // Thiết lập dữ liệu
             titleTextView.setText(invoice.getTitle());
             timeTextView.setText(invoice.getTime());
             dateTextView.setText(invoice.getDate());
@@ -60,19 +61,25 @@ public class InvoiceAdapter extends ArrayAdapter<Invoice> {
             statusTextView.setText(invoice.getPaymentStatus());
             totalTextView.setText(String.format("%.2f$", invoice.getTotal()));
 
-            // Đổi màu trạng thái thanh toán
             if ("Đã thanh toán".equals(invoice.getPaymentStatus())) {
                 statusTextView.setTextColor(context.getResources().getColor(R.color.green));
             } else {
                 statusTextView.setTextColor(context.getResources().getColor(R.color.red));
             }
 
-            // Xử lý sự kiện xóa
             deleteButton.setOnClickListener(v -> showDeleteConfirmation(invoice));
+
+            // Chuyển sang màn hình InvoiceDetailActivity khi nhấn vào một hóa đơn
+            convertView.setOnClickListener(v -> {
+                Intent intent = new Intent(context, InvoiceDetailActivity.class);
+                intent.putExtra("invoiceId", invoice.getId());  // Truyền ID của hóa đơn
+                context.startActivity(intent);
+            });
         }
 
         return convertView;
     }
+
 
     private void showDeleteConfirmation(Invoice invoice) {
         new AlertDialog.Builder(context)

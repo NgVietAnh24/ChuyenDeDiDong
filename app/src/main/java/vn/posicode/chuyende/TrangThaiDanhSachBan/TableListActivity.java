@@ -19,15 +19,13 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import vn.posicode.chuyende.DanhSachMonAn.FoodMenuActivity;
-import vn.posicode.chuyende.Menu.ManageActivity;
+import vn.posicode.chuyende.Manage.ManageActivity;
 import vn.posicode.chuyende.R;
 
 public class TableListActivity extends AppCompatActivity {

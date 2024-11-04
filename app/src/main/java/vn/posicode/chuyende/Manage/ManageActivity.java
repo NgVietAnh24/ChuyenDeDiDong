@@ -1,4 +1,4 @@
-package vn.posicode.chuyende.Menu;
+package vn.posicode.chuyende.Manage;
 
 import android.content.Intent;
 import android.graphics.Paint;

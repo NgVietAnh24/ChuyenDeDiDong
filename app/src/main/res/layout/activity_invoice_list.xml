@@ -28,6 +28,31 @@
         android:layout_marginTop="8dp"
         android:layout_gravity="center_horizontal" />
 
+    <!-- Phần sắp xếp -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
+
+        <ImageButton
+            android:id="@+id/sortButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="Sắp xếp" />
+
+        <TextView
+            android:id="@+id/sortTypeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:textColor="@android:color/black"
+            android:text="Sắp xếp: Theo trạng thái  Thời gian" />
+    </LinearLayout>
+
     <!-- Danh sách hóa đơn -->
     <ListView
         android:id="@+id/invoiceListView"

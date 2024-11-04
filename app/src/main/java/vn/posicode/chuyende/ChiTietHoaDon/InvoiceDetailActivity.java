@@ -8,6 +8,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +31,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
     private Invoice selectedInvoice;
 
     private TextView titleTextView, timeTextView, dateTextView, totalTextView, amountReceivedTextView, changeTextView;
+    private TextView customerNameTextView, customerPhoneTextView;
     private Button paymentButton;
     private ListView itemsListView;
 
@@ -45,12 +47,13 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         invoiceId = getIntent().getStringExtra("invoiceId");
         Log.d(TAG, "Received invoice ID: " + invoiceId);
 
-        if (invoiceId != null && !invoiceId.isEmpty()) {
-            loadInvoiceDetails();
-        } else {
+        if (invoiceId == null || invoiceId.isEmpty()) {
             Toast.makeText(this, "Không tìm thấy thông tin hóa đơn", Toast.LENGTH_SHORT).show();
             finish();
+            return;
         }
+
+        loadInvoiceDetails();
     }
 
     private void initializeViews() {
@@ -60,8 +63,13 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         totalTextView = findViewById(R.id.totalTextView);
         amountReceivedTextView = findViewById(R.id.amountReceivedTextView);
         changeTextView = findViewById(R.id.changeTextView);
+        customerNameTextView = findViewById(R.id.customerNameTextView);
+        customerPhoneTextView = findViewById(R.id.customerPhoneTextView);
         paymentButton = findViewById(R.id.paymentButton);
         itemsListView = findViewById(R.id.itemsListView);
+
+        ImageButton backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(v -> onBackPressed());
 
         paymentButton.setOnClickListener(v -> showPaymentDialog());
     }
@@ -72,23 +80,25 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        selectedInvoice = Invoice.fromFirestore(documentSnapshot);
-                        selectedInvoice.setId(documentSnapshot.getId());
-                        selectedInvoice.setBanId(documentSnapshot.getString("ban_id"));
-                        selectedInvoice.setDate(documentSnapshot.getString("ngay_tao"));
-                        selectedInvoice.setTime(documentSnapshot.getString("gio_tao"));
-                        selectedInvoice.setTotal(documentSnapshot.getDouble("tong_tien"));
-                        selectedInvoice.setPaymentStatus(documentSnapshot.getString("tinh_trang"));
-
-                        loadInvoiceItems();
+                        try {
+                            selectedInvoice = Invoice.fromFirestore(documentSnapshot);
+                            if (selectedInvoice != null) {
+                                loadInvoiceItems();
+                            } else {
+                                throw new Exception("Failed to parse invoice");
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error parsing invoice: " + e.getMessage());
+                            Toast.makeText(this, "Lỗi khi đọc thông tin hóa đơn", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
                     } else {
-                        Log.e(TAG, "Invoice document does not exist");
                         Toast.makeText(this, "Không tìm thấy thông tin hóa đơn", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading invoice", e);
+                    Log.e(TAG, "Error loading invoice: " + e.getMessage());
                     Toast.makeText(this, "Lỗi khi tải thông tin hóa đơn", Toast.LENGTH_SHORT).show();
                     finish();
                 });
@@ -126,28 +136,46 @@ public class InvoiceDetailActivity extends AppCompatActivity {
     }
 
     private void displayInvoiceDetails() {
-        if (selectedInvoice != null) {
-            titleTextView.setText("Chi tiết " + selectedInvoice.getTitle());
-            timeTextView.setText(selectedInvoice.getTime());
-            dateTextView.setText(selectedInvoice.getDate());
-            totalTextView.setText("Tổng tiền: " + String.format("%.2f$", selectedInvoice.getTotal()));
+        if (selectedInvoice == null) {
+            Log.e(TAG, "Selected invoice is null");
+            Toast.makeText(this, "Lỗi hiển thị thông tin hóa đơn", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-            if (selectedInvoice.getPaymentStatus().equals("Đã thanh toán")) {
+        try {
+            titleTextView.setText(selectedInvoice.getTitle());
+            timeTextView.setText(selectedInvoice.getTime() != null ? selectedInvoice.getTime() : "N/A");
+            dateTextView.setText(selectedInvoice.getDate() != null ? selectedInvoice.getDate() : "N/A");
+            totalTextView.setText(String.format("Tổng tiền: %.2f$", selectedInvoice.getTotal()));
+
+            customerNameTextView.setText("Tên khách hàng: " +
+                    (selectedInvoice.getCustomerName() != null ? selectedInvoice.getCustomerName() : "N/A"));
+            customerPhoneTextView.setText("Số điện thoại: " +
+                    (selectedInvoice.getCustomerPhone() != null ? selectedInvoice.getCustomerPhone() : "N/A"));
+
+            String paymentStatus = selectedInvoice.getPaymentStatus();
+            if (paymentStatus != null && paymentStatus.equals("Đã thanh toán")) {
                 paymentButton.setVisibility(View.GONE);
-                amountReceivedTextView.setText("Tiền thu: " + String.format("%.2f$", selectedInvoice.getAmountReceived()));
-                changeTextView.setText("Tiền dư: " + String.format("%.2f$", selectedInvoice.getChange()));
                 amountReceivedTextView.setVisibility(View.VISIBLE);
                 changeTextView.setVisibility(View.VISIBLE);
+                amountReceivedTextView.setText(String.format("Tiền thu: %.2f$", selectedInvoice.getAmountReceived()));
+                changeTextView.setText(String.format("Tiền dư: %.2f$", selectedInvoice.getChange()));
             } else {
                 paymentButton.setVisibility(View.VISIBLE);
                 amountReceivedTextView.setVisibility(View.GONE);
                 changeTextView.setVisibility(View.GONE);
             }
 
-            InvoiceItemAdapter adapter = new InvoiceItemAdapter(this, R.layout.invoice_item, selectedInvoice.getItems());
-            itemsListView.setAdapter(adapter);
-        } else {
-            Log.e(TAG, "Invoice is null");
+            if (selectedInvoice.getItems() != null && !selectedInvoice.getItems().isEmpty()) {
+                InvoiceItemAdapter adapter = new InvoiceItemAdapter(this, R.layout.invoice_item, selectedInvoice.getItems());
+                itemsListView.setAdapter(adapter);
+            } else {
+                Toast.makeText(this, "Không có món ăn trong hóa đơn", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error displaying invoice details: " + e.getMessage());
+            Toast.makeText(this, "Lỗi hiển thị thông tin hóa đơn", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -164,7 +192,8 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         }
 
         TextView titleTextView = dialog.findViewById(R.id.titleTextView);
-        EditText edtTienThu = dialog.findViewById(R.id.edtTienThu); Button btnThanhToan = dialog.findViewById(R.id.btnThanhToan);
+        EditText edtTienThu = dialog.findViewById(R.id.edtTienThu);
+        Button btnThanhToan = dialog.findViewById(R.id.btnThanhToan);
         Button btnClose = dialog.findViewById(R.id.btnClose);
         TextView totalAmountValue = dialog.findViewById(R.id.totalAmountValue);
 
@@ -227,5 +256,12 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                         Log.e(TAG, "Lỗi khi cập nhật trạng thái bàn", e);
                     });
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Đặt kết quả trả về nếu cần
+        setResult(RESULT_OK);
+        super.onBackPressed();
     }
 }

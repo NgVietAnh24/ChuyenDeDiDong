@@ -33,25 +33,31 @@ android {
 }
 
 dependencies {
-
+    // AndroidX
     implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
+    // Material Design
+    implementation("com.google.android.material:material:1.12.0")
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+
+    // Google Play Services
+    implementation("com.google.android.gms:play-services-base:18.2.0")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+
+    // Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
+    // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")
-    implementation ("com.google.firebase:firebase-firestore:22.0.1")
-    implementation ("com.google.firebase:firebase-auth:21.0.1")
-    implementation ("com.google.firebase:firebase-firestore:24.0.0")
-    implementation ("com.google.android.gms:play-services-auth:20.2.0")
-    implementation ("com.google.firebase:firebase-auth:latest_version")
-    implementation ("com.google.firebase:firebase-firestore:latest_version")
-    implementation ("androidx.cardview:cardview:1.0.0")
-    implementation  ("androidx.appcompat:appcompat:1.4.0")
-    implementation ("androidx.recyclerview:recyclerview:1.2.1")
-    implementation ("com.google.android.gms:play-services-base:18.2.0")
-    implementation ("com.google.android.gms:play-services-auth:20.5.0")
 }

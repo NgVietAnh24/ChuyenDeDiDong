@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -27,7 +28,6 @@ import java.util.Map;
 
 import vn.posicode.chuyende.ChiTietHoaDon.InvoiceDetailActivity;
 import vn.posicode.chuyende.QuanLyHoaDon.Invoice;
-import vn.posicode.chuyende.QuanLyHoaDon.InvoiceListActivity;
 import vn.posicode.chuyende.R;
 
 public class SelectedFoodActivity extends AppCompatActivity {
@@ -80,7 +80,7 @@ public class SelectedFoodActivity extends AppCompatActivity {
 
     private void addFoodView(Food food) {
         View foodView = LayoutInflater.from(this).inflate(R.layout.selected_food_item, selectedFoodLayout, false);
-        foodView.setTag(food.getName());
+        foodView.setTag(food.getId());
 
         ImageView imgFood = foodView.findViewById(R.id.imgMonAn);
         TextView tvFoodName = foodView.findViewById(R.id.tvTenMonAn);
@@ -88,9 +88,13 @@ public class SelectedFoodActivity extends AppCompatActivity {
         TextView tvStatus = foodView.findViewById(R.id.tvTrangThai);
         TextView tvQuantity = foodView.findViewById(R.id.tvSoLuong);
 
-        imgFood.setImageResource(food.getImageResId());
+        Glide.with(this)
+                .load(food.getImage())
+                .placeholder(R.drawable.placeholder_image)
+                .into(imgFood);
         tvFoodName.setText(food.getName());
-        tvFoodPrice.setText(food.getPrice());
+        // Chuyển đổi và định dạng giá tiền sang VND
+        tvFoodPrice.setText(String.format("%,d VNĐ", (long)(food.getPrice())));
         tvStatus.setText("Chưa được đặt.");
         tvQuantity.setText("1");
 
@@ -139,9 +143,7 @@ public class SelectedFoodActivity extends AppCompatActivity {
                         DocumentSnapshot tableDoc = queryDocumentSnapshots.getDocuments().get(0);
                         String tableId = tableDoc.getId();
 
-                        // Tạo hóa đơn mới và lấy ID
                         createInvoiceInFirestore(tableDoc, invoice -> {
-                            // Sau khi tạo hóa đơn thành công, chuyển sang màn hình chi tiết hóa đơn
                             Intent intent = new Intent(this, InvoiceDetailActivity.class);
                             intent.putExtra("invoiceId", invoice.getId());
                             startActivity(intent);
@@ -179,7 +181,6 @@ public class SelectedFoodActivity extends AppCompatActivity {
                     String invoiceId = documentReference.getId();
                     addInvoiceItems(invoiceId, totalAmount);
 
-                    // Tạo đối tượng Invoice và gọi callback
                     Invoice invoice = new Invoice();
                     invoice.setId(invoiceId);
                     invoice.setBanId(tableDoc.getId());
@@ -198,19 +199,19 @@ public class SelectedFoodActivity extends AppCompatActivity {
                 });
     }
 
-    // Interface để callback khi tạo hóa đơn xong
     interface OnInvoiceCreatedListener {
         void onInvoiceCreated(Invoice invoice);
     }
+
     private double calculateTotalAmount() {
         double totalAmount = 0;
         for (Food food : selectedFoodList) {
-            View foodView = selectedFoodLayout.findViewWithTag(food.getName());
+            View foodView = selectedFoodLayout.findViewWithTag(food.getId());
             if (foodView != null) {
                 TextView tvQuantity = foodView.findViewById(R.id.tvSoLuong);
                 int quantity = Integer.parseInt(tvQuantity.getText().toString());
-                double price = Double.parseDouble(food.getPrice().replace("$", ""));
-                totalAmount += price * quantity;
+                // Chuyển đổi giá tiền sang VND
+                totalAmount += (food.getPrice()) * quantity;
             }
         }
         return totalAmount;
@@ -218,16 +219,16 @@ public class SelectedFoodActivity extends AppCompatActivity {
 
     private void addInvoiceItems(String invoiceId, double totalAmount) {
         for (Food food : selectedFoodList) {
-            View foodView = selectedFoodLayout.findViewWithTag(food.getName());
+            View foodView = selectedFoodLayout.findViewWithTag(food.getId());
             if (foodView != null) {
                 TextView tvQuantity = foodView.findViewById(R.id.tvSoLuong);
                 int quantity = Integer.parseInt(tvQuantity.getText().toString());
-                double price = Double.parseDouble(food.getPrice().replace("$", ""));
                 Map<String, Object> itemData = new HashMap<>();
                 itemData.put("hoa_don_id", invoiceId);
                 itemData.put("ten_mon_an", food.getName());
                 itemData.put("so_luong", quantity);
-                itemData.put("gia", price);
+                // Chuyển đổi giá tiền sang VND
+                itemData.put("gia", food.getPrice());
 
                 db.collection("invoice_items")
                         .add(itemData)
@@ -252,7 +253,7 @@ public class SelectedFoodActivity extends AppCompatActivity {
                         String documentId = tableDoc.getId();
 
                         Map<String, Object> updates = new HashMap<>();
-                        updates.put("status ", status);
+                        updates.put("status", status);
 
                         db.collection("tables")
                                 .document(documentId)

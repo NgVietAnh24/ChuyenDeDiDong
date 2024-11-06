@@ -4,23 +4,53 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Food implements Parcelable {
+    private String id;
     private String name;
-    private String price;
-    private int imageResId;
-    private String category;
+    private double price;
+    private String image;
+    private String categoryId;
+    private String categoryName;
 
-    public Food(String name, String price, int imageResId, String category) {
+    public Food(String id, String name, double price, String image, String categoryId, String categoryName) {
+        this.id = id;
         this.name = name;
         this.price = price;
-        this.imageResId = imageResId;
-        this.category = category;
+        this.image = image;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
     }
 
+    // Getters and setters
+    public String getId() { return id; }
+    public String getName() { return name; }
+    public double getPrice() { return price; }
+    public String getImage() { return image; }
+    public String getCategoryId() { return categoryId; }
+    public String getCategoryName() { return categoryName; }
+
+    // Parcelable implementation
     protected Food(Parcel in) {
+        id = in.readString();
         name = in.readString();
-        price = in.readString();
-        imageResId = in.readInt();
-        category = in.readString();
+        price = in.readDouble();
+        image = in.readString();
+        categoryId = in.readString();
+        categoryName = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeDouble(price);
+        dest.writeString(image);
+        dest.writeString(categoryId);
+        dest.writeString(categoryName);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public static final Creator<Food> CREATOR = new Creator<Food>() {
@@ -34,34 +64,4 @@ public class Food implements Parcelable {
             return new Food[size];
         }
     };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeString(price);
-        dest.writeInt(imageResId);
-        dest.writeString(category);
-    }
-
-    // Getters
-    public String getName() {
-        return name;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public int getImageResId() {
-        return imageResId;
-    }
-
-    public String getCategory() {
-        return category;
-    }
 }

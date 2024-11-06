@@ -4,8 +4,16 @@
     android:layout_height ="wrap_content"
     android:layout_margin="8dp"
     android:background="@drawable/background_card"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="8dp">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+
 
     <!-- Ảnh món ăn -->
     <ImageView
@@ -25,7 +33,7 @@
 
         <TextView
             android:id="@+id/tvTenMonAn"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Tên món ăn"
             android:textSize="16sp"
@@ -34,7 +42,7 @@
 
         <TextView
             android:id="@+id/tvGiaMonAn"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="$0"
             android:textSize="14sp"
@@ -42,7 +50,7 @@
 
         <TextView
             android:id="@+id/tvTrangThai"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Chưa được đặt"
             android:textSize="14sp"
@@ -88,42 +96,45 @@
             android:padding="4dp"
             android:textSize="12sp" />
 
-        <!-- Nút Tăng Giảm Số Lượng -->
-        <LinearLayout
+
+    </LinearLayout>
+    </LinearLayout>
+    <!-- Nút Tăng Giảm Số Lượng -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="right"
+        android:layout_marginTop="2dp">
+
+        <Button
+            android:id="@+id/btnGiam"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="2dp">
+            android:text="-"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:padding="4dp"
+            android:textSize="22sp" />
 
-            <Button
-                android:id="@+id/btnGiam"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="-"
-                android:textColor="@android:color/white"
-                android:backgroundTint="@android:color/holo_red_dark"
-                android:padding="4dp"
-                android:textSize="22sp" />
+        <TextView
+            android:id="@+id/tvSoLuong"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp" />
 
-            <TextView
-                android:id="@+id/tvSoLuong"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1"
-                android:textSize="20sp"
-                android:textColor="@android:color/black"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp" />
-
-            <Button
-                android:id="@+id/btnTang"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="+"
-                android:textColor="@android:color/white"
-                android:backgroundTint="@android:color/holo_red_dark"
-                android:padding="4dp"
-                android:textSize="22sp" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/btnTang"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:padding="4dp"
+            android:textSize="22sp" />
     </LinearLayout>
 </LinearLayout>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -12,7 +13,6 @@
         android:orientation="horizontal"
         android:layout_marginBottom="16dp">
 
-        <!-- TextView for Table Name -->
         <TextView
             android:id="@+id/tableNameTextView"
             android:layout_width="wrap_content"
@@ -22,7 +22,6 @@
             android:textColor="@android:color/black"
             android:layout_marginEnd="18dp"/>
 
-        <!-- TextView for Table Description -->
         <TextView
             android:id="@+id/tableDescriptionTextView"
             android:layout_width="wrap_content"
@@ -32,7 +31,6 @@
             android:textColor="@android:color/black"/>
     </LinearLayout>
 
-    <!-- Search Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -66,7 +64,6 @@
             android:contentDescription="Search Icon"/>
     </LinearLayout>
 
-    <!-- Category Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -97,7 +94,7 @@
 
         <Button
             android:id="@+id/btn_grill"
-            android:layout_width="10dp"
+            android:layout_width="8dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Món nướng"
@@ -117,61 +114,15 @@
             android:padding="8dp"/>
     </LinearLayout>
 
-    <!-- Food List -->
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewFoods"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="16dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="2"/>
 
-        <LinearLayout
-            android:id="@+id/food_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <!-- Each Food Item -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="8dp"
-                android:layout_marginBottom="8dp">
-
-                <ImageView
-                    android:id="@+id/food_image"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginEnd="8dp"
-                    android:src="@drawable/sample_food_image" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/food_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tên món ăn"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/food_price"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="$0"
-                        android:textColor="@color/red"
-                        android:textSize="14sp" />
-                </LinearLayout>
-            </LinearLayout>
-            <!-- Add more food items as needed -->
-        </LinearLayout>
-    </ScrollView>
-
-    <!-- Bottom Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

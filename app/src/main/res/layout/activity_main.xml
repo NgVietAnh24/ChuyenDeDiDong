@@ -112,6 +112,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/vien_edittext"
                 android:hint="Giá"
+                android:inputType="phone"
                 android:fontFamily="sans-serif-medium"
                 android:textColorHint="#A01111"
                 android:padding="8dp"

@@ -50,7 +50,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
        // Gán dữ liệu cho ViewHolder tại vị trí tương ứng
         Food food = foodList.get(position);
         holder.foodName.setText(food.getName());
-        holder.foodPrice.setText("$" + food.getPrice());  // Có thể định dạng lại giá trị tiền tệ nếu cần
+        holder.foodPrice.setText( food.getPrice() + " VNĐ");  // Có thể định dạng lại giá trị tiền tệ nếu cần
 
         String imageUrl = food.getImage(); // Lấy URL hình ảnh từ getImage()
         Log.d("FoodAdapter", "Image URL: " + imageUrl);// Ghi log URL hình ảnh

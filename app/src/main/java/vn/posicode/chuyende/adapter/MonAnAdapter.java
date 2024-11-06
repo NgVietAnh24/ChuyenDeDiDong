@@ -20,7 +20,7 @@ import vn.posicode.chuyende.R;
 
 public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.MonAnViewHolder> {
     private final Context context;
-    private final List<Food> foodList;
+    private List<Food> foodList;
     private final List<Food> foodListFull; // Danh sách đầy đủ để lưu lại
 
 //    // Constructor
@@ -37,7 +37,10 @@ public MonAnAdapter(Context context, List<Food> foodList) {
     this.foodListFull = new ArrayList<>(this.foodList); // Sao chép foodList ban đầu vào foodListFull
 
 }
-
+    public void updateFoodList(List<Food> newFoodList) {
+        this.foodList = newFoodList;
+        notifyDataSetChanged(); // Cập nhật adapter
+    }
     @NonNull
     @Override
     public MonAnViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -1,9 +1,13 @@
 package vn.posicode.chuyende.activities;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,8 +22,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.CategoryButtonAdapter;
@@ -31,6 +37,7 @@ public class DanhSachMon extends AppCompatActivity {
     private static final String FOODS_COLLECTION = "foods";// Tên collection chứa món ăn
     private static final String CATEGORY_COLLECTION = "categories";// Tên collection chứa món ăn
     private List<Food> foodList; // Danh sách chứa món ăn
+    private List<Food> foodListSearch; // Danh sách chứa món ăn
     private List<CategoryModel> cateList;
     private RecyclerView listMonAn; // RecyclerView cho món ăn
     private MonAnAdapter monAnAdapter; // Adapter cho món ăn
@@ -38,6 +45,8 @@ public class DanhSachMon extends AppCompatActivity {
     private RecyclerView listCate;
     private EditText searchBar;
     private ImageView searchIcon;
+    private TextView tv_null;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,11 +59,13 @@ public class DanhSachMon extends AppCompatActivity {
         // khởi tạo đối tượng tìm kiếm
         searchBar = findViewById(R.id.searchBar);
         searchIcon = findViewById(R.id.searchIcon);
+        tv_null = findViewById(R.id.tv_null);
 
         LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         listCate.setLayoutManager(horizontalLayoutManager);
 
         foodList = new ArrayList<>();
+        foodListSearch = new ArrayList<>(foodList);
         cateList = new ArrayList<>();
         monAnAdapter = new MonAnAdapter(DanhSachMon.this, foodList);
 
@@ -86,24 +97,85 @@ public class DanhSachMon extends AppCompatActivity {
         // Sự kiện cho danh mục
         cateAdapter.setOnCategoryClickListener(new CategoryButtonAdapter.OnCategoryClickListener() {
             @Override
-            public void onCategoryClick(String categoryId,String name) {
+            public void onCategoryClick(String categoryId, String name) {
                 // Gọi phương thức lọc món ăn theo danh mục đã chọn
-                monAnAdapter.LocDanhMuc(categoryId,name);
+                monAnAdapter.LocDanhMuc(categoryId, name);
             }
         });
 
 
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
+            }
 
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.toString().isEmpty()) {
+                    foodListSearch.clear();
+                    foodListSearch.addAll(foodList);
+                    monAnAdapter.updateFoodList(foodListSearch);
+                } else {
+                    SearchFood(charSequence.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
 
     }
 
+    // Hàm tìm kiếm món ăn
+    private void SearchFood(String key) {
+        String chuanHoaTuKhoa = chuanHoaChuoi(key.toLowerCase());
+        foodListSearch.clear(); // Xóa danh sách tìm kiếm cũ
+
+        if (key.isEmpty()) {
+
+            foodListSearch.addAll(foodList);
+        } else {
+            // Nếu từ khóa có nội dung, thực hiện tìm kiếm
+            for (Food food : foodList) {
+                String chuanHoaTenMon = chuanHoaChuoi(food.getName().toLowerCase());
+                if (chuanHoaTenMon.contains(chuanHoaTuKhoa)) {
+                    foodListSearch.add(food);
+                }
+            }
+        }
+
+        // Kiểm tra kết quả tìm kiếm
+        if (foodListSearch.isEmpty()) {
+            tv_null.setVisibility(View.VISIBLE);
+            listMonAn.setVisibility(View.GONE);
+
+            foodListSearch.addAll(foodList);
+        } else {
+            tv_null.setVisibility(View.GONE);
+            listMonAn.setVisibility(View.VISIBLE);
+        }
+
+        // Cập nhật lại dữ liệu cho adapter của RecyclerView
+        monAnAdapter.notifyDataSetChanged();
+    }
+
+
+    // Hàm chuẩn hóa chuỗi (loại bỏ dấu tiếng Việt)
+    private String chuanHoaChuoi(String text) {
+        String normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(normalized).replaceAll("").replaceAll("đ", "d").replaceAll("Đ", "D");
+    }
 
 
     // Định nghĩa interface callback để tải dữ liệu
     public interface DataLoadCallback {
         void onDataLoaded(List<Food> foodList);
     }
+
     public interface CategoryDataLoadCallback {
         void onDataLoaded(List<CategoryModel> categoryList);
     }
@@ -131,6 +203,7 @@ public class DanhSachMon extends AppCompatActivity {
                     }
                 });
     }
+
     //    Lay danh muc tu firestore
     public void layDuLieuCategoryTuFirestore(final CategoryDataLoadCallback callback) {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();

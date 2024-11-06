@@ -5,14 +5,13 @@ import android.util.Log;
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class Invoice implements Serializable {
-    private String hoa_don_id;
     private String id;
+    private String hoaDonId; // Trường mới thêm
     private String title;
     private String time;
     private String date;
@@ -37,10 +36,10 @@ public class Invoice implements Serializable {
         this.paymentStatus = "Chưa thanh toán";
     }
 
-    public Invoice(String hoa_don_id ,String id, String title, String time, String date, List<InvoiceItem> items,
+    public Invoice(String id, String title, String time, String date, List<InvoiceItem> items,
                    String customerName, String customerPhone, String note, String tableId, String staffId) {
-        this.hoa_don_id = hoa_don_id;
         this.id = id;
+        this.hoaDonId = id; // Khởi tạo hoaDonId
         this.title = title;
         this.time = time;
         this.date = date;
@@ -60,21 +59,12 @@ public class Invoice implements Serializable {
         Log.d("Invoice", "Converting document to Invoice: " + document.getId());
         Invoice invoice = new Invoice();
 
-        // Log toàn bộ dữ liệu document để debug
         Log.d("Invoice", "Document data: " + document.getData());
 
-        // Xử lý hoa_don_id
-        Object hoaDonIdObj = document.get("hoa_don_id");
-        if (hoaDonIdObj != null) {
-            invoice.setHoa_don_id(String.valueOf(hoaDonIdObj));
-        }
-
-        // Set ID và title
         invoice.setId(document.getId());
-        Log.d("Invoice", "Set invoice ID: " + invoice.getId());
+        invoice.setHoaDonId(document.getString("hoa_don_id")); // Đọc hoa_don_id
         invoice.setTitle("Hóa đơn #" + document.getId().substring(0, 8));
 
-        // Xử lý ngày tạo
         Object ngayTaoObj = document.get("ngay_tao");
         String ngayTao = "";
         if (ngayTaoObj != null) {
@@ -88,7 +78,6 @@ public class Invoice implements Serializable {
             }
         }
 
-        // Xử lý giờ tạo
         Object gioTaoObj = document.get("gio_tao");
         String gioTao = "";
         if (gioTaoObj != null) {
@@ -105,7 +94,6 @@ public class Invoice implements Serializable {
         invoice.setDate(ngayTao.isEmpty() ? "N/A" : ngayTao);
         invoice.setTime(gioTao.isEmpty() ? "N/A" : gioTao);
 
-        // Xử lý tổng tiền
         Object tongTienObj = document.get("tong_tien");
         if (tongTienObj != null) {
             if (tongTienObj instanceof Double) {
@@ -123,7 +111,6 @@ public class Invoice implements Serializable {
             invoice.setTotal(0.0);
         }
 
-        // Xử lý tình trạng
         Object tinhTrangObj = document.get("tinh_trang");
         if (tinhTrangObj != null) {
             invoice.setPaymentStatus(String.valueOf(tinhTrangObj));
@@ -131,37 +118,31 @@ public class Invoice implements Serializable {
             invoice.setPaymentStatus("Chưa thanh toán");
         }
 
-        // Xử lý ban_id
         Object banIdObj = document.get("ban_id");
         if (banIdObj != null) {
             invoice.setBanId(String.valueOf(banIdObj));
         }
 
-        // Xử lý tên khách hàng
         Object tenKhachHangObj = document.get("ten_khach_hang");
         if (tenKhachHangObj != null) {
             invoice.setCustomerName(String.valueOf(tenKhachHangObj));
         }
 
-        // Xử lý số điện thoại
         Object soDtObj = document.get("so_dt");
         if (soDtObj != null) {
             invoice.setCustomerPhone(String.valueOf(soDtObj));
         }
 
-        // Xử lý ghi chú
         Object ghiChuObj = document.get("ghi_chu");
         if (ghiChuObj != null) {
             invoice.setNote(String.valueOf(ghiChuObj));
         }
 
-        // Xử lý nv_id
         Object nvIdObj = document.get("nv_id");
         if (nvIdObj != null) {
             invoice.setStaffId(String.valueOf(nvIdObj));
         }
 
-        // Xử lý tiền thu
         Object tienThuObj = document.get("tien_thu");
         if (tienThuObj != null) {
             if (tienThuObj instanceof Double) {
@@ -177,7 +158,6 @@ public class Invoice implements Serializable {
             }
         }
 
-        // Xử lý items nếu có
         List<Map<String, Object>> itemsData = (List<Map<String, Object>>) document.get("items");
         if (itemsData != null) {
             List<InvoiceItem> items = new ArrayList<>();
@@ -198,7 +178,7 @@ public class Invoice implements Serializable {
                         try {
                             item.setQuantity(Integer.parseInt(String.valueOf(quantityObj)));
                         } catch (NumberFormatException e) {
-                            item.setQuantity(0);
+                            item. setQuantity(0);
                         }
                     }
                 }
@@ -264,13 +244,11 @@ public class Invoice implements Serializable {
     }
 
     // Getters and Setters
-
-    // Thêm getter và setter cho hoa_don_id
-    public String getHoa_don_id() { return hoa_don_id; }
-    public void setHoa_don_id(String hoa_don_id) { this.hoa_don_id = hoa_don_id; }
-
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getHoaDonId() { return hoaDonId; }
+    public void setHoaDonId(String hoaDonId) { this.hoaDonId = hoaDonId; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -328,20 +306,20 @@ public class Invoice implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Invoice invoice = (Invoice) o;
-        return Objects.equals(hoa_don_id, invoice.hoa_don_id) &&
-                Objects.equals(id, invoice.id);
+        return Objects.equals(id, invoice.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(hoa_don_id, id);
+        return Objects.hash(id);
     }
 
     @Override
+
     public String toString() {
         return "Invoice{" +
-                "hoa_don_id='" + hoa_don_id + '\'' +
                 "id='" + id + '\'' +
+                ", hoaDonId='" + hoaDonId + '\'' +
                 ", title='" + title + '\'' +
                 ", time='" + time + '\'' +
                 ", date='" + date + '\'' +
@@ -350,24 +328,6 @@ public class Invoice implements Serializable {
                 ", banId='" + banId + '\'' +
                 ", tableName='" + tableName + '\'' +
                 '}';
-    }
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("hoa_don_id", hoa_don_id);  // Thêm vào toMap
-        map.put("id", id);
-        map.put("ngay_tao", date);
-        map.put("gio_tao", time);
-        map.put("tong_tien", total);
-        map.put("tinh_trang", paymentStatus);
-        map.put("ban_id", banId);
-        map.put("ten_khach_hang", customerName);
-        map.put("so_dt", customerPhone);
-        map.put("ghi_chu", note);
-        map.put("nv_id", staffId);
-        map.put("tien_thu", amountReceived);
-        // Thêm xử lý cho items nếu cần
-        return map;
     }
 
     public static class InvoiceItem implements Serializable {
@@ -380,7 +340,7 @@ public class Invoice implements Serializable {
 
         public InvoiceItem(String name, int quantity, double price) {
             this.name = name;
-            this .quantity = quantity;
+            this.quantity = quantity;
             this.price = price;
         }
 
@@ -401,9 +361,9 @@ public class Invoice implements Serializable {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             InvoiceItem item = (InvoiceItem) o;
-            return Objects.equals(name, item.name) &&
-                    quantity == item.quantity &&
+            return quantity == item.quantity &&
                     Double.compare(item.price, price) == 0 &&
+                    Objects.equals(name, item.name) &&
                     Objects.equals(note, item.note);
         }
 

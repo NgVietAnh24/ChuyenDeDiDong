@@ -19,8 +19,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import vn.posicode.chuyende.ChiTietHoaDon.InvoiceDetailActivity;
 import vn.posicode.chuyende.R;
@@ -61,42 +59,6 @@ public class InvoiceListActivity extends AppCompatActivity {
         }
     }
 
-    private void createNewInvoice(Invoice newInvoice) {
-        // Tạo một ID mới cho hóa đơn
-        String newInvoiceId = db.collection("invoices").document().getId();
-        newInvoice.setHoa_don_id(newInvoiceId);
-
-        // Tạo Map chứa dữ liệu hóa đơn
-        Map<String, Object> invoiceData = new HashMap<>();
-        invoiceData.put("hoa_don_id", newInvoiceId);  // Thêm hoa_don_id vào dữ liệu
-        invoiceData.put("ngay_tao", newInvoice.getDate());
-        invoiceData.put("gio_tao", newInvoice.getTime());
-        invoiceData.put("tong_tien", newInvoice.getTotal());
-        invoiceData.put("tinh_trang", newInvoice.getPaymentStatus());
-        invoiceData.put("ban_id", newInvoice.getBanId());
-        invoiceData.put("ten_khach_hang", newInvoice.getCustomerName());
-        invoiceData.put("so_dt", newInvoice.getCustomerPhone());
-        invoiceData.put("ghi_chu", newInvoice.getNote());
-        invoiceData.put("nv_id", newInvoice.getStaffId());
-        invoiceData.put("tien_thu", newInvoice.getAmountReceived());
-
-        // Lưu hóa đơn vào Firestore với ID đã tạo
-        db.collection("invoices").document(newInvoiceId)
-                .set(invoiceData)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Invoice added with ID: " + newInvoiceId);
-                    Toast.makeText(InvoiceListActivity.this,
-                            "Tạo hóa đơn thành công", Toast.LENGTH_SHORT).show();
-                    // Refresh danh sách hóa đơn
-                    loadAllInvoices();
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "Error adding invoice", e);
-                    Toast.makeText(InvoiceListActivity.this,
-                            "Lỗi khi tạo hóa đơn", Toast.LENGTH_SHORT).show();
-                });
-    }
-
     private void setupViews() {
         // Thiết lập tiêu đề
         TextView titleTextView = findViewById(R.id.titleTextView);
@@ -118,15 +80,15 @@ public class InvoiceListActivity extends AppCompatActivity {
             Log.d(TAG, "Item clicked at position: " + position);
             if (position >= 0 && position < invoiceList.size()) {
                 Invoice selectedInvoice = invoiceList.get(position);
-                if (selectedInvoice != null && selectedInvoice.getHoa_don_id() != null) {
-                    Log.d(TAG, "Opening invoice with hoa_don_id: " + selectedInvoice.getHoa_don_id());
+                if (selectedInvoice != null && selectedInvoice.getId() != null) {
+                    Log.d(TAG, "Attempting to open invoice with ID: " + selectedInvoice.getId());
                     Intent intent = new Intent(this, InvoiceDetailActivity.class);
-                    intent.putExtra("hoa_don_id", selectedInvoice.getHoa_don_id());
-                    intent.putExtra("invoiceId", selectedInvoice.getHoa_don_id());
+                    intent.putExtra("invoiceId", selectedInvoice.getId());
                     intent.putExtra("tableName", selectedInvoice.getTableName());
+                    intent.putExtra("hoa_don_id", selectedInvoice.getHoaDonId()); // Thêm dòng này
                     startActivity(intent);
                 } else {
-                    Log.e(TAG, "Invalid invoice or hoa_don_id");
+                    Log.e(TAG, "Invalid invoice or invoice ID");
                     Toast.makeText(this, "Không thể mở chi tiết hóa đơn", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -208,20 +170,24 @@ public class InvoiceListActivity extends AppCompatActivity {
                 try {
                     Invoice invoice = Invoice.fromFirestore(document);
                     if (invoice != null) {
-                        // Đảm bảo rằng hoa_don_id được set
-                        if (invoice.getHoa_don_id() == null || invoice.getHoa_don_id().isEmpty()) {
-                            invoice.setHoa_don_id(document.getId());
+                        // Tạo hoa_don_id theo định dạng: HD + timestamp
+                        String hoaDonId = document.getString("hoa_don_id");
+                        if (hoaDonId == null || hoaDonId.isEmpty()) {
+                            hoaDonId = "HD" + System.currentTimeMillis();
+                            // Cập nhật hoa_don_id lên Firebase
+                            updateHoaDonId(document.getId(), hoaDonId);
                         }
+                        invoice.setHoaDonId(hoaDonId);
                         invoiceList.add(invoice);
-                        loadTableInfo(invoice); // Tải thông tin bàn liên quan
-                        Log.d(TAG, "Added invoice with ID: " + invoice.getId() + ", hoa_don_id: " + invoice.getHoa_don_id());
+                        loadTableInfo(invoice);
+                        Log.d(TAG, "Added invoice: " + invoice.toString());
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error parsing invoice: " + e.getMessage());
                 }
             }
-            sortInvoices(); // Sắp xếp hóa đơn sau khi tải xong
-            adapter.notifyDataSetChanged(); // Cập nhật adapter
+
+            sortInvoices();
 
             if (invoiceList.isEmpty()) {
                 Toast.makeText(this, "Không có hóa đơn nào", Toast.LENGTH_SHORT).show();
@@ -230,6 +196,18 @@ public class InvoiceListActivity extends AppCompatActivity {
             Log.e(TAG, "Error getting documents: ", task.getException());
             Toast.makeText(this, "Lỗi khi tải danh sách hóa đơn", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Thêm phương thức mới để cập nhật hoa_don_id lên Firebase
+    private void updateHoaDonId(String documentId, String hoaDonId) {
+        db.collection("invoices").document(documentId)
+                .update("hoa_don_id", hoaDonId)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "hoa_don_id updated successfully");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error updating hoa_don_id", e);
+                });
     }
 
     private void loadTableInfo(Invoice invoice) {
@@ -275,11 +253,7 @@ public class InvoiceListActivity extends AppCompatActivity {
             int dateCompare = i2.getDate().compareTo(i1.getDate());
             if (dateCompare != 0) return dateCompare;
 
-            int timeCompare = i2.getTime().compareTo(i1.getTime());
-            if (timeCompare != 0) return timeCompare;
-
-            // Cuối cùng sắp xếp theo hoa_don_id
-            return i1.getHoa_don_id().compareTo(i2.getHoa_don_id());
+            return i2.getTime().compareTo(i1.getTime());
         });
     }
 

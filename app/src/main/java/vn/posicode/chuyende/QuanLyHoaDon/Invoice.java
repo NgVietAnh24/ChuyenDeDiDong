@@ -5,11 +5,13 @@ import android.util.Log;
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class Invoice implements Serializable {
+    private String hoa_don_id;
     private String id;
     private String title;
     private String time;
@@ -35,8 +37,9 @@ public class Invoice implements Serializable {
         this.paymentStatus = "Chưa thanh toán";
     }
 
-    public Invoice(String id, String title, String time, String date, List<InvoiceItem> items,
+    public Invoice(String hoa_don_id ,String id, String title, String time, String date, List<InvoiceItem> items,
                    String customerName, String customerPhone, String note, String tableId, String staffId) {
+        this.hoa_don_id = hoa_don_id;
         this.id = id;
         this.title = title;
         this.time = time;
@@ -60,8 +63,15 @@ public class Invoice implements Serializable {
         // Log toàn bộ dữ liệu document để debug
         Log.d("Invoice", "Document data: " + document.getData());
 
+        // Xử lý hoa_don_id
+        Object hoaDonIdObj = document.get("hoa_don_id");
+        if (hoaDonIdObj != null) {
+            invoice.setHoa_don_id(String.valueOf(hoaDonIdObj));
+        }
+
         // Set ID và title
         invoice.setId(document.getId());
+        Log.d("Invoice", "Set invoice ID: " + invoice.getId());
         invoice.setTitle("Hóa đơn #" + document.getId().substring(0, 8));
 
         // Xử lý ngày tạo
@@ -254,6 +264,11 @@ public class Invoice implements Serializable {
     }
 
     // Getters and Setters
+
+    // Thêm getter và setter cho hoa_don_id
+    public String getHoa_don_id() { return hoa_don_id; }
+    public void setHoa_don_id(String hoa_don_id) { this.hoa_don_id = hoa_don_id; }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -313,17 +328,19 @@ public class Invoice implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Invoice invoice = (Invoice) o;
-        return Objects.equals(id, invoice.id);
+        return Objects.equals(hoa_don_id, invoice.hoa_don_id) &&
+                Objects.equals(id, invoice.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(hoa_don_id, id);
     }
 
     @Override
     public String toString() {
         return "Invoice{" +
+                "hoa_don_id='" + hoa_don_id + '\'' +
                 "id='" + id + '\'' +
                 ", title='" + title + '\'' +
                 ", time='" + time + '\'' +
@@ -333,6 +350,24 @@ public class Invoice implements Serializable {
                 ", banId='" + banId + '\'' +
                 ", tableName='" + tableName + '\'' +
                 '}';
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("hoa_don_id", hoa_don_id);  // Thêm vào toMap
+        map.put("id", id);
+        map.put("ngay_tao", date);
+        map.put("gio_tao", time);
+        map.put("tong_tien", total);
+        map.put("tinh_trang", paymentStatus);
+        map.put("ban_id", banId);
+        map.put("ten_khach_hang", customerName);
+        map.put("so_dt", customerPhone);
+        map.put("ghi_chu", note);
+        map.put("nv_id", staffId);
+        map.put("tien_thu", amountReceived);
+        // Thêm xử lý cho items nếu cần
+        return map;
     }
 
     public static class InvoiceItem implements Serializable {

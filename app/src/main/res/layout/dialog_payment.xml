@@ -50,6 +50,7 @@
             android:inputType="numberDecimal"
             android:padding="16dp"
             android:textSize="18sp"
+            android:textColor="@color/black"
             android:backgroundTint="#B71C1C" />
 
     </com.google.android.material.textfield.TextInputLayout>

@@ -46,6 +46,7 @@ public class InvoiceAdapter extends ArrayAdapter<Invoice> {
         Invoice invoice = getItem(position);
 
         if (invoice != null) {
+            TextView hdIdTextView = convertView.findViewById(R.id.hdIdTextView);
             TextView titleTextView = convertView.findViewById(R.id.invoiceTitleTextView);
             TextView timeTextView = convertView.findViewById(R.id.invoiceTimeTextView);
             TextView dateTextView = convertView.findViewById(R.id.invoiceDateTextView);
@@ -54,12 +55,16 @@ public class InvoiceAdapter extends ArrayAdapter<Invoice> {
             TextView totalTextView = convertView.findViewById(R.id.totalTextView);
             ImageButton deleteButton = convertView.findViewById(R.id.deleteButton);
 
+            hdIdTextView.setText("#" + invoice.getId());
+
             titleTextView.setText(invoice.getTitle());
             timeTextView.setText(invoice.getTime());
             dateTextView.setText(invoice.getDate());
             tableNameTextView.setText("Bàn: " + (invoice.getTableName() != null ? invoice.getTableName() : "N/A"));
             statusTextView.setText(invoice.getPaymentStatus());
-            totalTextView.setText(String.format("%.2f$", invoice.getTotal()));
+            // Chỉnh sửa định dạng hiển thị tổng tiền
+            totalTextView.setText(String.format("%,.0f VND", invoice.getTotal())); // Hiển thị tiền Việt Nam
+
 
             if ("Đã thanh toán".equals(invoice.getPaymentStatus())) {
                 statusTextView.setTextColor(context.getResources().getColor(R.color.green));

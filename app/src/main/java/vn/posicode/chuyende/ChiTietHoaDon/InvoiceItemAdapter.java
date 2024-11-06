@@ -43,7 +43,8 @@ public class InvoiceItemAdapter extends ArrayAdapter<Invoice.InvoiceItem> {
 
             nameTextView.setText(item.getName());
             quantityTextView.setText(String.valueOf(item.getQuantity()));
-            priceTextView.setText(String.format("%.2f$", item.getPrice() * item.getQuantity()));
+            // Cập nhật định dạng giá tiền thành VND
+            priceTextView.setText(String.format("%,.0f VND", item.getPrice() * item.getQuantity())); // Hiển thị tiền Việt Nam
         }
 
         return convertView;

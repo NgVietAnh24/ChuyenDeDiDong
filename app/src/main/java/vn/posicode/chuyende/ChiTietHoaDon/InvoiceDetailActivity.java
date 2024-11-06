@@ -32,6 +32,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
 
     private TextView titleTextView, timeTextView, dateTextView, totalTextView, amountReceivedTextView, changeTextView;
     private TextView customerNameTextView, customerPhoneTextView;
+    private TextView invoiceIdTextView; // Thêm biến này
     private Button paymentButton;
     private ListView itemsListView;
 
@@ -65,6 +66,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         changeTextView = findViewById(R.id.changeTextView);
         customerNameTextView = findViewById(R.id.customerNameTextView);
         customerPhoneTextView = findViewById(R.id.customerPhoneTextView);
+        invoiceIdTextView = findViewById(R.id.invoiceIdTextView); // Khởi tạo TextView cho mã hóa đơn
         paymentButton = findViewById(R.id.paymentButton);
         itemsListView = findViewById(R.id.itemsListView);
 
@@ -111,7 +113,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Log.e(TAG, "No items found for this invoice");
+                        Log .e(TAG, "No items found for this invoice");
                     } else {
                         for (DocumentSnapshot document : queryDocumentSnapshots) {
                             String name = document.getString("ten_mon_an");
@@ -145,9 +147,10 @@ public class InvoiceDetailActivity extends AppCompatActivity {
 
         try {
             titleTextView.setText(selectedInvoice.getTitle());
+            invoiceIdTextView.setText("Mã hóa đơn: " + selectedInvoice.getId()); // Hiển thị mã hóa đơn
             timeTextView.setText(selectedInvoice.getTime() != null ? selectedInvoice.getTime() : "N/A");
             dateTextView.setText(selectedInvoice.getDate() != null ? selectedInvoice.getDate() : "N/A");
-            totalTextView.setText(String.format("Tổng tiền: %.2f$", selectedInvoice.getTotal()));
+            totalTextView.setText(String.format("Tổng tiền: %,.0f VND", selectedInvoice.getTotal())); // Cập nhật định dạng tiền
 
             customerNameTextView.setText("Tên khách hàng: " +
                     (selectedInvoice.getCustomerName() != null ? selectedInvoice.getCustomerName() : "N/A"));
@@ -159,8 +162,8 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                 paymentButton.setVisibility(View.GONE);
                 amountReceivedTextView.setVisibility(View.VISIBLE);
                 changeTextView.setVisibility(View.VISIBLE);
-                amountReceivedTextView.setText(String.format("Tiền thu: %.2f$", selectedInvoice.getAmountReceived()));
-                changeTextView.setText(String.format("Tiền dư: %.2f$", selectedInvoice.getChange()));
+                amountReceivedTextView.setText(String.format("Tiền thu: %,.0f VND", selectedInvoice.getAmountReceived())); // Cập nhật định dạng tiền
+                changeTextView.setText(String.format("Tiền dư: %,.0f VND", selectedInvoice.getChange())); // Cập nhật định dạng tiền
             } else {
                 paymentButton.setVisibility(View.VISIBLE);
                 amountReceivedTextView.setVisibility(View.GONE);
@@ -198,7 +201,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         TextView totalAmountValue = dialog.findViewById(R.id.totalAmountValue);
 
         titleTextView.setText("Tính tiền");
-        totalAmountValue.setText(String.format("%.2f$", selectedInvoice.getTotal()));
+        totalAmountValue.setText(String.format("%,.0f VND", selectedInvoice.getTotal())); // Cập nhật định dạng tiền
 
         btnThanhToan.setOnClickListener(v -> {
             String tienThuStr = edtTienThu.getText().toString();

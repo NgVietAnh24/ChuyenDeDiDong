@@ -406,10 +406,6 @@ public class MainActivity extends AppCompatActivity {
                 showToast("Quản lý danh mục");
                 startActivity(new Intent(MainActivity.this, CategoryActivity.class));
                 return true;
-            } else if (item.getItemId() == R.id.category_itemID) {
-                showToast("Quản lý danh mục con");
-                startActivity(new Intent(MainActivity.this, CategoryItemActivity.class));
-                return true;
             }
             return false;
         });

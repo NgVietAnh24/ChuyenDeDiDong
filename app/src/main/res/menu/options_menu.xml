@@ -3,7 +3,5 @@
     <item
         android:id="@+id/categoryID"
         android:title="Quản lý danh mục" />
-    <item
-        android:id="@+id/category_itemID"
-        android:title="Quản lý danh mục con" />
+
 </menu>

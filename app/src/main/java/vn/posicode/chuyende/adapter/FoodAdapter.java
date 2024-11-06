@@ -66,13 +66,13 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
             // Đặt hình ảnh mặc định nếu không có URL
             holder.foodImage.setImageResource(R.drawable.banhmi);
         }
-
+        int pos =position;
         // Thêm sự kiện click cho từng item
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (onItemClickListener != null) {
-                    onItemClickListener.onItemClick(position);
+                    onItemClickListener.onItemClick(pos);
                 }
             }
         });

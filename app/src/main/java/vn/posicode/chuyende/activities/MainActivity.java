@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private String image;
     private Uri imageUri;
 
+
     private EditText editTextTenMonAn, editTextGia;
     private Spinner spinnerDanhMuc;
     private Button buttonAdd, buttonEdit, buttonDelete;
@@ -79,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
         setupRecyclerView();
         setupListeners();
         loadFoodData();
+
+
+
     }
 
     private void initializeViews() {
@@ -187,48 +191,88 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+//    private void addFood() {
+//        String tenMonAn = editTextTenMonAn.getText().toString();
+//        String gia = editTextGia.getText().toString();
+//        CategoryModel category = (CategoryModel) spinnerDanhMuc.getSelectedItem();
+//        String category_id = category.getId();
+//
+//        if (!tenMonAn.isEmpty() && !gia.isEmpty()) {
+//            if (imageUri != null) {
+//                // Tải ảnh lên Firebase Storage trước khi lưu dữ liệu món ăn
+//                uploadImageToFirebaseStorage();
+//            }
+//            Food newFood = new Food(tenMonAn, gia, image, category_id);
+//            foodList.add(newFood);
+//            saveFoodToFirestore(newFood);// Lưu món ăn lên Firestore
+//            adapter.notifyDataSetChanged();
+//            showToast("Thêm món ăn thành công");
+//        } else {
+//            showToast("Vui lòng nhập đủ thông tin");
+//        }
+//    }
+
     private void addFood() {
         String tenMonAn = editTextTenMonAn.getText().toString();
         String gia = editTextGia.getText().toString();
-        CategoryModel category = (CategoryModel) spinnerDanhMuc.getSelectedItem();
-        String category_id = category.getId();
 
-        if (!tenMonAn.isEmpty() && !gia.isEmpty()) {
-            if (imageUri != null) {
-                // Tải ảnh lên Firebase Storage trước khi lưu dữ liệu món ăn
-                uploadImageToFirebaseStorage();
+        // Kiểm tra xem Spinner có giá trị được chọn không
+        if (spinnerDanhMuc.getSelectedItem() != null) {
+            CategoryModel category = (CategoryModel) spinnerDanhMuc.getSelectedItem();
+            String category_id = category.getId();
+            String categoryName = category.getName(); // Lấy tên danh mục
+
+            if (!tenMonAn.isEmpty() && !gia.isEmpty()) {
+                String foodId = firestore.collection(FOODS_COLLECTION).document().getId(); // Tạo ID món ăn mới
+
+                if (imageUri != null) {
+                    uploadImageToFirebaseStorage(foodId, tenMonAn, gia, category_id, categoryName); // Tải ảnh lên trước khi lưu món ăn
+                } else {
+                    Food newFood = new Food(foodId, tenMonAn, gia, null, category_id, categoryName); // Không có ảnh
+                    saveFoodToFirestore(newFood);
+                    foodList.add(newFood);
+                    adapter.notifyDataSetChanged();
+                    showToast("Thêm món ăn thành công");
+                }
+            } else {
+                showToast("Vui lòng nhập đủ thông tin");
             }
-            Food newFood = new Food(tenMonAn, gia, image, category_id);
-            foodList.add(newFood);
-            saveFoodToFirestore(newFood);// Lưu món ăn lên Firestore
-            adapter.notifyDataSetChanged();
-            showToast("Thêm món ăn thành công");
         } else {
-            showToast("Vui lòng nhập đủ thông tin");
+            showToast("Vui lòng chọn danh mục");
         }
     }
 
     // Tải ảnh lên Firebase Storage và lấy URL ảnh sau khi tải
-    private void uploadImageToFirebaseStorage() {
+    private void uploadImageToFirebaseStorage(String foodId, String tenMonAn, String gia, String category_id, String categoryName) {
         if (imageUri != null) {
-            String fileName = System.currentTimeMillis() + ".jpg";
-            StorageReference ref = storageReference.child("Food/" + fileName);
+            StorageReference ref = storageReference.child("Food/" + foodId + ".jpg");
 
             ref.putFile(imageUri)
                     .addOnSuccessListener(taskSnapshot -> {
                         ref.getDownloadUrl().addOnSuccessListener(uri -> {
-                            image = uri.toString();
-                            Glide.with(this).load(uri).into(imageView);
+                            String imageUrl = uri.toString(); // Lưu URL của ảnh vào biến tạm thời
+                            Glide.with(this).load(uri).into(imageView); // Hiển thị ảnh trên ImageView
                             showToast("Tải ảnh lên thành công!");
-                            Log.d("UploadImage", "URL của ảnh: " + image);
+
+                            // Tạo đối tượng món ăn sau khi có URL ảnh
+                            Food newFood = new Food(foodId, tenMonAn, gia, imageUrl, category_id, categoryName);
+                            saveFoodToFirestore(newFood); // Lưu món ăn lên Firestore
+                            foodList.add(newFood);
+                            adapter.notifyDataSetChanged();
+                            Log.d("UploadImage", "URL của ảnh: " + imageUrl);
                         });
                     })
                     .addOnFailureListener(e -> {
                         showToast("Lỗi khi tải ảnh lên: " + e.getMessage());
                         Log.e("UploadImage", "Lỗi khi tải ảnh lên: ", e);
                     });
+        } else {
+            showToast("Vui lòng chọn ảnh trước khi tải lên.");
         }
     }
+
+
+
 
 
 

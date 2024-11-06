@@ -46,7 +46,7 @@ public class InvoiceAdapter extends ArrayAdapter<Invoice> {
         Invoice invoice = getItem(position);
 
         if (invoice != null) {
-            TextView hdIdTextView = convertView.findViewById(R.id.hdIdTextView);
+            //TextView hdIdTextView = convertView.findViewById(R.id.hdIdTextView);
             TextView titleTextView = convertView.findViewById(R.id.invoiceTitleTextView);
             TextView timeTextView = convertView.findViewById(R.id.invoiceTimeTextView);
             TextView dateTextView = convertView.findViewById(R.id.invoiceDateTextView);
@@ -55,7 +55,7 @@ public class InvoiceAdapter extends ArrayAdapter<Invoice> {
             TextView totalTextView = convertView.findViewById(R.id.totalTextView);
             ImageButton deleteButton = convertView.findViewById(R.id.deleteButton);
 
-            hdIdTextView.setText("#" + invoice.getId());
+            //hdIdTextView.setText("#" + invoice.getId());
 
             titleTextView.setText(invoice.getTitle());
             timeTextView.setText(invoice.getTime());

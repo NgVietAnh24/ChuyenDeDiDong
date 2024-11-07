@@ -1,17 +1,19 @@
 package vn.posicode.chuyende.models;
 
+import java.util.List;
+
 public class ThongKeModels {
     String tk_id;
    // int tong_tien_nam;
     int tong_tien_thang;
     int nam;
     int thang;
-    String hd_id;
+   List<String> hd_id;
 
     public ThongKeModels() {
     }
 
-    public ThongKeModels(String tk_id, int tong_tien_thang, int nam, int thang, String hd_id) {
+    public ThongKeModels(String tk_id, int tong_tien_thang, int nam, int thang, List<String> hd_id) {
         this.tk_id = tk_id;
         this.tong_tien_thang = tong_tien_thang;
         this.nam = nam;
@@ -51,11 +53,11 @@ public class ThongKeModels {
         this.thang = thang;
     }
 
-    public String getHd_id() {
+    public List<String> getHd_id() {
         return hd_id;
     }
 
-    public void setHd_id(String hd_id) {
+    public void setHd_id(List<String> hd_id) {
         this.hd_id = hd_id;
     }
 }

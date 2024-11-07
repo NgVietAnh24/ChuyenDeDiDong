@@ -27,13 +27,19 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -58,6 +64,7 @@ public class ThongKeActivity extends AppCompatActivity {
         doanhThuList = new ArrayList<>();
         yearList = new ArrayList<>();
         // ghiDuLieu();
+        ghiDuLieuTuInVoices();
         docNamTuFireStore();
 
         spinYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -81,7 +88,6 @@ public class ThongKeActivity extends AppCompatActivity {
         });
 
     }
-
     private void connectXML() {
         tvTongTien = findViewById(R.id.tvTongTien);
         spinYear = findViewById(R.id.spinYear);
@@ -90,7 +96,7 @@ public class ThongKeActivity extends AppCompatActivity {
         lineChartDoanhThu.setDragEnabled(true);
         lineChartDoanhThu.setScaleEnabled(false);
     }
-
+/*
     //    Ham ghi du lieu
     private void ghiDuLieu() {
         Random random = new Random();
@@ -129,9 +135,11 @@ public class ThongKeActivity extends AppCompatActivity {
         return data;
     }
 
+ */
+
     //    Doc du lieu nam de truyen vao spinner
     private void docNamTuFireStore() {
-        db.collection("thongke").get().addOnCompleteListener(task -> {
+        db.collection("ThongKe").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     // Lấy năm từ tài liệu
@@ -146,10 +154,10 @@ public class ThongKeActivity extends AppCompatActivity {
             }
         });
     }
-
+//Doc du lieu doanh thu
     private void docDoanhThu(String year) {
         doanhThuList.clear(); // Làm sạch danh sách doanh thu trước khi lấy dữ liệu mới
-        db.collection("thongke").whereEqualTo("nam", Integer.parseInt(year)) // Lọc theo năm
+        db.collection("ThongKe").whereEqualTo("nam", Integer.parseInt(year))
                 .get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         double tongTienNam = 0;
@@ -180,7 +188,6 @@ public class ThongKeActivity extends AppCompatActivity {
         for (int i = 0; i < 12; i++) {
             entries.add(new Entry(i + 1, doanhThuTheoThang[i]));
         }
-
         LineDataSet dataSet = new LineDataSet(entries, "Doanh thu theo tháng");
         dataSet.setFillAlpha(110);
         dataSet.setLineWidth(3.5f);
@@ -220,10 +227,82 @@ public class ThongKeActivity extends AppCompatActivity {
                 }
             }
         });
-
-
         lineChartDoanhThu.getAxisRight().setEnabled(false);//Tat truc y ben phai
         lineChartDoanhThu.invalidate();
+    }
+//    Ham doc du lieu tu invoices va ghi vao ThongKe
+private void ghiDuLieuTuInVoices() {
+    db.collection("invoices").get().addOnCompleteListener(task -> {
+        if (task.isSuccessful()) {
+            Map<String, Double> monthlyTotals = new HashMap<>();
+            Map<String, List<String>> monthlyHdIds = new HashMap<>();
+            for (QueryDocumentSnapshot document : task.getResult()) {
+                double tongTien = document.getDouble("tong_tien");
+                String hdId = document.getId();
+                Date ngayTaoDate = null;
+                if (document.contains("ngay_tao")) {
+                    String ngayTaoString = document.getString("ngay_tao");
+
+                    if (ngayTaoString != null) {
+                        try {
+                            // Giả sử ngày được lưu dưới dạng "dd/MM/yyyy"
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                            ngayTaoDate = sdf.parse(ngayTaoString);
+                        } catch (Exception e) {
+                            Log.w("Firestore", "Lỗi khi chuyển đổi ngày: " + ngayTaoString, e);
+                        }
+                    }
+                }
+                // Nếu có ngày tạo hợp lệ, tiếp tục xử lý
+                if (ngayTaoDate != null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(ngayTaoDate);
+                    int thang = cal.get(Calendar.MONTH) + 1;
+                    int nam = cal.get(Calendar.YEAR);
+                    String monthKey = nam + "_" + thang;
+                    monthlyTotals.put(monthKey, monthlyTotals.getOrDefault(monthKey, 0.0) + tongTien);
+                    monthlyHdIds.putIfAbsent(monthKey, new ArrayList<>());
+                    monthlyHdIds.get(monthKey).add(hdId);
+                } else {
+                    Log.w("Firestore", "Trường 'ngay_tao' không hợp lệ trong tài liệu HoaDon với ID: " + hdId);
+                }
+            }
+            // Tạo thống kê cho từng tháng
+            for (Map.Entry<String, Double> entry : monthlyTotals.entrySet()) {
+                String[] parts = entry.getKey().split("_");
+                int nam = Integer.parseInt(parts[0]);
+                int thang = Integer.parseInt(parts[1]);
+                double tongTienThang = entry.getValue();
+                List<String> hdIds = monthlyHdIds.get(entry.getKey());
+
+                // Tạo đối tượng ThongKeModels
+                ThongKeModels thongKe = new ThongKeModels("tk_" + nam + "_" + thang,
+                        (int) tongTienThang,
+                        nam,
+                        thang,
+                        hdIds
+                );
+                // Ghi dữ liệu vào Firestore
+                db.collection("ThongKe").document(thongKe.getTk_id()).set(createDataMapThongKe(thongKe)).addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Thêm dữ liệu thành công cho: " + thongKe.getTk_id());
+                }).addOnFailureListener(e -> {
+                    Log.d("Firestore", "Thêm dữ liệu thất bại", e);
+                });
+            }
+        } else {
+            Log.w("Firestore", "Lỗi khi lấy dữ liệu từ HoaDon.", task.getException());
+        }
+    });
+}
+    @NonNull
+    private Map<String, Object> createDataMapThongKe(ThongKeModels thongKe) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("tk_id", thongKe.getTk_id());
+        data.put("tong_tien_thang", thongKe.getTong_tien_thang());
+        data.put("nam", thongKe.getNam());
+        data.put("thang", thongKe.getThang());
+        data.put("hd_id", thongKe.getHd_id());
+        return data;
     }
 
 }

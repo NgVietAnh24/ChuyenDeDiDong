@@ -94,7 +94,7 @@ public class SelectedFoodActivity extends AppCompatActivity {
                 .into(imgFood);
         tvFoodName.setText(food.getName());
         // Chuyển đổi và định dạng giá tiền sang VND
-        tvFoodPrice.setText(String.format("%,d VNĐ", (long)(food.getPrice())));
+        tvFoodPrice.setText(String.format("%,d VNĐ", (long)(food.getPrice() )));
         tvStatus.setText("Chưa được đặt.");
         tvQuantity.setText("1");
 
@@ -228,15 +228,11 @@ public class SelectedFoodActivity extends AppCompatActivity {
                 itemData.put("ten_mon_an", food.getName());
                 itemData.put("so_luong", quantity);
                 // Chuyển đổi giá tiền sang VND
-                itemData.put("gia", food.getPrice());
-
+                itemData.put("gia", (food.getPrice()));
                 db.collection("invoice_items")
                         .add(itemData)
-                        .addOnSuccessListener(documentReference -> {
-                            Log.d("Firestore", "Chi tiết hóa đơn đã được tạo thành công");
-                        })
                         .addOnFailureListener(e -> {
-                            Log.e("Firestore", "Lỗi khi tạo chi tiết hóa đơn", e);
+                            Log.e("InvoiceItems", "Error adding invoice items", e);
                         });
             }
         }
@@ -250,26 +246,22 @@ public class SelectedFoodActivity extends AppCompatActivity {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
                         DocumentSnapshot tableDoc = queryDocumentSnapshots.getDocuments().get(0);
-                        String documentId = tableDoc.getId();
+                        String tableId = tableDoc.getId();
+                        Map<String, Object> tableData = new HashMap<>();
+                        tableData.put("status", status);
 
-                        Map<String, Object> updates = new HashMap<>();
-                        updates.put("status", status);
-
-                        db.collection("tables")
-                                .document(documentId)
-                                .update(updates)
+                        db.collection("tables").document(tableId)
+                                .update(tableData)
                                 .addOnSuccessListener(aVoid -> {
-                                    Log.d("Firestore", "Trạng thái bàn đã được cập nhật thành " + status);
+                                    Log.d("Firestore", "Cập nhật trạng thái bàn thành công");
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e("Firestore", "Lỗi khi cập nhật trạng thái bàn", e);
-                                    Toast.makeText(this, "Có lỗi xảy ra khi cập nhật trạng thái bàn", Toast.LENGTH_SHORT).show();
                                 });
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e("Firestore", "Lỗi khi tìm thông tin bàn", e);
-                    Toast.makeText(this, "Có lỗi xảy ra khi tìm thông tin bàn", Toast.LENGTH_SHORT).show();
                 });
     }
 }

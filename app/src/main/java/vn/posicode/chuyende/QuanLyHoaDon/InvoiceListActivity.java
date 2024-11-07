@@ -25,7 +25,6 @@ import vn.posicode.chuyende.R;
 
 public class InvoiceListActivity extends AppCompatActivity {
     private static final String TAG = "InvoiceListActivity";
-    private static final int REQUEST_INVOICE_DETAIL = 1;
 
     private ListView invoiceListView;
     private ArrayList<Invoice> invoiceList;
@@ -51,7 +50,27 @@ public class InvoiceListActivity extends AppCompatActivity {
         setupListeners();
         setupSortingViews();
 
-        // Load danh sách hóa đơn
+        // Kiểm tra xem có cần làm mới dữ liệu không
+        boolean shouldRefresh = getIntent().getBooleanExtra("refresh", false);
+        if (shouldRefresh) {
+            refreshData();
+        } else {
+            // Load danh sách hóa đơn
+            if (tableId != null && !tableId.isEmpty()) {
+                loadInvoicesForTable();
+            } else {
+                loadAllInvoices();
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshData();
+    }
+
+    private void refreshData() {
         if (tableId != null && !tableId.isEmpty()) {
             loadInvoicesForTable();
         } else {
@@ -85,7 +104,7 @@ public class InvoiceListActivity extends AppCompatActivity {
                     Intent intent = new Intent(this, InvoiceDetailActivity.class);
                     intent.putExtra("invoiceId", selectedInvoice.getId());
                     intent.putExtra("tableName", selectedInvoice.getTableName());
-                    intent.putExtra("hoa_don_id", selectedInvoice.getHoaDonId()); // Thêm dòng này
+                    intent.putExtra("hoa_don_id", selectedInvoice.getHoaDonId());
                     startActivity(intent);
                 } else {
                     Log.e(TAG, "Invalid invoice or invoice ID");
@@ -170,17 +189,15 @@ public class InvoiceListActivity extends AppCompatActivity {
                 try {
                     Invoice invoice = Invoice.fromFirestore(document);
                     if (invoice != null) {
-                        // Tạo hoa_don_id theo định dạng: HD + timestamp
                         String hoaDonId = document.getString("hoa_don_id");
                         if (hoaDonId == null || hoaDonId.isEmpty()) {
                             hoaDonId = "HD" + System.currentTimeMillis();
-                            // Cập nhật hoa_don_id lên Firebase
                             updateHoaDonId(document.getId(), hoaDonId);
                         }
                         invoice.setHoaDonId(hoaDonId);
                         invoiceList.add(invoice);
                         loadTableInfo(invoice);
-                        Log.d(TAG, "Added invoice: " + invoice.toString());
+                        Log.d(TAG, "Added invoice : " + invoice.toString());
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error parsing invoice: " + e.getMessage());
@@ -198,7 +215,6 @@ public class InvoiceListActivity extends AppCompatActivity {
         }
     }
 
-    // Thêm phương thức mới để cập nhật hoa_don_id lên Firebase
     private void updateHoaDonId(String documentId, String hoaDonId) {
         db.collection("invoices").document(documentId)
                 .update("hoa_don_id", hoaDonId)
@@ -213,7 +229,7 @@ public class InvoiceListActivity extends AppCompatActivity {
     private void loadTableInfo(Invoice invoice) {
         if (invoice.getBanId() != null) {
             db.collection("tables").document(invoice.getBanId())
-                    .get ()
+                    .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             String tableName = documentSnapshot.getString("name");
@@ -242,14 +258,12 @@ public class InvoiceListActivity extends AppCompatActivity {
 
     private void sortByStatusAndTime() {
         Collections.sort(invoiceList, (i1, i2) -> {
-            // Đầu tiên sắp xếp theo trạng thái
             int statusCompare = Boolean.compare(
                     "Đã thanh toán".equals(i1.getPaymentStatus()),
                     "Đã thanh toán".equals(i2.getPaymentStatus())
             );
             if (statusCompare != 0) return statusCompare;
 
-            // Sau đó sắp xếp theo ngày và thời gian
             int dateCompare = i2.getDate().compareTo(i1.getDate());
             if (dateCompare != 0) return dateCompare;
 
@@ -271,18 +285,5 @@ public class InvoiceListActivity extends AppCompatActivity {
             if (dateCompare != 0) return dateCompare;
             return i2.getTime().compareTo(i1.getTime());
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_INVOICE_DETAIL && resultCode == RESULT_OK) {
-            // Refresh danh sách sau khi quay lại từ chi tiết hóa đơn
-            if (tableId != null && !tableId.isEmpty()) {
-                loadInvoicesForTable();
-            } else {
-                loadAllInvoices();
-            }
-        }
     }
 }

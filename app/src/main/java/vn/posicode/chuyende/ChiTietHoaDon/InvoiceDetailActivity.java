@@ -1,6 +1,7 @@
 package vn.posicode.chuyende.ChiTietHoaDon;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import vn.posicode.chuyende.QuanLyHoaDon.Invoice;
+import vn.posicode.chuyende.QuanLyHoaDon.InvoiceListActivity;
 import vn.posicode.chuyende.R;
 
 public class InvoiceDetailActivity extends AppCompatActivity {
@@ -238,7 +240,14 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                     selectedInvoice.setAmountReceived(amountReceived);
                     displayInvoiceDetails();
                     updateTableStatus("Trống");
-                    setResult(RESULT_OK);
+
+                    // Tạo Intent để chuyển sang màn hình InvoiceList
+                    Intent intent = new Intent(InvoiceDetailActivity.this, InvoiceListActivity.class);
+                    // Xóa tất cả các activity trước đó và đặt InvoiceList làm activity mới
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+
+                    // Kết thúc activity hiện tại
                     finish();
                 })
                 .addOnFailureListener(e -> {

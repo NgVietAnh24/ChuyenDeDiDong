@@ -5,6 +5,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -46,6 +47,8 @@ public class DanhSachMon extends AppCompatActivity {
     private EditText searchBar;
     private ImageView searchIcon;
     private TextView tv_null;
+    private Button btnmondachon;
+    private List<Food> selectedFoods = new ArrayList<>(); // Danh sách món ăn đã chọn
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +63,7 @@ public class DanhSachMon extends AppCompatActivity {
         searchBar = findViewById(R.id.searchBar);
         searchIcon = findViewById(R.id.searchIcon);
         tv_null = findViewById(R.id.tv_null);
+        btnmondachon = findViewById(R.id.btnmondachon);
 
         LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         listCate.setLayoutManager(horizontalLayoutManager);
@@ -67,13 +71,18 @@ public class DanhSachMon extends AppCompatActivity {
         foodList = new ArrayList<>();
         foodListSearch = new ArrayList<>(foodList);
         cateList = new ArrayList<>();
-        monAnAdapter = new MonAnAdapter(DanhSachMon.this, foodList);
 
-        // Sửa đổi ở đây để truyền monAnAdapter vào constructor
-        cateAdapter = new CategoryButtonAdapter(DanhSachMon.this, cateList, monAnAdapter);
-
-        listMonAn.setAdapter(monAnAdapter);
         listCate.setAdapter(cateAdapter);
+
+
+        monAnAdapter = new MonAnAdapter(DanhSachMon.this,foodListSearch);
+        monAnAdapter.setOnItemClickListener(new MonAnAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Food food) {
+                Toast.makeText(DanhSachMon.this,"Bạn đã chọn món:"+food.getName(),Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         // Tải dữ liệu từ Firestore
         layDuLieuTuFirestore(new DataLoadCallback() {
@@ -81,7 +90,19 @@ public class DanhSachMon extends AppCompatActivity {
             public void onDataLoaded(List<Food> foods) {
                 foodList.clear();
                 foodList.addAll(foods);
-                monAnAdapter.notifyDataSetChanged(); // Cập nhật adapter cho món ăn
+                foodListSearch.clear();
+                foodListSearch.addAll(foods); // Khởi tạo dữ liệu cho danh sách tìm kiếm
+                monAnAdapter.notifyDataSetChanged();
+
+            }
+        });
+        monAnAdapter = new MonAnAdapter(DanhSachMon.this, foodListSearch);
+        listMonAn.setAdapter(monAnAdapter);
+        ImageView backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
             }
         });
 
@@ -94,15 +115,26 @@ public class DanhSachMon extends AppCompatActivity {
             }
         });
 
+        cateAdapter = new CategoryButtonAdapter(DanhSachMon.this, cateList, monAnAdapter);
+        listCate.setAdapter(cateAdapter);
         // Sự kiện cho danh mục
         cateAdapter.setOnCategoryClickListener(new CategoryButtonAdapter.OnCategoryClickListener() {
             @Override
             public void onCategoryClick(String categoryId, String name) {
                 // Gọi phương thức lọc món ăn theo danh mục đã chọn
-                monAnAdapter.LocDanhMuc(categoryId, name);
+
+                    monAnAdapter.LocDanhMuc(categoryId, name);
+
             }
         });
 
+        // danh sách món đã chọn
+        btnmondachon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
 
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
@@ -112,13 +144,7 @@ public class DanhSachMon extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.toString().isEmpty()) {
-                    foodListSearch.clear();
-                    foodListSearch.addAll(foodList);
-                    monAnAdapter.updateFoodList(foodListSearch);
-                } else {
                     SearchFood(charSequence.toString());
-                }
             }
 
             @Override
@@ -135,7 +161,6 @@ public class DanhSachMon extends AppCompatActivity {
         foodListSearch.clear(); // Xóa danh sách tìm kiếm cũ
 
         if (key.isEmpty()) {
-
             foodListSearch.addAll(foodList);
         } else {
             // Nếu từ khóa có nội dung, thực hiện tìm kiếm
@@ -151,8 +176,6 @@ public class DanhSachMon extends AppCompatActivity {
         if (foodListSearch.isEmpty()) {
             tv_null.setVisibility(View.VISIBLE);
             listMonAn.setVisibility(View.GONE);
-
-            foodListSearch.addAll(foodList);
         } else {
             tv_null.setVisibility(View.GONE);
             listMonAn.setVisibility(View.VISIBLE);

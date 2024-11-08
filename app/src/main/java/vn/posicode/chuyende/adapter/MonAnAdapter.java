@@ -21,26 +21,26 @@ import vn.posicode.chuyende.R;
 public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.MonAnViewHolder> {
     private final Context context;
     private List<Food> foodList;
-    private final List<Food> foodListFull; // Danh sách đầy đủ để lưu lại
+    private final List<Food> foodListFull; // Lưu lại danh sách món ăn ban đầu
+   private OnItemClickListener onItemClickListener;
 
-//    // Constructor
-//    public MonAnAdapter(Context context, List<Food> foodList) {
-//        this.context = context;
-//        this.foodList = foodList;
-//        foodListFull = new ArrayList<>(foodList); // Lưu lại danh sách ban đầu
-//    }
-// Constructor
-public MonAnAdapter(Context context, List<Food> foodList) {
-    this.context = context;
-    // Đảm bảo foodList và foodListFull không bị null
-    this.foodList = (foodList != null) ? foodList : new ArrayList<>();
-    this.foodListFull = new ArrayList<>(this.foodList); // Sao chép foodList ban đầu vào foodListFull
-
-}
-    public void updateFoodList(List<Food> newFoodList) {
-        this.foodList = newFoodList;
-        notifyDataSetChanged(); // Cập nhật adapter
+    // Constructor
+    public MonAnAdapter(Context context, List<Food> foodList) {
+        this.context = context;
+        // Đảm bảo foodList và foodListFull không bị null
+        this.foodList = (foodList != null) ? foodList : new ArrayList<>();
+        this.foodListFull = new ArrayList<>(this.foodList); // Sao chép foodList ban đầu vào foodListFull
     }
+
+    // Interface để xử lý sự kiện nhấn chọn
+    public interface OnItemClickListener {
+        void onItemClick(Food food);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
+
     @NonNull
     @Override
     public MonAnViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -60,13 +60,26 @@ public MonAnAdapter(Context context, List<Food> foodList) {
         Glide.with(context)
                 .load(food.getImage()) // URL của ảnh
                 .into(holder.foodImageView); // ImageView để hiển thị ảnh
-        Log.d("MonAnAdapter", "Initial foodList size: " + this.foodList.size());
-        Log.d("MonAnAdapter", "Initial foodListFull size: " + this.foodListFull.size());
+
+        Log.d("MonAnAdapter", "Current foodList size: " + foodList.size());
+        Log.d("MonAnAdapter", "Current foodListFull size: " + foodListFull.size());
+
+        // Xử lý sự kiện nhấn vào item
+        holder.itemView.setOnClickListener(v -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(food);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
         return foodList.size();
+    }
+
+    public void updateFoodList(List<Food> newFoodList) {
+        this.foodList = newFoodList != null ? newFoodList : new ArrayList<>();
+        notifyDataSetChanged(); // Cập nhật adapter
     }
 
     public void LocDanhMuc(String categoryId, String categoryName) {
@@ -95,10 +108,6 @@ public MonAnAdapter(Context context, List<Food> foodList) {
         Log.d("LocDanhMuc", "Size of filtered foodList: " + foodList.size());
         notifyDataSetChanged();  // Cập nhật lại giao diện
     }
-
-
-
-
 
 
 

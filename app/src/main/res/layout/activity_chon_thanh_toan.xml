@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activities.ChonThanhToan">
+    <TextView
+        android:id="@+id/tvTen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nguyễn Việt Anh"/>
+    <EditText
+        android:id="@+id/edtSL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Số lượng"/>
+    <TextView
+        android:id="@+id/tvGia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1000000 VNĐ"/>
+    <Button
+        android:id="@+id/btnTT"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thanh toán"/>
+
+
+
+</LinearLayout>

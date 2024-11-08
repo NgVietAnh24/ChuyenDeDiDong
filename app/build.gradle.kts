@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "vn.posicode.chuyende"
-        minSdk = 33
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -46,6 +46,11 @@ dependencies {
     implementation ("com.airbnb.android:lottie:6.1.0")
     implementation ("com.github.bumptech.glide:glide:4.14.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation(fileTree(mapOf(
+        "dir" to "C:\\Users\\ADMIN\\OneDrive\\Desktop\\ZaloPayLibs",
+        "include" to listOf("*.aar", "*.jar"),
+        "exclude" to listOf("")
+    )))
     annotationProcessor ("com.github.bumptech.glide:compiler:4.14.2")
     implementation ("com.google.android.material:material:1.4.0")
 
@@ -59,4 +64,9 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    implementation("com.squareup.okhttp3:okhttp:4.6.0")
+    implementation("commons-codec:commons-codec:1.14")
+
+    implementation ("com.google.zxing:core:3.4.1")
+
 }

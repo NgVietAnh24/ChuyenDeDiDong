@@ -55,6 +55,13 @@ public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
             // Xử lý trường hợp state là null
             holder.vState.setBackgroundResource(R.drawable.item_background_selector); // Hoặc một màu khác phù hợp
         }
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onItemClickListener.onItemClick(ban);
+            }
+        });
     }
 
 

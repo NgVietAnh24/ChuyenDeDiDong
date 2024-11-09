@@ -67,7 +67,10 @@ public class Home extends AppCompatActivity {
         banAdapter = new BanAdapter(list, new BanAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Ban ban) {
-
+                Intent intent = new Intent(Home.this, DanhSachChonMon.class);
+                intent.putExtra("id", ban.getId());
+                intent.putExtra("name", ban.getName());
+                startActivity(intent);
             }
         });
         listTable.setAdapter(banAdapter);
@@ -173,7 +176,6 @@ public class Home extends AppCompatActivity {
                     }
                 });
     }
-
 
 
     public void Event() {

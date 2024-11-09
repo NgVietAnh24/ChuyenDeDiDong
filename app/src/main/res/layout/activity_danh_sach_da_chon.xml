@@ -7,9 +7,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp"
-    tools:context=".activities.DanhSachChonMon">
+    tools:context=".activities.DanhSachDaChon">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,11 +24,12 @@
             android:src="@drawable/back" />
 
         <TextView
+            android:id="@+id/txtDanhSachMon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Danh sách món ăn"
+            android:text="Danh sách món bàn 1"
             android:textColor="@color/textColorTitle"
             android:textSize="25sp"
             android:textStyle="bold" />
@@ -40,21 +40,7 @@
         android:id="@+id/linearLayoutContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <EditText
-            android:id="@+id/edtSearch"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/border_edt"
-            android:hint="Tìm kiếm..."
-            android:padding="10dp"
-            android:singleLine="true"
-            android:textColor="@color/textColorTitle"
-            android:textColorHint="#BD6060"
-            android:textStyle="bold" />
-    </LinearLayout>
+        android:orientation="vertical" />
 
     <!-- RecyclerView Containers -->
     <LinearLayout
@@ -62,11 +48,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:orientation="vertical">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/listCategory"
-            android:layout_width="match_parent"
-            android:layout_height="35dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listFood"
@@ -79,17 +60,62 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:text="Ghi chú:"
+            android:textColor="@color/textColorTitle"
+            android:textStyle="bold" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="8"
+            android:background="@drawable/border_edt" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center|bottom"
-        android:orientation="vertical"
+        android:gravity="center"
+        android:orientation="horizontal"
         android:padding="10dp">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnMonDaChon"
-            android:layout_width="100dp"
+            android:id="@+id/btnBackHome"
+            android:layout_width="160dp"
             android:layout_height="35dp"
+            android:layout_margin="10dp"
             android:background="@drawable/rounded_btn"
-            android:text="Món đã chọn"
+            android:padding="10dp"
+            android:text="Về màn hình chính"
+            android:textColor="@color/textColor"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnHuyDon"
+            android:layout_width="120dp"
+            android:layout_height="35dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/rounded_btn"
+            android:padding="10dp"
+            android:text="Hủy đơn"
+            android:textColor="@color/textColor"
+            android:textSize="14sp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnThanhToan"
+            android:layout_width="120dp"
+            android:layout_height="35dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/rounded_btn"
+            android:padding="10dp"
+            android:text="Thanh toán"
             android:textColor="@color/textColor"
             android:textSize="14sp" />
     </LinearLayout>

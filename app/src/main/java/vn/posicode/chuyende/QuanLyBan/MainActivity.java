@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
         tableListLayout = findViewById(R.id.tableListLayout);
         addButton = findViewById(R.id.addButton);
         editButton = findViewById(R.id.editButton);
+
+        // Làm mờ nút sửa ban đầu
+        editButton.setEnabled(false);
+        editButton.setAlpha(0.5f); // Làm mờ nút sửa
 
         loadTableData();
 
@@ -84,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
     private String formatTableName(String tableName) {
         // Trích xuất số từ tên bàn
         String number = tableName.replaceAll("[^0-9]", "");
-
         // Định dạng lại tên bàn
         return "Bàn " + number;
     }
@@ -111,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     showToast("Đã thêm bàn thành công");
                 })
                 .addOnFailureListener(e -> {
-                    showToast("Lỗi khi thêm bàn: " + e.getMessage());
+                    showToast("Lỗi khi thêm bàn : " + e.getMessage());
                     Log.e("FirestoreError", "Lỗi khi thêm bàn: ", e);
                 });
     }
@@ -149,6 +153,10 @@ public class MainActivity extends AppCompatActivity {
         currentSelectedTable = tableView;
         editTextTableName.setText(tableName);
         editTextTableDescription.setText(tableDescription);
+        addButton.setEnabled(false); // Làm mờ nút Thêm
+        addButton.setAlpha(0.5f); // Làm mờ nút Thêm
+        editButton.setEnabled(true); // Làm sáng nút Sửa
+        editButton.setAlpha(1.0f); // Khôi phục độ sáng cho nút Sửa
     }
 
     private void editTable() {
@@ -193,6 +201,10 @@ public class MainActivity extends AppCompatActivity {
                     updateTableLayout();
                     clearInputFields();
                     currentSelectedTable = null;
+                    addButton.setEnabled(true); // Làm sáng nút Thêm
+                    addButton.setAlpha(1.0f); // Khôi phục độ sáng cho nút Thêm
+                    editButton.setEnabled(false); // Làm mờ nút Sửa
+                    editButton.setAlpha(0.5f); // Làm mờ nút Sửa
                     showToast("Đã sửa bàn thành công");
                 })
                 .addOnFailureListener(e -> showToast("Lỗi khi sửa bàn: " + e.getMessage()));
@@ -257,6 +269,15 @@ public class MainActivity extends AppCompatActivity {
                     tableViewsList.remove(tableView);
                     updateTableLayout();
                     showToast("Đã xóa bàn thành công");
+
+                    // Kiểm tra xem có bàn nào được chọn không
+                    if (currentSelectedTable == tableView) {
+                        currentSelectedTable = null; // Đặt lại
+                        addButton.setEnabled(true); // Làm sáng nút Thêm
+                        addButton.setAlpha(1.0f); // Khôi phục độ sáng cho nút Thêm
+                        editButton.setEnabled(false); // Làm mờ nút Sửa
+                        editButton.setAlpha(0.5f); // Làm mờ nút Sửa
+                    }
                 })
                 .addOnFailureListener(e -> showToast("Lỗi khi xóa bàn: " + e.getMessage()));
     }

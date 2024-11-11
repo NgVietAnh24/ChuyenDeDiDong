@@ -7,10 +7,11 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -125,7 +126,6 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
                             String categoryId = document.getString("category_id");
                             String categoryName = document.getString("category_name");
 
-                            // Xử lý price
                             double price = 0.0;
                             Object priceObj = document.get("price");
                             if (priceObj != null) {
@@ -142,7 +142,6 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
                                 }
                             }
 
-                            // Log để debug
                             Log.d("FoodDebug", "Loading food: " +
                                     "\nID: " + id +
                                     "\nName: " + name +
@@ -193,6 +192,23 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
         btnSelectedFood.setOnClickListener(v -> handleSelectedFood());
         Button btnReserve = findViewById(R.id.btn_reserve);
         btnReserve.setOnClickListener(v -> showReserveDialog());
+
+        searchFood.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Không cần thực hiện gì
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterFoodList(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Không cần thực hiện gì
+            }
+        });
     }
 
     private void handleSelectedFood() {
@@ -243,7 +259,7 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
     private List<Food> filterFoodByCategory(String categoryName) {
         List<Food> filteredList = new ArrayList<>();
         Log.d("FilterDebug", "Filtering for category: " + categoryName);
-        Log.d("FilterDebug", "Total foods before filter: " + foodList.size());
+        Log.d(" FilterDebug", "Total foods before filter: " + foodList.size());
 
         for (Food food : foodList) {
             String foodCategoryName = food.getCategoryName();
@@ -258,6 +274,18 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
 
         Log.d("FilterDebug", "Filtered list size: " + filteredList.size());
         return filteredList;
+    }
+
+    private void filterFoodList(String query) {
+        List<Food> filteredList = new ArrayList<>();
+
+        for (Food food : foodList) {
+            if (food.getName().toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(food);
+            }
+        }
+
+        foodAdapter.updateData(filteredList);
     }
 
     private void showReserveDialog() {
@@ -298,7 +326,6 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
 
     @Override
     public void onFoodClick(Food food) {
-        // Xử lý khi một món ăn được click
         if (!selectedFoodList.contains(food)) {
             selectedFoodList.add(food);
             Toast.makeText(this, "Đã thêm " + food.getName() + " vào danh sách", Toast.LENGTH_SHORT).show();
@@ -307,7 +334,6 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
             Toast.makeText(this, "Đã xóa " + food.getName() + " khỏi danh sách", Toast.LENGTH_SHORT).show();
         }
 
-        // Cập nhật số lượng món ăn đã chọn trên button (nếu cần)
         updateSelectedFoodCount();
     }
 

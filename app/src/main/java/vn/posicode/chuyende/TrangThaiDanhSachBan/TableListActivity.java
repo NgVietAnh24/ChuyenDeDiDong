@@ -5,8 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,13 +35,30 @@ public class TableListActivity extends AppCompatActivity {
 
     private FirebaseFirestore firestore;
     private BroadcastReceiver updateTableReceiver;
+    private List<QueryDocumentSnapshot> originalTableList = new ArrayList<>();
+    private EditText searchBar;
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table_list);
 
         FirebaseApp.initializeApp(this);
         firestore = FirebaseFirestore.getInstance();
+
+        searchBar = findViewById(R.id.searchBar);
+        searchBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterTables(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         loadTableData();
 
@@ -85,12 +105,14 @@ public class TableListActivity extends AppCompatActivity {
                     }
 
                     if (snapshots != null) {
+                        originalTableList.clear();
                         tableListLayout.removeAllViews();
                         List<QueryDocumentSnapshot> tableList = new ArrayList<>();
 
                         for (QueryDocumentSnapshot document : snapshots) {
                             if (document.getString("name") != null) {
                                 tableList.add(document);
+                                originalTableList.add(document);
                             }
                         }
 
@@ -130,6 +152,59 @@ public class TableListActivity extends AppCompatActivity {
                 });
     }
 
+    private void filterTables(String searchText) {
+        LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
+        tableListLayout.removeAllViews();
+
+        List<QueryDocumentSnapshot> filteredList = new ArrayList<>();
+
+        for (QueryDocumentSnapshot document : originalTableList) {
+            String tableName = document.getString("name");
+            String tableDescription = document.getString("description");
+            String tableStatus = document.getString("status");
+
+            if (tableName != null &&
+                    (tableName.toLowerCase().contains(searchText.toLowerCase()) ||
+                            tableDescription.toLowerCase().contains(searchText.toLowerCase()) ||
+                            tableStatus.toLowerCase().contains(searchText.toLowerCase()))) {
+                filteredList.add(document);
+            }
+        }
+
+        Collections.sort(filteredList, (t1, t2) -> {
+            String name1 = t1.getString("name");
+            String name2 = t2.getString("name");
+
+            if (name1 == null) return -1;
+            if (name2 == null) return 1;
+
+            try {
+                String num1 = name1.replaceAll("[^0-9]", "");
+                String num2 = name2.replaceAll("[^0-9]", "");
+
+                if (num1.isEmpty()) return -1;
+                if (num2.isEmpty()) return 1;
+
+                return Integer.compare(
+                        Integer.parseInt(num1),
+                        Integer.parseInt(num2)
+                );
+            } catch (NumberFormatException e1) {
+                return name1.compareTo(name2);
+            }
+        });
+
+        for (QueryDocumentSnapshot document : filteredList) {
+            String tableName = document.getString("name");
+            String tableDescription = document.getString("description");
+            String tableStatus = document.getString("status");
+
+            if (tableName != null && tableDescription != null && tableStatus != null) {
+                addTableToLayout(tableName, tableDescription, tableStatus);
+            }
+        }
+    }
+
     private void addTableToLayout(String tableName, String tableDescription, String tableStatus) {
         LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
         View tableView = getLayoutInflater().inflate(R.layout.table_item_tablelist, null);
@@ -141,7 +216,6 @@ public class TableListActivity extends AppCompatActivity {
         tableNameTextView.setText(tableName);
         tableDescriptionTextView.setText(tableDescription);
 
-        // Cập nhật UI dựa trên trạng thái
         updateTableStatusUI(tableStatusImage, tableStatus);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -151,8 +225,6 @@ public class TableListActivity extends AppCompatActivity {
         params.setMargins(0, 0, 0, 8);
         tableView.setLayoutParams(params);
 
-// Trong TableListActivity.java, sửa lại phần setOnClickListener của tableView:
-
         tableView.setOnClickListener(v -> {
             firestore.collection("tables")
                     .whereEqualTo("name", tableName)
@@ -161,7 +233,6 @@ public class TableListActivity extends AppCompatActivity {
                         if (!queryDocumentSnapshots.isEmpty()) {
                             DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
                             String currentStatus = document.getString("status");
-                            // Sửa điều kiện kiểm tra để cho phép trạng thái "Đang sử dụng"
                             if (currentStatus != null &&
                                     (currentStatus.equals("Trống") ||
                                             currentStatus.equals("Đã đặt") ||
@@ -189,7 +260,6 @@ public class TableListActivity extends AppCompatActivity {
         tableListLayout.addView(tableView);
     }
 
-    // Thêm phương thức mới để cập nhật UI trạng thái bàn
     private void updateTableStatusUI(ImageView statusImage, String status) {
         switch (status) {
             case "Đã đặt":
@@ -208,22 +278,11 @@ public class TableListActivity extends AppCompatActivity {
     private void updateTableUI(String tableName, String status) {
         LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
         for (int i = 0; i < tableListLayout.getChildCount(); i++) {
-            View tableView = tableListLayout.getChildAt(i );
+            View tableView = tableListLayout.getChildAt(i);
             TextView tableNameTextView = tableView.findViewById(R.id.tableNameTextView);
             if (tableNameTextView.getText().toString().equals(tableName)) {
                 ImageView tableStatusImage = tableView.findViewById(R.id.tableStatusImage);
-                switch (status) {
-                    case "Đã đặt":
-                        tableStatusImage.setImageResource(R.drawable.circle_yellow);
-                        break;
-                    case "Đang sử dụng":
-                        tableStatusImage.setImageResource(R.drawable.circle_red);
-                        break;
-                    case "Trống":
-                    default:
-                        tableStatusImage.setImageResource(R.drawable.circle_grey);
-                        break;
-                }
+                updateTableStatusUI(tableStatusImage, status);
                 break;
             }
         }

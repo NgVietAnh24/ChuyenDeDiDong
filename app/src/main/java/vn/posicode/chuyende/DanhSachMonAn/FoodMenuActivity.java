@@ -23,9 +23,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import vn.posicode.chuyende.R;
@@ -220,7 +223,8 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
-                        String documentId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                        DocumentSnapshot tableDoc = queryDocumentSnapshots.getDocuments().get(0);
+                        String documentId = tableDoc.getId();
 
                         Map<String, Object> updates = new HashMap<>();
                         updates.put("status", "Đang sử dụng");
@@ -230,6 +234,9 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
                                 .update(updates)
                                 .addOnSuccessListener(aVoid -> {
                                     Log.d("Firestore", "Trạng thái bàn đã được cập nhật thành đang sử dụng");
+
+                                    // Tạo hóa đơn
+                                    createInvoiceForSelectedFoods(tableDoc);
 
                                     Intent broadcastIntent = new Intent("UPDATE_TABLE_STATUS");
                                     broadcastIntent.putExtra("tableName", tableName);
@@ -254,6 +261,60 @@ public class FoodMenuActivity extends AppCompatActivity implements FoodAdapter.O
                             Toast.LENGTH_SHORT).show();
                     Log.e("Firestore", "Error finding table", e);
                 });
+    }
+
+    private void createInvoiceForSelectedFoods(DocumentSnapshot tableDoc) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        Date now = new Date();
+
+        Map<String, Object> invoiceData = new HashMap<>();
+        invoiceData.put("ban_id", tableDoc.getId());
+        invoiceData.put("nv_id", "1"); // Bạn có thể thay đổi ID nhân viên tùy theo logic của bạn
+        invoiceData.put("ten_khach_hang", tableDoc.getString("reservationName"));
+        invoiceData.put("so_dt", tableDoc.getString("reservationPhone"));
+        invoiceData.put("ngay_tao", dateFormat.format(now));
+        invoiceData.put("gio_tao", timeFormat.format(now));
+        invoiceData.put("tinh_trang", "Chưa thanh toán");
+        invoiceData.put("ghi_chu", ""); // Bạn có thể để trống hoặc thêm logic ghi chú
+
+        double totalAmount = calculateTotalAmount();
+        invoiceData.put("tong_tien", totalAmount);
+
+        FirebaseFirestore.getInstance().collection("invoices")
+                .add(invoiceData)
+                .addOnSuccessListener(documentReference -> {
+                    String invoiceId = documentReference.getId();
+                    addInvoiceItems(invoiceId);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("CreateInvoice", "Error creating invoice", e);
+                    Toast.makeText(this, "Có lỗi xảy ra khi tạo hóa đơn", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private double calculateTotalAmount() {
+        double totalAmount = 0;
+        for (Food selectedFood : selectedFoodList) {
+            totalAmount += selectedFood.getPrice();
+        }
+        return totalAmount;
+    }
+
+    private void addInvoiceItems(String invoiceId) {
+        for (Food selectedFood : selectedFoodList) {
+            Map<String, Object> itemData = new HashMap<>();
+            itemData.put("hoa_don_id", invoiceId);
+            itemData.put("ten_mon_an", selectedFood.getName());
+            itemData.put("so_luong", 1); // Mặc định số lượng là 1
+            itemData.put("gia", selectedFood.getPrice());
+
+            FirebaseFirestore.getInstance().collection("invoice_items")
+                    .add(itemData)
+                    .addOnFailureListener(e -> {
+                        Log.e("InvoiceItems", "Error adding invoice items", e);
+                    });
+        }
     }
 
     private List<Food> filterFoodByCategory(String categoryName) {

@@ -130,7 +130,7 @@ public class SelectedFoodActivity extends AppCompatActivity {
 
                         for (SelectedFood selectedFood : selectedFoodList) {
                             selectedFood.setTableId(tableId);
-                            db.collection("selected_food s")
+                            db.collection("selected_foods")
                                     .add(selectedFood.toMap())
                                     .addOnSuccessListener(documentReference -> {
                                         selectedFood.setId(documentReference.getId());

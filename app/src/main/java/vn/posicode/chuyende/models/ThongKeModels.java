@@ -8,7 +8,7 @@ public class ThongKeModels {
     int tong_tien_thang;
     int nam;
     int thang;
-   List<String> hd_id;
+    List<String> hd_id;
 
     public ThongKeModels() {
     }

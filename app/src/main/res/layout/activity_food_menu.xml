@@ -7,44 +7,56 @@
     android:background="#F9F9F9"
     android:padding="16dp">
 
+    <!-- Thông tin bàn -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="16dp">
-
-        <TextView
-            android:id="@+id/tableNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tên Bàn"
-            android:textSize="20sp"
-            android:textColor="@android:color/black"
-            android:layout_marginEnd="18dp"/>
-
-        <TextView
-            android:id="@+id/tableDescriptionTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mô Tả Bàn"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical">
 
         <ImageButton
             android:id="@+id/backButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@android:color/transparent"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_back_arrow"
-            android:scaleType="fitXY"
-            android:contentDescription="Back button" />
+            android:scaleType="fitCenter"
+            android:contentDescription="Quay lại" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+            <TextView
+                android:id="@+id/tableNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên Bàn"
+                android:textSize="20sp"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tableDescriptionTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mô Tả Bàn"
+                android:textSize="14sp"
+                android:textColor="#666666"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Thanh tìm kiếm -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/rounded_search_background"
+        android:padding="8dp"
+        android:gravity="center_vertical">
 
         <EditText
             android:id="@+id/search_food"
@@ -52,68 +64,53 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Tìm kiếm..."
+            android:background="@android:color/transparent"
             android:padding="8dp"
             android:textColor="#000000"
             android:textSize="14sp"/>
 
         <ImageView
             android:id="@+id/search_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/ic_search"
-            android:contentDescription="Search Icon"/>
+            android:contentDescription="Tìm kiếm"/>
     </LinearLayout>
 
-    <LinearLayout
+    <!-- Các nút danh mục -->
+    <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp">
-
-        <Button
-            android:id="@+id/btn_all"
-            android:layout_width="0dp"
+        android:layout_marginTop="16dp"
+        android:scrollbars="none">
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Tất cả"
-            android:backgroundTint="@color/red"
-            android:textColor="@android:color/white"
-            android:layout_marginEnd="8dp"
-            android:padding="8dp"/>
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btn_hotpot"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Món Lẩu"
-            android:backgroundTint="@color/red"
-            android:textColor="@android:color/white"
-            android:layout_marginEnd="8dp"
-            android:padding="8dp"/>
+            <Button
+                android:id="@+id/btn_all"
+                style="@style/CategoryButton"
+                android:text="Tất cả"/>
 
-        <Button
-            android:id="@+id/btn_grill"
-            android:layout_width="8dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Món nướng"
-            android:backgroundTint="@color/red"
-            android:textColor="@android:color/white"
-            android:layout_marginEnd="8dp"
-            android:padding="8dp"/>
+            <Button
+                android:id="@+id/btn_hotpot"
+                style="@style/CategoryButton"
+                android:text="Món Lẩu"/>
 
-        <Button
-            android:id="@+id/btn_drinks"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Đồ uống"
-            android:backgroundTint="@color/red"
-            android:textColor="@android:color/white"
-            android:padding="8dp"/>
-    </LinearLayout>
+            <Button
+                android:id="@+id/btn_grill"
+                style="@style/CategoryButton"
+                android:text="Món nướng"/>
 
+            <Button
+                android:id="@+id/btn_drinks"
+                style="@style/CategoryButton"
+                android:text="Đồ uống"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Danh sách món ăn -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewFoods"
         android:layout_width="match_parent"
@@ -123,11 +120,13 @@
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="2"/>
 
+    <!-- Nút cuối -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="16dp"
+        android:gravity="center">
 
         <Button
             android:id="@+id/btn_selected_items"
@@ -135,10 +134,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Món đã chọn"
-            android:backgroundTint="@color/red"
-            android:textColor="@android:color/white"
             android:layout_marginEnd="8dp"
-            android:padding="12dp"/>
+            style="@style/ActionButton"/>
 
         <Button
             android:id="@+id/btn_reserve"
@@ -146,8 +143,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Đặt trước"
-            android:backgroundTint="@color/red"
-            android:textColor="@android:color/white"
-            android:padding="12dp"/>
+            style="@style/ActionButton"/>
     </LinearLayout>
 </LinearLayout>

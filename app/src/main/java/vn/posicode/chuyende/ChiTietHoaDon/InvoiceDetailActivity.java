@@ -19,7 +19,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import vn.posicode.chuyende.QuanLyHoaDon.Invoice;
@@ -149,23 +151,34 @@ public class InvoiceDetailActivity extends AppCompatActivity {
 
         try {
             titleTextView.setText(selectedInvoice.getTitle());
-            invoiceIdTextView.setText("Mã hóa đơn: " + selectedInvoice.getId()); // Hiển thị mã hóa đơn
+            invoiceIdTextView.setText("Mã hóa đơn: " + selectedInvoice.getId());
             timeTextView.setText(selectedInvoice.getTime() != null ? selectedInvoice.getTime() : "N/A");
             dateTextView.setText(selectedInvoice.getDate() != null ? selectedInvoice.getDate() : "N/A");
-            totalTextView.setText(String.format("Tổng tiền: %,.0f VND", selectedInvoice.getTotal())); // Cập nhật định dạng tiền
+            totalTextView.setText(String.format("Tổng tiền: %,.0f VND", selectedInvoice.getTotal()));
 
             customerNameTextView.setText("Tên khách hàng: " +
                     (selectedInvoice.getCustomerName() != null ? selectedInvoice.getCustomerName() : "N/A"));
             customerPhoneTextView.setText("Số điện thoại: " +
                     (selectedInvoice.getCustomerPhone() != null ? selectedInvoice.getCustomerPhone() : "N/A"));
 
+            // Xử lý hiển thị ghi chú
+            TextView noteTextView = findViewById(R.id.noteTextView);
+            String note = selectedInvoice.getNote();
+            if (note != null && !note.isEmpty()) {
+                noteTextView.setText("Ghi chú: " + note);
+                noteTextView.setVisibility(View.VISIBLE);
+            } else {
+                noteTextView.setText("Ghi chú: Không có");
+                noteTextView.setVisibility(View.VISIBLE);
+            }
+
             String paymentStatus = selectedInvoice.getPaymentStatus();
             if (paymentStatus != null && paymentStatus.equals("Đã thanh toán")) {
                 paymentButton.setVisibility(View.GONE);
                 amountReceivedTextView.setVisibility(View.VISIBLE);
                 changeTextView.setVisibility(View.VISIBLE);
-                amountReceivedTextView.setText(String.format("Tiền thu: %,.0f VND", selectedInvoice.getAmountReceived())); // Cập nhật định dạng tiền
-                changeTextView.setText(String.format("Tiền dư: %,.0f VND", selectedInvoice.getChange())); // Cập nhật định dạng tiền
+                amountReceivedTextView.setText(String.format("Tiền thu: %,.0f VND", selectedInvoice.getAmountReceived()));
+                changeTextView.setText(String.format("Tiền dư: %,.0f VND", selectedInvoice.getChange()));
             } else {
                 paymentButton.setVisibility(View.VISIBLE);
                 amountReceivedTextView.setVisibility(View.GONE);
@@ -186,6 +199,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
 
     private void showPaymentDialog() {
         final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_payment);
 
         Window window = dialog.getWindow();
@@ -199,20 +213,32 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         TextView titleTextView = dialog.findViewById(R.id.titleTextView);
         EditText edtTienThu = dialog.findViewById(R.id.edtTienThu);
         Button btnThanhToan = dialog.findViewById(R.id.btnThanhToan);
-        Button btnClose = dialog.findViewById(R.id.btnClose);
+        TextView btnClose = dialog.findViewById(R.id.btnClose);
         TextView totalAmountValue = dialog.findViewById(R.id.totalAmountValue);
 
+        // Format tổng tiền theo locale Việt Nam
+        Locale vietnameseLocale = new Locale("vi", "VN");
+        NumberFormat currencyFormatter = NumberFormat.getNumberInstance(vietnameseLocale);
+        currencyFormatter.setGroupingUsed(true);
+        currencyFormatter.setMaximumFractionDigits(0);
+
         titleTextView.setText("Tính tiền");
-        totalAmountValue.setText(String.format("%,.0f VND", selectedInvoice.getTotal())); // Cập nhật định dạng tiền
+        totalAmountValue.setText(currencyFormatter.format(selectedInvoice.getTotal()) + " VND");
+
+        // Áp dụng CurrencyTextWatcher
+        CurrencyTextWatcher currencyTextWatcher = new CurrencyTextWatcher(edtTienThu);
+        edtTienThu.addTextChangedListener(currencyTextWatcher);
 
         btnThanhToan.setOnClickListener(v -> {
-            String tienThuStr = edtTienThu.getText().toString();
-            if (!tienThuStr.isEmpty()) {
-                double tienThu = Double.parseDouble(tienThuStr);
+            // Sử dụng phương thức getNumericValue() để lấy giá trị thực
+            double tienThu = currencyTextWatcher.getNumericValue();
+
+            if (tienThu > 0) {
                 if (tienThu >= selectedInvoice.getTotal()) {
-                    selectedInvoice.setAmountReceived(tienThu);
-                    updateInvoicePayment(tienThu);
-                    dialog.dismiss();
+                    double tienDu = tienThu - selectedInvoice.getTotal();
+
+                    // Hiển thị thông báo xác nhận
+                    showConfirmPaymentDialog(tienThu, tienDu, dialog, currencyTextWatcher);
                 } else {
                     Toast.makeText(this, "Số tiền không đủ", Toast.LENGTH_SHORT).show();
                 }
@@ -221,9 +247,35 @@ public class InvoiceDetailActivity extends AppCompatActivity {
             }
         });
 
+        // Sử dụng TextView làm nút đóng
         btnClose.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
+    }
+
+    private void showConfirmPaymentDialog(double tienThu, double tienDu,
+                                          Dialog originalDialog,
+                                          CurrencyTextWatcher currencyTextWatcher) {
+        Locale vietnameseLocale = new Locale("vi", "VN");
+        NumberFormat currencyFormatter = NumberFormat.getNumberInstance(vietnameseLocale);
+        currencyFormatter.setGroupingUsed(true);
+        currencyFormatter.setMaximumFractionDigits(0);
+
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Xác nhận thanh toán")
+                .setMessage(String.format(
+                        "Tiền thu: %s VND\nTổng tiền: %s VND\nTiền dư: %s VND",
+                        currencyFormatter.format(tienThu),
+                        currencyFormatter.format(selectedInvoice.getTotal()),
+                        currencyFormatter.format(tienDu)
+                ))
+                .setPositiveButton("Xác nhận", (dialog, which) -> {
+                    selectedInvoice.setAmountReceived(tienThu);
+                    updateInvoicePayment(tienThu);
+                    originalDialog.dismiss();
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
     }
 
     private void updateInvoicePayment(double amountReceived) {
@@ -231,6 +283,11 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         updates.put("tinh_trang", "Đã thanh toán");
         updates.put("tien_thu", amountReceived);
         updates.put("tien_du", amountReceived - selectedInvoice.getTotal());
+
+        // Nếu muốn giữ lại ghi chú cũ
+        if (selectedInvoice.getNote() != null && !selectedInvoice.getNote().isEmpty()) {
+            updates.put ("ghi_chu", selectedInvoice.getNote());
+        }
 
         db.collection("invoices").document(selectedInvoice.getId())
                 .update(updates)
@@ -241,13 +298,9 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                     displayInvoiceDetails();
                     updateTableStatus("Trống");
 
-                    // Tạo Intent để chuyển sang màn hình InvoiceList
                     Intent intent = new Intent(InvoiceDetailActivity.this, InvoiceListActivity.class);
-                    // Xóa tất cả các activity trước đó và đặt InvoiceList làm activity mới
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-
-                    // Kết thúc activity hiện tại
                     finish();
                 })
                 .addOnFailureListener(e -> {

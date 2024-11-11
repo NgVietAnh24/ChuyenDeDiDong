@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,14 +12,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingBottom="8dp">
+        android:paddingBottom="16dp">
 
         <ImageButton
             android:id="@+id/backButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:scaleType="fitXY"
-            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_menu"
             android:contentDescription="Nút menu" />
 
@@ -38,21 +39,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp">
+        android:background="@drawable/rounded_search_background"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="12dp"
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_search"
-            android:contentDescription="Biểu tượng tìm kiếm" />
+            android:contentDescription="Biểu tượng tìm kiếm"
+            android:layout_marginEnd="8dp"/>
 
         <EditText
             android:id="@+id/searchBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Tìm kiếm . . ."
-            android:paddingStart="8dp"
             android:background="@android:color/transparent"
             android:textSize="16sp"
             android:textColorHint="#D43B3B"

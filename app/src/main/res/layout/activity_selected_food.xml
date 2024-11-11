@@ -1,33 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@android:color/white">
+    android:background="#F9F9F9">
 
     <!-- Nút Quay Lại -->
-    <ImageButton
-        android:id="@+id/btnQuayLai"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_back_arrow"
-        android:scaleType="fitXY"
-        android:contentDescription="Nút quay lại" />
-
-    <!-- Tiêu đề -->
-    <TextView
-        android:id="@+id/tvTieuDe"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Danh sách món B:"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_gravity="center_horizontal" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
 
-    <!-- Danh sách món ăn sẽ được thêm vào đây -->
+        <ImageButton
+            android:id="@+id/btnQuayLai"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back_arrow"
+            android:scaleType="fitCenter"
+            android:contentDescription="Nút quay lại" />
+
+        <TextView
+            android:id="@+id/tvTieuDe"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Danh sách món B:"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+    <!-- Danh sách món ăn -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -38,18 +47,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="17dp">
+            android:layout_marginTop="8dp">
         </LinearLayout>
     </ScrollView>
 
     <!-- Nút Làm tất cả -->
     <Button
         android:id="@+id/btnLamTatCa"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Làm tất cả"
         android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/holo_red_dark"/>
+
+        android:backgroundTint="#D43B3B"
+        android:layout_marginTop="16dp"/>
 
     <!-- Ghi chú -->
     <LinearLayout
@@ -69,11 +80,13 @@
         <EditText
             android:id="@+id/etGhiChu"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="100dp"
             android:gravity="top|start"
             android:hint="Nhập ghi chú"
-            android:padding="8dp"
-            android:backgroundTint="@android:color/white" />
+            android:textColor="@color/black"
+            android:padding="12dp"
+
+            android:inputType="textMultiLine"/>
     </LinearLayout>
 
     <!-- Nút dưới cùng -->
@@ -90,8 +103,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Hủy đơn"
-            android:textColor="@android:color/white"
-            android:backgroundTint="@android:color/holo_red_dark" />
+            android:layout_marginEnd="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textColor="#D43B3B"
+            app:strokeColor="#D43B3B"/>
 
         <Button
             android:id="@+id/btnThanhToan"
@@ -99,9 +114,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Thanh toán"
-            android:textColor="@android:color/white"
-            android:backgroundTint="@android:color/holo_red_dark"
-            android:layout_marginLeft="8dp" />
+
+            android:backgroundTint="#D43B3B"/>
     </LinearLayout>
 
 </LinearLayout>

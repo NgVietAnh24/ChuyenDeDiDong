@@ -1,87 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#FFFFFF">
+    android:background="#F5F5F5"
+    android:padding="16dp">
 
     <!-- Nút quay lại -->
-    <ImageButton
-        android:id="@+id/backButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:scaleType="fitXY"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_back_arrow"
-        android:contentDescription="Quay lại" />
-
-    <!-- Tiêu đề Quản lý -->
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Quản lý"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#FF0000"
-        android:layout_marginTop="8dp"
-        android:layout_gravity="center_horizontal" />
+        android:layout_marginBottom="16dp">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_back_arrow"
+            android:contentDescription="Quay lại"
+            android:layout_alignParentStart="true"/>
+
+        <!-- Tiêu đề Quản lý -->
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quản lý"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
 
     <!-- Các mục quản lý -->
-    <TextView
-        android:id="@+id/manageAccountTextView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Quản lý tài khoản"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical" />
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginTop="8dp">
 
-    <TextView
-        android:id="@+id/manageDishTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Quản lý món ăn"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical" />
+        <TextView
+            android:id="@+id/manageAccountTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quản lý tài khoản"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:padding="12dp"
 
-    <TextView
-        android:id="@+id/manageTableTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Quản lý bàn"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical" />
+            android:drawablePadding="12dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical" />
 
-    <TextView
-        android:id="@+id/manageInvoiceTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Quản lý hóa đơn"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"/>
 
-    <TextView
-        android:id="@+id/statisticsTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Thống kê"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:padding="16dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:gravity="center_vertical" />
+        <TextView
+            android:id="@+id/manageDishTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quản lý món ăn"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:padding="12dp"
+
+            android:drawablePadding="12dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"/>
+
+        <TextView
+            android:id="@+id/manageTableTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quản lý bàn"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:padding="12dp"
+
+            android:drawablePadding="12dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"/>
+
+        <TextView
+            android:id="@+id/manageInvoiceTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quản lý hóa đơn"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:padding="12dp"
+
+            android:drawablePadding="12dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"/>
+
+        <TextView
+            android:id="@+id/statisticsTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thống kê"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:padding="12dp"
+
+            android:drawablePadding="12dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical" />
+    </LinearLayout>
 
     <!-- Đăng xuất -->
     <TextView
@@ -90,7 +138,11 @@
         android:layout_height="wrap_content"
         android:text="Đăng xuất"
         android:textSize="18sp"
-        android:textColor="#FF0000"
-        android:padding="16dp"
-        android:layout_gravity="end" />
+        android:textColor="#D43B3B"
+        android:padding="12dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+
+        android:drawablePadding="8dp"
+        android:background="?attr/selectableItemBackground"/>
 </LinearLayout>

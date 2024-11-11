@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -33,11 +34,14 @@ import vn.posicode.chuyende.R;
 public class SelectedFoodActivity extends AppCompatActivity {
     private ImageButton btnBack;
     private LinearLayout selectedFoodLayout;
-    private Button btnCancelOrder, btnPay;
+    private Button btnCancelOrder, btnPay, btnMakeAll;
     private EditText etNote;
     private TextView tvTableName;
-    private ArrayList<Food> selectedFoodList;
+    private ArrayList<SelectedFood> selectedFoodList;
     private FirebaseFirestore db;
+    private String tableId;
+    private String tableName;
+    private SelectedFoodViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,17 +49,122 @@ public class SelectedFoodActivity extends AppCompatActivity {
         setContentView(R.layout.activity_selected_food);
 
         db = FirebaseFirestore.getInstance();
+        viewModel = new ViewModelProvider(this).get(SelectedFoodViewModel.class);
         initializeViews();
         setupListeners();
 
-        selectedFoodList = getIntent().getParcelableArrayListExtra("selectedFoodList");
-        String tableName = getIntent().getStringExtra("tableName");
+        // Retrieve the list of selected foods and table name
+        ArrayList<Food> originalFoodList = getIntent().getParcelableArrayListExtra("selectedFoodList");
+        tableName = getIntent().getStringExtra("tableName");
         tvTableName.setText("Tên bàn: " + tableName);
 
-        if (selectedFoodList != null) {
-            for (Food food : selectedFoodList) {
-                addFoodView(food);
+        // Initialize the selected food list
+        selectedFoodList = viewModel.getSelectedFoodList().getValue();
+        if (selectedFoodList == null) {
+            selectedFoodList = new ArrayList<>();
+        }
+
+        // Convert Food to SelectedFood
+        if (originalFoodList != null && !originalFoodList.isEmpty()) {
+            for (Food food : originalFoodList) {
+                SelectedFood selectedFood = new SelectedFood(
+                        food.getId(),
+                        "", // tableId will be set later
+                        food.getName(),
+                        food.getPrice(),
+                        food.getImage()
+                );
+                selectedFoodList.add(selectedFood);
+                addFoodView(selectedFood);
             }
+            viewModel.setSelectedFoodList(selectedFoodList); // Set the list in ViewModel
+        } else {
+            // Load previously selected foods from ViewModel
+            selectedFoodList = viewModel.getSelectedFoodList().getValue();
+            if (selectedFoodList != null) {
+                for (SelectedFood food : selectedFoodList) {
+                    addFoodView(food);
+                }
+            }
+        }
+
+        // Set tableId
+        findAndSetTableId();
+    }
+
+    private void findAndSetTableId() {
+        db.collection("tables")
+                .whereEqualTo("name", tableName)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot tableDoc = queryDocumentSnapshots.getDocuments().get(0);
+                        tableId = tableDoc.getId();
+
+                        // Save selected foods to Firestore
+                        if (!selectedFoodList.isEmpty()) {
+                            for (SelectedFood selectedFood : selectedFoodList) {
+                                selectedFood.setTableId(tableId);
+                            }
+                            saveSelectedFoodsToFirebase();
+                        } else {
+                            loadSelectedFoodsFromFirebase();
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Firestore", "Error finding table info", e);
+                    Toast.makeText(this, "Có lỗi xảy ra khi tìm thông tin bàn", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void saveSelectedFoodsToFirebase() {
+        if (tableId != null && selectedFoodList != null && !selectedFoodList.isEmpty()) {
+            db.collection("selected_foods")
+                    .whereEqualTo("tableId", tableId)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                            doc.getReference().delete();
+                        }
+
+                        for (SelectedFood selectedFood : selectedFoodList) {
+                            selectedFood.setTableId(tableId);
+                            db.collection("selected_food s")
+                                    .add(selectedFood.toMap())
+                                    .addOnSuccessListener(documentReference -> {
+                                        selectedFood.setId(documentReference.getId());
+                                        Log.d("SaveSelectedFood", "Saved food: " + selectedFood.getFoodName());
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("SaveSelectedFood", "Error saving food", e);
+                                    });
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("SaveSelectedFood", "Error querying selected foods", e);
+                    });
+        }
+    }
+
+    private void loadSelectedFoodsFromFirebase() {
+        if (tableId != null) {
+            db.collection("selected_foods")
+                    .whereEqualTo("tableId", tableId)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        selectedFoodList.clear();
+                        selectedFoodLayout.removeAllViews();
+
+                        for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                            SelectedFood selectedFood = SelectedFood.fromDocumentSnapshot(doc);
+                            selectedFoodList.add(selectedFood);
+                            addFoodView(selectedFood);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("LoadSelectedFoods", "Error loading selected foods", e);
+                    });
         }
     }
 
@@ -64,23 +173,39 @@ public class SelectedFoodActivity extends AppCompatActivity {
         selectedFoodLayout = findViewById(R.id.selected_food_list);
         btnCancelOrder = findViewById(R.id.btnHuyDon);
         btnPay = findViewById(R.id.btnThanhToan);
+        btnMakeAll = findViewById(R.id.btnLamTatCa);
         etNote = findViewById(R.id.etGhiChu);
         tvTableName = findViewById(R.id.tvTieuDe);
     }
 
     private void setupListeners() {
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> {
+            viewModel.setSelectedFoodList(selectedFoodList);
+            saveSelectedFoodsToFirebase();
+            finish();
+        });
+
         btnCancelOrder.setOnClickListener(v -> {
             updateTableStatus("Trống");
             Toast.makeText(this, "Đã hủy đơn", Toast.LENGTH_SHORT).show();
             finish();
         });
+
         btnPay.setOnClickListener(v -> createAndShowInvoice());
+
+        btnMakeAll.setOnClickListener(v -> {
+            for (int i = 0; i < selectedFoodLayout.getChildCount(); i++) {
+                View foodView = selectedFoodLayout.getChildAt(i);
+                TextView tvStatus = foodView.findViewById(R.id.tvTrangThai);
+                tvStatus.setText("Đã chọn làm");
+            }
+            Toast.makeText(this, "Đã chọn làm tất cả các món", Toast.LENGTH_SHORT).show();
+        });
     }
 
-    private void addFoodView(Food food) {
+    private void addFoodView(SelectedFood selectedFood) {
         View foodView = LayoutInflater.from(this).inflate(R.layout.selected_food_item, selectedFoodLayout, false);
-        foodView.setTag(food.getId());
+        foodView.setTag(selectedFood.getFoodId());
 
         ImageView imgFood = foodView.findViewById(R.id.imgMonAn);
         TextView tvFoodName = foodView.findViewById(R.id.tvTenMonAn);
@@ -89,60 +214,67 @@ public class SelectedFoodActivity extends AppCompatActivity {
         TextView tvQuantity = foodView.findViewById(R.id.tvSoLuong);
 
         Glide.with(this)
-                .load(food.getImage())
+                .load(selectedFood.getImageUrl())
                 .placeholder(R.drawable.placeholder_image)
                 .into(imgFood);
-        tvFoodName.setText(food.getName());
-        // Chuyển đổi và định dạng giá tiền sang VND
-        tvFoodPrice.setText(String.format("%,d VNĐ", (long)(food.getPrice() )));
-        tvStatus.setText("Chưa được đặt.");
-        tvQuantity.setText("1");
 
-        setupFoodViewListeners(foodView, food, tvStatus, tvQuantity);
+        tvFoodName.setText(selectedFood.getFoodName());
+        tvFoodPrice.setText(String.format("%,d VNĐ", (long)(selectedFood.getPrice())));
+        tvStatus.setText(selectedFood.getStatus());
+        tvQuantity.setText(String.valueOf(selectedFood.getQuantity()));
+
+        setupFoodViewListeners(foodView, selectedFood, tvStatus, tvQuantity);
         selectedFoodLayout.addView(foodView);
     }
 
-    private void setupFoodViewListeners(View foodView, Food food, TextView tvStatus, TextView tvQuantity) {
+    private void setupFoodViewListeners(View foodView, SelectedFood selectedFood, TextView tvStatus, TextView tvQuantity) {
         foodView.findViewById(R.id.btnChonLam).setOnClickListener(v -> {
-            tvStatus.setText("Đã chọn làm.");
-            Toast.makeText(this, "Đã chọn làm món " + food.getName(), Toast.LENGTH_SHORT).show();
+            selectedFood.setStatus("Đã chọn làm");
+            tvStatus.setText("Đã chọn làm");
+            updateSelectedFoodInFirestore(selectedFood);
+            Toast.makeText(this, "Đã chọn làm món " + selectedFood.getFoodName(), Toast.LENGTH_SHORT).show();
         });
 
         foodView.findViewById(R.id.btnDaLay).setOnClickListener(v -> {
-            tvStatus.setText("Đã lấy.");
-            Toast.makeText(this, "Đã lấy món " + food.getName(), Toast.LENGTH_SHORT).show();
+            selectedFood.setStatus("Đã lấy");
+            tvStatus.setText("Đã lấy");
+            updateSelectedFoodInFirestore(selectedFood);
+            Toast.makeText(this, "Đã lấy món " + selectedFood .getFoodName(), Toast.LENGTH_SHORT).show();
         });
 
         foodView.findViewById(R.id.btnXoa).setOnClickListener(v -> {
             selectedFoodLayout.removeView(foodView);
-            selectedFoodList.remove(food);
-            Toast.makeText(this, "Đã xóa món " + food.getName(), Toast.LENGTH_SHORT).show();
+            selectedFoodList.remove(selectedFood);
+            if (selectedFood.getId() != null) {
+                db.collection("selected_foods").document(selectedFood.getId()).delete();
+            }
+            Toast.makeText(this, "Đã xóa món " + selectedFood.getFoodName(), Toast.LENGTH_SHORT).show();
         });
 
         foodView.findViewById(R.id.btnTang).setOnClickListener(v -> {
             int quantity = Integer.parseInt(tvQuantity.getText().toString()) + 1;
             tvQuantity.setText(String.valueOf(quantity));
+            selectedFood.setQuantity(quantity);
+            updateSelectedFoodInFirestore(selectedFood);
         });
 
         foodView.findViewById(R.id.btnGiam).setOnClickListener(v -> {
             int quantity = Integer.parseInt(tvQuantity.getText().toString());
             if (quantity > 1) {
                 tvQuantity.setText(String.valueOf(quantity - 1));
+                selectedFood.setQuantity(quantity - 1);
+                updateSelectedFoodInFirestore(selectedFood);
             }
         });
     }
 
     private void createAndShowInvoice() {
-        String tableName = tvTableName.getText().toString().replace("Tên bàn: ", "");
-
         db.collection("tables")
                 .whereEqualTo("name", tableName)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
                         DocumentSnapshot tableDoc = queryDocumentSnapshots.getDocuments().get(0);
-                        String tableId = tableDoc.getId();
-
                         createInvoiceInFirestore(tableDoc, invoice -> {
                             Intent intent = new Intent(this, InvoiceDetailActivity.class);
                             intent.putExtra("invoiceId", invoice.getId());
@@ -152,7 +284,7 @@ public class SelectedFoodActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Lỗi khi tìm thông tin bàn", e);
+                    Log.e("Firestore", "Error finding table info", e);
                     Toast.makeText(this, "Có lỗi xảy ra khi tìm thông tin bàn", Toast.LENGTH_SHORT).show();
                 });
     }
@@ -179,7 +311,7 @@ public class SelectedFoodActivity extends AppCompatActivity {
                 .add(invoiceData)
                 .addOnSuccessListener(documentReference -> {
                     String invoiceId = documentReference.getId();
-                    addInvoiceItems(invoiceId, totalAmount);
+                    addInvoiceItems(invoiceId);
 
                     Invoice invoice = new Invoice();
                     invoice.setId(invoiceId);
@@ -205,41 +337,28 @@ public class SelectedFoodActivity extends AppCompatActivity {
 
     private double calculateTotalAmount() {
         double totalAmount = 0;
-        for (Food food : selectedFoodList) {
-            View foodView = selectedFoodLayout.findViewWithTag(food.getId());
-            if (foodView != null) {
-                TextView tvQuantity = foodView.findViewById(R.id.tvSoLuong);
-                int quantity = Integer.parseInt(tvQuantity.getText().toString());
-                // Chuyển đổi giá tiền sang VND
-                totalAmount += (food.getPrice()) * quantity;
-            }
+        for (SelectedFood selectedFood : selectedFoodList) {
+            totalAmount += selectedFood.getPrice() * selectedFood.getQuantity();
         }
         return totalAmount;
     }
 
-    private void addInvoiceItems(String invoiceId, double totalAmount) {
-        for (Food food : selectedFoodList) {
-            View foodView = selectedFoodLayout.findViewWithTag(food.getId());
-            if (foodView != null) {
-                TextView tvQuantity = foodView.findViewById(R.id.tvSoLuong);
-                int quantity = Integer.parseInt(tvQuantity.getText().toString());
-                Map<String, Object> itemData = new HashMap<>();
-                itemData.put("hoa_don_id", invoiceId);
-                itemData.put("ten_mon_an", food.getName());
-                itemData.put("so_luong", quantity);
-                // Chuyển đổi giá tiền sang VND
-                itemData.put("gia", (food.getPrice()));
-                db.collection("invoice_items")
-                        .add(itemData)
-                        .addOnFailureListener(e -> {
-                            Log.e("InvoiceItems", "Error adding invoice items", e);
-                        });
-            }
+    private void addInvoiceItems(String invoiceId) {
+        for (SelectedFood selectedFood : selectedFoodList) {
+            Map<String, Object> itemData = new HashMap<>();
+            itemData.put("hoa_don_id", invoiceId);
+            itemData.put("ten_mon_an", selectedFood.getFoodName());
+            itemData.put("so_luong", selectedFood.getQuantity());
+            itemData.put("gia", selectedFood.getPrice());
+            db.collection("invoice_items")
+                    .add(itemData)
+                    .addOnFailureListener(e -> {
+                        Log.e("InvoiceItems ", "Error adding invoice items", e);
+                    });
         }
     }
 
     private void updateTableStatus(String status) {
-        String tableName = tvTableName.getText().toString().replace("Tên bàn: ", "");
         db.collection("tables")
                 .whereEqualTo("name", tableName)
                 .get()
@@ -253,15 +372,45 @@ public class SelectedFoodActivity extends AppCompatActivity {
                         db.collection("tables").document(tableId)
                                 .update(tableData)
                                 .addOnSuccessListener(aVoid -> {
-                                    Log.d("Firestore", "Cập nhật trạng thái bàn thành công");
+                                    Log.d("Firestore", "Updated table status successfully");
                                 })
                                 .addOnFailureListener(e -> {
-                                    Log.e("Firestore", "Lỗi khi cập nhật trạng thái bàn", e);
+                                    Log.e("Firestore", "Error updating table status", e);
                                 });
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Lỗi khi tìm thông tin bàn", e);
+                    Log.e("Firestore", "Error finding table info", e);
                 });
+    }
+
+    private void updateSelectedFoodInFirestore(SelectedFood selectedFood) {
+        if (selectedFood.getId() != null) {
+            db.collection("selected_foods").document(selectedFood.getId())
+                    .update(selectedFood.toMap())
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d("UpdateSelectedFood", "Updated food: " + selectedFood.getFoodName());
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e("UpdateSelectedFood", "Error updating food", e);
+                    });
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("selectedFoodList", selectedFoodList);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        selectedFoodList = savedInstanceState.getParcelableArrayList("selectedFoodList");
+        if (selectedFoodList != null) {
+            for (SelectedFood selectedFood : selectedFoodList) {
+                addFoodView(selectedFood);
+            }
+        }
     }
 }

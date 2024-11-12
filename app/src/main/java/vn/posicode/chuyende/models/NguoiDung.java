@@ -1,6 +1,5 @@
 package vn.posicode.chuyende.models;
 
-import java.text.DateFormat;
 
 public class NguoiDung {
     private String uid;
@@ -125,6 +124,8 @@ public class NguoiDung {
                 return "Thu ngân";
             case 3:
                 return "Đầu bếp";
+            case 4:
+                return "Khách hàng";
             default:
                 return "Không xác định";
         }

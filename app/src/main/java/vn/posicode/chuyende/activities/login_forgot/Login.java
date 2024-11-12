@@ -27,8 +27,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import vn.posicode.chuyende.HomeQuanLy;
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.TrangThaiDanhSachBan.TableListActivity;
 import vn.posicode.chuyende.activities.Loading;
 import vn.posicode.chuyende.activities.homes.HomeDauBep;
 import vn.posicode.chuyende.activities.homes.HomeNhanVien;
@@ -94,7 +94,7 @@ public class Login extends AppCompatActivity {
                                                             // Điều hướng người dùng dựa trên role
                                                             switch (role) {
                                                                 case 0:
-                                                                    startActivity(new Intent(Login.this, HomeQuanLy.class));
+                                                                    startActivity(new Intent(Login.this, TableListActivity.class));
                                                                     break;
                                                                 case 1:
                                                                     startActivity(new Intent(Login.this, HomeNhanVien.class));
@@ -107,7 +107,7 @@ public class Login extends AppCompatActivity {
                                                                     break;
                                                                 default:
                                                                     // Vai trò không xác định, quay về màn hình chính
-                                                                    startActivity(new Intent(Login.this, HomeQuanLy.class));
+                                                                    startActivity(new Intent(Login.this, TableListActivity.class));
                                                                     break;
                                                             }
                                                         } else {

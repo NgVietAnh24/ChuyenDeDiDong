@@ -16,7 +16,7 @@
             android:id="@+id/btnBack"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:background="@drawable/back"
+            android:background="@drawable/ic_back_arrow"
             android:scaleType="fitXY" />
 
         <TextView
@@ -257,7 +257,8 @@
             android:textColor="@color/textColorTitle"
             android:textStyle="bold" />
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">

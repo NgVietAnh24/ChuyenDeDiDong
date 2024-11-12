@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import vn.posicode.chuyende.HomeQuanLy;
+import vn.posicode.chuyende.Manage.ManageActivity;
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapters.NguoiDungAdapter;
 import vn.posicode.chuyende.models.NguoiDung;
@@ -210,6 +210,14 @@ public class QLNhanVien extends AppCompatActivity {
             }
         });
 
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(RESULT_OK); // Trả về kết quả OK
+                finish(); // Kết thúc Activity
+            }
+        });
+
         btnSua.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -318,7 +326,7 @@ public class QLNhanVien extends AppCompatActivity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(QLNhanVien.this, HomeQuanLy.class);
+                Intent intent = new Intent(QLNhanVien.this, ManageActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -636,10 +644,11 @@ public class QLNhanVien extends AppCompatActivity {
                             list.clear(); // Xóa dữ liệu cũ
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 NguoiDung userData = document.toObject(NguoiDung.class);
-                                list.add(userData);
-                                Log.d("VVV", "getData: " + list.add(userData));
+                                // Kiểm tra xem người dùng đã tồn tại trong danh sách chưa
+                                if (!list.contains(userData)) {
+                                    list.add(userData);
+                                }
                             }
-                            Log.d(TAG, "Getting documents: ");
                             nguoiDungAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu mới
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());

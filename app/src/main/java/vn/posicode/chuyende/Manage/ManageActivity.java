@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import vn.posicode.chuyende.QuanLyBan.MainActivity;
 import vn.posicode.chuyende.QuanLyHoaDon.InvoiceListActivity;
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.activities.login_forgot.Login;
+import vn.posicode.chuyende.activities.manages.QLNhanVien;
 
 public class ManageActivity extends AppCompatActivity {
     @Override
@@ -63,6 +65,26 @@ public class ManageActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Chuyển đến màn hình danh sách hóa đơn (InvoiceListActivity)
                 Intent intent = new Intent(ManageActivity.this, InvoiceListActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        // Quản lý nhân viên
+        manageAccountTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Chuyển đến màn hình danh sách hóa đơn (QLNhanVien)
+                Intent intent = new Intent(ManageActivity.this, QLNhanVien.class);
+                startActivity(intent);
+            }
+        });
+
+        // Đăng xuất
+        logoutTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Chuyển đến màn hình login (Login)
+                Intent intent = new Intent(ManageActivity.this, Login.class);
                 startActivity(intent);
             }
         });

@@ -22,5 +22,9 @@
     <color name="colorPrimaryDark">#8B0000</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="dark_red">#A01111</color>
+    <color name="grey">#8E8A8A</color>
+    <color name="light_pink">#F7E9E9</color>
+
 </resources>
 

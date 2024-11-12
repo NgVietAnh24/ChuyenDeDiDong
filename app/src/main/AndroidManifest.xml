@@ -95,6 +95,11 @@
             android:name=".DanhSachMonAn.SelectedFoodActivity"
             android:exported="true">
         </activity>
+
+        <activity
+            android:name=".activities.ThongKeActivity"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

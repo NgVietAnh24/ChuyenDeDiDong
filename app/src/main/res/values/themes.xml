@@ -4,8 +4,8 @@
     <style name="Base.Theme.ChuyenDe" parent="Theme.Material3.DayNight">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-         <item name="windowNoTitle">true</item>
-         <item name="windowActionBar">false</item>
-         <item name="android:windowFullscreen">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">false</item>
     </style>
 </resources>

@@ -13,7 +13,7 @@
         android:theme="@style/Theme.ChuyenDe"
         tools:targetApi="31">
         <activity
-            android:name=".activities.DanhSachMon"
+            android:name=".activities.MonAnDaChonActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,28 +21,32 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<!--        Khai báo màn hình Danh mục con-->
-<!--        <activity android:name=".activities.CategoryItemActivity" />-->
+        <!--        Khai báo màn hình Danh mục con-->
+        <!--        <activity android:name=".activities.CategoryItemActivity" />-->
 
-<!--        Khai báo màn hình danh mục-->
+        <!--        Khai báo màn hình danh mục-->
         <activity android:name=".activities.CategoryActivity" />
         <activity android:name=".activities.MainActivity" />
+        <activity android:name=".activities.DauBepActivity" />
+        <activity android:name=".activities.LichSuDauBep" />
+
+<!--        <activity-->
+<!--            android:name=".activities.MonAnDaChon"-->
+<!--            android:exported="false" />-->
 
     </application>
-<!--    Quyền truy cập để đọc dữ liệu từ bộ nhớ ngoài của thiết bị-->
+    <!--    Quyền truy cập để đọc dữ liệu từ bộ nhớ ngoài của thiết bị-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<!--    Quyền truy cập Internet-->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!--    Quyền truy cập Internet-->
+    <uses-permission android:name="android.permission.INTERNET" />
 
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-
 
 
 </manifest>

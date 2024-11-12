@@ -1,9 +1,12 @@
 package vn.posicode.chuyende.activities;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +29,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -47,23 +52,17 @@ public class DanhSachMon extends AppCompatActivity {
     private EditText searchBar;
     private ImageView searchIcon;
     private TextView tv_null;
-    private Button btnmondachon;
+    private Button btnMonDaChon;
     private List<Food> selectedFoods = new ArrayList<>(); // Danh sách món ăn đã chọn
+    private int tongMonDaChon = 0;
+    private HashMap<String, Integer> monDaChon = new HashMap<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.danhsachmon);
+        Event();
 
-        // Khởi tạo RecyclerView cho món ăn
-        listMonAn = findViewById(R.id.foodListRecyclerView);
-        listCate = findViewById(R.id.categoryRecyclerView);
-        listMonAn.setLayoutManager(new LinearLayoutManager(this));
-        // khởi tạo đối tượng tìm kiếm
-        searchBar = findViewById(R.id.searchBar);
-        searchIcon = findViewById(R.id.searchIcon);
-        tv_null = findViewById(R.id.tv_null);
-        btnmondachon = findViewById(R.id.btnmondachon);
 
         LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         listCate.setLayoutManager(horizontalLayoutManager);
@@ -71,17 +70,33 @@ public class DanhSachMon extends AppCompatActivity {
         foodList = new ArrayList<>();
         foodListSearch = new ArrayList<>(foodList);
         cateList = new ArrayList<>();
-
+        listMonAn.setLayoutManager(new LinearLayoutManager(this));
         listCate.setAdapter(cateAdapter);
 
 
-        monAnAdapter = new MonAnAdapter(DanhSachMon.this,foodListSearch);
-        monAnAdapter.setOnItemClickListener(new MonAnAdapter.OnItemClickListener() {
+//        monAnAdapter = new MonAnAdapter(DanhSachMon.this, foodListSearch);
+//        listMonAn.setAdapter(monAnAdapter);
+//        btnmondachon.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(DanhSachMon.this, MonAnDaChon.class);
+//                startActivity(intent); // Bắt đầu Activity mới
+//            }
+//        });
+        Log.d("ABC","-----------------------");
+
+        btnMonDaChon.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(Food food) {
-                Toast.makeText(DanhSachMon.this,"Bạn đã chọn món:"+food.getName(),Toast.LENGTH_SHORT).show();
+            public void onClick(View view) {
+                // Chuyển danh sách món đã chọn (monDaChon) qua Intent
+                Intent intent = new Intent(DanhSachMon.this, MonAnDaChonActivity.class);
+                ArrayList<String> selectedFoodIds = new ArrayList<>(monDaChon.keySet()); // Lấy danh sách các món ăn đã chọn
+                intent.putStringArrayListExtra("selectedFoods", selectedFoodIds); // Truyền qua Intent
+                startActivity(intent); // Bắt đầu Activity mới
+
             }
         });
+
 
 
         // Tải dữ liệu từ Firestore
@@ -123,16 +138,17 @@ public class DanhSachMon extends AppCompatActivity {
             public void onCategoryClick(String categoryId, String name) {
                 // Gọi phương thức lọc món ăn theo danh mục đã chọn
 
-                    monAnAdapter.LocDanhMuc(categoryId, name);
+                monAnAdapter.LocDanhMuc(categoryId, name);
 
             }
         });
-
-        // danh sách món đã chọn
-        btnmondachon.setOnClickListener(new View.OnClickListener() {
+        monAnAdapter.setOnItemClickListener(new MonAnAdapter.OnItemClickListener() {
             @Override
-            public void onClick(View view) {
-
+            public void onItemClick(int position) {
+//             count++;
+//             btnmondachon.setText("Món đã chọn: " + "("+count+")");
+                Food food = foodList.get(position);
+                showQuantityDialog(food.getId());
             }
         });
 
@@ -144,7 +160,7 @@ public class DanhSachMon extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    SearchFood(charSequence.toString());
+                SearchFood(charSequence.toString());
             }
 
             @Override
@@ -153,6 +169,18 @@ public class DanhSachMon extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void Event() {
+        // Khởi tạo RecyclerView cho món ăn
+        listMonAn = findViewById(R.id.foodListRecyclerView);
+        listCate = findViewById(R.id.categoryRecyclerView);
+
+        // khởi tạo đối tượng tìm kiếm
+        searchBar = findViewById(R.id.searchBar);
+        searchIcon = findViewById(R.id.searchIcon);
+        tv_null = findViewById(R.id.tv_null);
+        btnMonDaChon = findViewById(R.id.btnmondachon);
     }
 
     // Hàm tìm kiếm món ăn
@@ -254,5 +282,57 @@ public class DanhSachMon extends AppCompatActivity {
 
     public List<Food> getFoodList() {
         return foodList;
+    }
+
+    public void showQuantityDialog(String foodId) {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+        builder.setCancelable(true);
+        TextView tvQuantity = dialogView.findViewById(R.id.tv_quantity);
+        TextView btnDecrease = dialogView.findViewById(R.id.btn_decrease);
+        TextView btnIncrease = dialogView.findViewById(R.id.btn_increase);
+
+        final int[] quantity = {monDaChon.getOrDefault(foodId, 1)};
+        tvQuantity.setText(String.valueOf(quantity[0]));
+
+        btnDecrease.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (quantity[0] > 0) {
+                    quantity[0]--;
+                    tvQuantity.setText(String.valueOf(quantity[0]));
+                }
+            }
+        });
+        btnIncrease.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                quantity[0]++;
+                tvQuantity.setText(String.valueOf(quantity[0]));
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                if (quantity[0] == 0) {
+                    monDaChon.remove(foodId);
+                } else {
+                    monDaChon.put(foodId, quantity[0]);
+                }
+//                Reset tổng món để tính lại
+                tongMonDaChon = 0;
+                for (Integer quanlity : monDaChon.values()) {
+                    tongMonDaChon += quanlity;
+                }
+                btnMonDaChon.setText("Món đã chọn: " + tongMonDaChon);
+                if (tongMonDaChon == 0) {
+                    btnMonDaChon.setText("Món đã chọn");
+                }
+            }
+        });
     }
 }

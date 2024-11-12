@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,7 +23,8 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.MonAnViewHol
     private final Context context;
     private List<Food> foodList;
     private final List<Food> foodListFull; // Lưu lại danh sách món ăn ban đầu
-   private OnItemClickListener onItemClickListener;
+    private static OnItemClickListener onItemClickListener;
+    private List<Food> selectedFoods = new ArrayList<>();
 
     // Constructor
     public MonAnAdapter(Context context, List<Food> foodList) {
@@ -34,12 +36,15 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.MonAnViewHol
 
     // Interface để xử lý sự kiện nhấn chọn
     public interface OnItemClickListener {
-        void onItemClick(Food food);
+        void onItemClick(int position);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
+
+
+
 
     @NonNull
     @Override
@@ -56,6 +61,7 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.MonAnViewHol
         holder.foodNameTextView.setText(food.getName());
         holder.foodPriceTextView.setText(food.getPrice());
 
+
         // Tải ảnh từ URL và hiển thị
         Glide.with(context)
                 .load(food.getImage()) // URL của ảnh
@@ -64,12 +70,19 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.MonAnViewHol
         Log.d("MonAnAdapter", "Current foodList size: " + foodList.size());
         Log.d("MonAnAdapter", "Current foodListFull size: " + foodListFull.size());
 
-        // Xử lý sự kiện nhấn vào item
-        holder.itemView.setOnClickListener(v -> {
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClick(food);
-            }
-        });
+//        // Xử lý sự kiện nhấn vào item
+//        holder.itemView.setOnClickListener(v -> {
+//            if (onItemClickListener != null) {
+//                onItemClickListener.onItemClick(food);
+//            }
+//        });
+
+//        holder.itemView.setOnClickListener(v -> {
+//            if (!selectedFoods.contains(food)) {
+//                selectedFoods.add(food);  // Lưu món ăn đã chọn
+//                Toast.makeText(context, "Món đã chọn: " + food.getName(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     @Override
@@ -123,6 +136,19 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.MonAnViewHol
             foodNameTextView = itemView.findViewById(R.id.textViewName);
             foodPriceTextView = itemView.findViewById(R.id.textViewPrice);
             foodImageView = itemView.findViewById(R.id.imageViewFood); // Khởi tạo ImageView
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (onItemClickListener != null)
+                    {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION)
+                        {
+                            onItemClickListener.onItemClick(position);
+                        }
+                    }
+                }
+            });
         }
     }
 }

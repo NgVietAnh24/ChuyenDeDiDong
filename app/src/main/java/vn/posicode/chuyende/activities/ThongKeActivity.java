@@ -152,9 +152,9 @@ public class ThongKeActivity extends AppCompatActivity {
                 adapterYear = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, yearList);
                 adapterYear.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinYear.setAdapter(adapterYear);
-
                 spinYear.setSelection(0);
                 docDoanhThu(yearList.get(0));
+
             }
         });
     }
@@ -247,7 +247,6 @@ private void ghiDuLieuTuInVoices() {
                     Date ngayTaoDate = null;
                     if (document.contains("ngay_tao")) {
                         String ngayTaoString = document.getString("ngay_tao");
-
                         if (ngayTaoString != null) {
                             try {
                                 // Giả sử ngày được lưu dưới dạng "dd/MM/yyyy"

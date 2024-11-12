@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 import java.util.ArrayList;
 
 import vn.posicode.chuyende.R;
-import vn.posicode.chuyende.adapter.ListTable_Adapter;
+import vn.posicode.chuyende.adapters.ListTable_Adapter;
 import vn.posicode.chuyende.models.ListTable;
 
 public class MainHienThiActivity extends AppCompatActivity {

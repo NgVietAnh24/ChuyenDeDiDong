@@ -10,6 +10,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+//        Url của MpChart
         maven { url = uri("https://jitpack.io") }
     }
 }

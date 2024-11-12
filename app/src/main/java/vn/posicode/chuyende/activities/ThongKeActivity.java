@@ -38,6 +38,7 @@ import java.util.Map;
 
 import vn.posicode.chuyende.Manage.ManageActivity;
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.TrangThaiDanhSachBan.TableListActivity;
 import vn.posicode.chuyende.models.ThongKeModels;
 
 public class ThongKeActivity extends AppCompatActivity {
@@ -76,10 +77,8 @@ public class ThongKeActivity extends AppCompatActivity {
         btnBackManage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ThongKeActivity.this, ManageActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                Intent intent = new Intent(ThongKeActivity.this, TableListActivity.class);
                 startActivity(intent);
-                finish(); // Kết thúc ThongKeActivity
             }
         });
 

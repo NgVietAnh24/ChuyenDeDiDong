@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "vn.posicode.chuyende"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "vn.posicode.chuyende"
@@ -90,6 +90,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 
     implementation("com.google.code.gson:gson:2.8.9")
+//    Thư viện MPChart
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }

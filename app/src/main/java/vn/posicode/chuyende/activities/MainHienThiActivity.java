@@ -23,11 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -35,8 +32,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.Normalizer;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import java.util.ArrayList;
@@ -45,7 +40,7 @@ import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.ListTable_Adapter;
 import vn.posicode.chuyende.models.ListTable;
 
-public class MainActivity extends AppCompatActivity {
+public class MainHienThiActivity extends AppCompatActivity {
     private RecyclerView recyclerView_table;
     private ListTable_Adapter table_adapter;
     private ArrayList<ListTable> listTable;
@@ -61,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_hienthi);
 
         connectXML();
         //ghiDulieu();
@@ -100,13 +95,13 @@ public class MainActivity extends AppCompatActivity {
 tv_ql_taikhoan.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View view) {
-        Toast.makeText(MainActivity.this,"Quan li tai khoan",Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainHienThiActivity.this,"Quan li tai khoan",Toast.LENGTH_SHORT).show();
     }
 });
 tv_thongke.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View view) {
-        Intent intent = new Intent(MainActivity.this, ThongKeActivity.class);
+        Intent intent = new Intent(MainHienThiActivity.this, ThongKeActivity.class);
         startActivity(intent);
     }
 });

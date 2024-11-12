@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.activities.ThongKeActivity;
 import vn.posicode.chuyende.activities.login_forgot.Login;
 
 public class ManageNhanVien extends AppCompatActivity {
@@ -29,11 +30,10 @@ public class ManageNhanVien extends AppCompatActivity {
         });
 
         // Lấy các TextView từ layout
-        TextView statisticsTextView = findViewById(R.id.statisticsTextView);
         TextView logoutTextView = findViewById(R.id.logoutTextView);
 
         // Thêm gạch dưới cho từng TextView
-        statisticsTextView.setPaintFlags(statisticsTextView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
         logoutTextView.setPaintFlags(logoutTextView.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
 

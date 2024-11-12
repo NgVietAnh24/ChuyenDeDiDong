@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChuyenDe">
         <activity
-            android:name=".activities.DatMonAn"
+            android:name=".HomeQuanLy"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".HomeQuanLy"
+            android:name=".activities.DatMonAn"
             android:exported="false" />
         <activity
             android:name=".activities.manages.QLBan"

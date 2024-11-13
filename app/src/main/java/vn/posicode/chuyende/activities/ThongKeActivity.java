@@ -1,6 +1,7 @@
 package vn.posicode.chuyende.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -23,8 +25,11 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -48,6 +53,7 @@ public class ThongKeActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapterYear;
     private LineChart lineChartDoanhThu;
     private List<ThongKeModels> doanhThuList;
+    private String selectedYear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,12 +65,16 @@ public class ThongKeActivity extends AppCompatActivity {
         ghiDuLieuTuInVoices();
         docNamTuFireStore();
 
+        SharedPreferences prefs = getSharedPreferences("ThongKePrefs", MODE_PRIVATE);
+        selectedYear = prefs.getString("selectedYear", null);
+
         spinYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String selectedYear = yearList.get(i);
-
+                selectedYear = yearList.get(i);
                 docDoanhThu(selectedYear);
+
+                prefs.edit().putString("selectedYear", selectedYear).apply();
             }
 
             @Override
@@ -81,6 +91,7 @@ public class ThongKeActivity extends AppCompatActivity {
         });
 
     }
+
     private void connectXML() {
         tvTongTien = findViewById(R.id.tvTongTien);
         spinYear = findViewById(R.id.spinYear);
@@ -132,43 +143,60 @@ public class ThongKeActivity extends AppCompatActivity {
 
     //    Doc du lieu nam de truyen vao spinner
     private void docNamTuFireStore() {
-        db.collection("ThongKe").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    // Lấy năm từ tài liệu
-                    int year = document.getLong("nam").intValue();
-                    if (!yearList.contains(String.valueOf(year))) {
-                        yearList.add(String.valueOf(year)); // Thêm năm vào danh sách
-                    }
+        db.collection("ThongKe").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    return;
                 }
-                yearList.sort((y1, y2) -> Integer.parseInt(y2) - Integer.parseInt(y1));
-                adapterYear = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, yearList);
-                adapterYear.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                spinYear.setAdapter(adapterYear);
-                spinYear.setSelection(0);
-                docDoanhThu(yearList.get(0));
+                if (value != null) {
+                    yearList.clear();
+                    for (QueryDocumentSnapshot document : value) {
+                        // Lấy năm từ tài liệu
+                        int year = document.getLong("nam").intValue();
+                        if (!yearList.contains(String.valueOf(year))) {
+                            yearList.add(String.valueOf(year)); // Thêm năm vào danh sách
+                        }
+                    }
+                    yearList.sort((y1, y2) -> Integer.parseInt(y2) - Integer.parseInt(y1));
+                    adapterYear = new ArrayAdapter<>(ThongKeActivity.this, android.R.layout.simple_spinner_item, yearList);
+                    adapterYear.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinYear.setAdapter(adapterYear);
+                    if (selectedYear != null && yearList.contains(selectedYear)) {
+                        spinYear.setSelection(yearList.indexOf(selectedYear));
+                    } else {
+                        spinYear.setSelection(0);
+                        selectedYear = yearList.get(0);
+                    }
+                    docDoanhThu(selectedYear);
 
+                }
             }
         });
     }
-//Doc du lieu doanh thu
+
+    //Doc du lieu doanh thu
     private void docDoanhThu(String year) {
-        doanhThuList.clear(); // Làm sạch danh sách doanh thu trước khi lấy dữ liệu mới
+        doanhThuList.clear();
         db.collection("ThongKe").whereEqualTo("nam", Integer.parseInt(year))
-                .get().addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        double tongTienNam = 0;
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            ThongKeModels thongKe = document.toObject(ThongKeModels.class);
-                            doanhThuList.add(thongKe);
-                            tongTienNam += thongKe.getTong_tien_thang();
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            return;
                         }
-                        updateLineChart(); // Cập nhật biểu đồ
-                        DecimalFormat deci = new DecimalFormat("#,###");
-                        String tongTienDeciMal = deci.format(tongTienNam);
-                        tvTongTien.setText("Tổng tiền trong năm: " + tongTienDeciMal);
-                    } else {
-                        Toast.makeText(this, "Error getting documents: " + task.getException(), Toast.LENGTH_SHORT).show();
+                        if (value != null) {
+                            double tongTienNam = 0;
+                            for (QueryDocumentSnapshot document : value) {
+                                ThongKeModels thongKe = document.toObject(ThongKeModels.class);
+                                doanhThuList.add(thongKe);
+                                tongTienNam += thongKe.getTong_tien_thang();
+                            }
+                            updateLineChart();
+                            DecimalFormat deci = new DecimalFormat("#,###");
+                            String tongTienDeciMal = deci.format(tongTienNam);
+                            tvTongTien.setText("Tổng tiền trong năm: " + tongTienDeciMal);
+                        }
                     }
                 });
     }
@@ -227,71 +255,77 @@ public class ThongKeActivity extends AppCompatActivity {
         lineChartDoanhThu.getAxisRight().setEnabled(false);//Tat truc y ben phai
         lineChartDoanhThu.invalidate();
     }
-//    Ham doc du lieu tu invoices va ghi vao ThongKe
-private void ghiDuLieuTuInVoices() {
-    db.collection("invoices").get().addOnCompleteListener(task -> {
-        if (task.isSuccessful()) {
-            Map<String, Double> monthlyTotals = new HashMap<>();
-            Map<String, List<String>> monthlyHdIds = new HashMap<>();
-            for (QueryDocumentSnapshot document : task.getResult()) {
-                Double tongTien = document.getDouble("tong_tien");
-                if (tongTien != null) {
-                    String hdId = document.getId();
-                    Date ngayTaoDate = null;
-                    if (document.contains("ngay_tao")) {
-                        String ngayTaoString = document.getString("ngay_tao");
-                        if (ngayTaoString != null) {
-                            try {
-                                // Giả sử ngày được lưu dưới dạng "dd/MM/yyyy"
-                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-                                ngayTaoDate = sdf.parse(ngayTaoString);
-                            } catch (Exception e) {
-                                Log.w("Firestore", "Lỗi khi chuyển đổi ngày: " + ngayTaoString, e);
+
+    //    Ham doc du lieu tu invoices va ghi vao ThongKe
+    private void ghiDuLieuTuInVoices() {
+        db.collection("invoices").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    return;
+                }
+                if (value != null) {
+                    Map<String, Double> monthlyTotals = new HashMap<>();
+                    Map<String, List<String>> monthlyHdIds = new HashMap<>();
+                    for (QueryDocumentSnapshot document : value) {
+                        Double tongTien = document.getDouble("tong_tien");
+                        if (tongTien != null) {
+                            String hdId = document.getId();
+                            Date ngayTaoDate = null;
+                            if (document.contains("ngay_tao")) {
+                                String ngayTaoString = document.getString("ngay_tao");
+                                if (ngayTaoString != null) {
+                                    try {
+                                        // Giả sử ngày được lưu dưới dạng "dd/MM/yyyy"
+                                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                                        ngayTaoDate = sdf.parse(ngayTaoString);
+                                    } catch (Exception e) {
+                                        Log.w("Firestore", "Lỗi khi chuyển đổi ngày: " + ngayTaoString, e);
+                                    }
+                                }
+                            }
+                            // Nếu có ngày tạo hợp lệ, tiếp tục xử lý
+                            if (ngayTaoDate != null) {
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(ngayTaoDate);
+                                int thang = cal.get(Calendar.MONTH) + 1;
+                                int nam = cal.get(Calendar.YEAR);
+                                String monthKey = nam + "_" + thang;
+                                monthlyTotals.put(monthKey, monthlyTotals.getOrDefault(monthKey, 0.0) + tongTien);
+                                monthlyHdIds.putIfAbsent(monthKey, new ArrayList<>());
+                                monthlyHdIds.get(monthKey).add(hdId);
+                            } else {
+                                Log.w("Firestore", "Trường 'ngay_tao' không hợp lệ trong tài liệu HoaDon với ID: " + hdId);
                             }
                         }
                     }
-                    // Nếu có ngày tạo hợp lệ, tiếp tục xử lý
-                    if (ngayTaoDate != null) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(ngayTaoDate);
-                        int thang = cal.get(Calendar.MONTH) + 1;
-                        int nam = cal.get(Calendar.YEAR);
-                        String monthKey = nam + "_" + thang;
-                        monthlyTotals.put(monthKey, monthlyTotals.getOrDefault(monthKey, 0.0) + tongTien);
-                        monthlyHdIds.putIfAbsent(monthKey, new ArrayList<>());
-                        monthlyHdIds.get(monthKey).add(hdId);
-                    } else {
-                        Log.w("Firestore", "Trường 'ngay_tao' không hợp lệ trong tài liệu HoaDon với ID: " + hdId);
+                    // Tạo thống kê cho từng tháng
+                    for (Map.Entry<String, Double> entry : monthlyTotals.entrySet()) {
+                        String[] parts = entry.getKey().split("_");
+                        int nam = Integer.parseInt(parts[0]);
+                        int thang = Integer.parseInt(parts[1]);
+                        double tongTienThang = entry.getValue();
+                        List<String> hdIds = monthlyHdIds.get(entry.getKey());
+
+                        // Tạo đối tượng ThongKeModels
+                        ThongKeModels thongKe = new ThongKeModels("tk_" + nam + "_" + thang,
+                                (int) tongTienThang,
+                                nam,
+                                thang,
+                                hdIds
+                        );
+                        // Ghi dữ liệu vào Firestore
+                        db.collection("ThongKe").document(thongKe.getTk_id()).set(createDataMapThongKe(thongKe)).addOnSuccessListener(aVoid -> {
+                            Log.d("Firestore", "Thêm dữ liệu thành công cho: " + thongKe.getTk_id());
+                        }).addOnFailureListener(e -> {
+                            Log.d("Firestore", "Thêm dữ liệu thất bại", e);
+                        });
                     }
                 }
             }
-            // Tạo thống kê cho từng tháng
-            for (Map.Entry<String, Double> entry : monthlyTotals.entrySet()) {
-                String[] parts = entry.getKey().split("_");
-                int nam = Integer.parseInt(parts[0]);
-                int thang = Integer.parseInt(parts[1]);
-                double tongTienThang = entry.getValue();
-                List<String> hdIds = monthlyHdIds.get(entry.getKey());
+        });
+    }
 
-                // Tạo đối tượng ThongKeModels
-                ThongKeModels thongKe = new ThongKeModels("tk_" + nam + "_" + thang,
-                        (int) tongTienThang,
-                        nam,
-                        thang,
-                        hdIds
-                );
-                // Ghi dữ liệu vào Firestore
-                db.collection("ThongKe").document(thongKe.getTk_id()).set(createDataMapThongKe(thongKe)).addOnSuccessListener(aVoid -> {
-                    Log.d("Firestore", "Thêm dữ liệu thành công cho: " + thongKe.getTk_id());
-                }).addOnFailureListener(e -> {
-                    Log.d("Firestore", "Thêm dữ liệu thất bại", e);
-                });
-            }
-        } else {
-            Log.w("Firestore", "Lỗi khi lấy dữ liệu từ HoaDon.", task.getException());
-        }
-    });
-}
     @NonNull
     private Map<String, Object> createDataMapThongKe(ThongKeModels thongKe) {
         Map<String, Object> data = new HashMap<>();

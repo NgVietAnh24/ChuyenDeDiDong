@@ -12,11 +12,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.SignInMethodQueryResult;
+
+import java.util.List;
 
 import vn.vietanhnguyen.khachhangdatmon.R;
 
@@ -26,6 +32,7 @@ public class ForgotPass extends AppCompatActivity {
     private Button btnForGot;
     private ImageView btnBack;
     private EditText edtEmail;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,25 +46,54 @@ public class ForgotPass extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String email = edtEmail.getText().toString();
-                if (email.isEmpty()){
-                    Toast.makeText(ForgotPass.this, "Email không được bỏ trống!", Toast.LENGTH_SHORT).show();
+                if (email.isEmpty()) {
+                    showAlert("Email không được bỏ trống!");
                     return;
                 }
 
-                mAuth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+                // Kiểm tra xem email có tồn tại trong Firebase Authentication hay không
+                mAuth.fetchSignInMethodsForEmail(email).addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
+                    public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(ForgotPass.this, "Chúng tôi đã gửi mail đến hộp thư của bạn để đổi mật khẩu!" + email, Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(ForgotPass.this, Login.class);
-                            new Handler().postDelayed(new Runnable() {
+                            SignInMethodQueryResult result = task.getResult();
+                            List<String> signInMethods = result.getSignInMethods();
+
+                            // Nếu danh sách signInMethods rỗng, email không tồn tại
+                            if (signInMethods == null || signInMethods.isEmpty()) {
+                                Toast.makeText(ForgotPass.this, "Email không tồn tại trong hệ thống.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            // Nếu email tồn tại, kiểm tra xem người dùng đã xác thực chưa
+                            mAuth.signInWithEmailAndPassword(email, "dummyPassword").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
-                                public void run() {
-                                    startActivity(intent);
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+                                        FirebaseUser user = mAuth.getCurrentUser();
+                                        if (user != null && !user.isEmailVerified()) {
+                                            showAlert("Email chưa được xác thực. Vui lòng xác thực email trước khi đặt lại mật khẩu.");
+                                            return;
+                                        }
+
+                                        // Gửi email đặt lại mật khẩu
+                                        mAuth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    showAlert("Chúng tôi đã gửi thông tin đến hộp thư trong mail của bạn để đổi mật khẩu!");
+                                                } else {
+                                                    Toast.makeText(ForgotPass.this, "Không thể gửi mail. Hãy kiểm tra lại địa chỉ email", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        Toast.makeText(ForgotPass.this, "Không thể xác thực người dùng. Hãy kiểm tra lại địa chỉ email.", Toast.LENGTH_SHORT).show();
+                                    }
                                 }
-                            },2000);
+                            });
                         } else {
-                            Toast.makeText(ForgotPass.this, "Không thể gửi mail. Hãy kiểm tra lại địa chỉ email.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ForgotPass.this, "Không thể kiểm tra email. Vui lòng thử lại sau.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -70,5 +106,17 @@ public class ForgotPass extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private void showAlert(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setPositiveButton("OK", (dialog, id) -> {
+                    Intent intent = new Intent(ForgotPass.this, Login.class);
+                    startActivity(intent);
+                    dialog.dismiss();
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }

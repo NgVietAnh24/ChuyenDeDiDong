@@ -35,7 +35,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvTenMonAn"
+                android:id="@+id/tvTenMonAnDaChon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Hamburger"
@@ -44,7 +44,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvGiaMonAn"
+                android:id="@+id/tvGiaMonAnDaChon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="50.000đ"
@@ -64,6 +64,7 @@
             >
 
             <TextView
+                android:id="@+id/tvTrangThai"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Đang chuẩn bị"
@@ -76,6 +77,7 @@
                 android:padding="5dp"
                 android:orientation="vertical">
                 <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnXoa"
                     android:layout_width="60dp"
                     android:layout_height="30dp"
                     android:background="@drawable/rounded_btn"
@@ -93,6 +95,7 @@
                 android:padding="5dp">
 
                 <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnGiam"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:background="@drawable/rounded_btn"
@@ -101,12 +104,14 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:layout_width="20dp"
+                    android:id="@+id/tvSoLuong"
+                    android:layout_width="19dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="1" />
 
                 <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnTang"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:background="@drawable/rounded_btn"

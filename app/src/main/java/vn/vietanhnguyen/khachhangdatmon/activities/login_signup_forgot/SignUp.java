@@ -142,15 +142,7 @@ public class SignUp extends AppCompatActivity {
                 int role = 0;
 
                 // Gán role dựa trên giá trị của Spinner
-                if (selectedRole.equals("Phục vụ")) {
-                    role = 1;
-                } else if (selectedRole.equals("Thu ngân")) {
-                    role = 2;
-                } else if (selectedRole.equals("Đầu bếp")) {
-                    role = 3;
-                } else if (selectedRole.equals("Quản lý")) {
-                    role = 0;
-                } else if (selectedRole.equals("Khách hàng")) {
+                if (selectedRole.equals("Khách hàng")) {
                     role = 4;
                 }
 
@@ -165,6 +157,20 @@ public class SignUp extends AppCompatActivity {
                                     if (user != null) {
                                         String uid = user.getUid(); // Lấy UID từ Firebase Authentication
 
+                                        // Gửi email xác thực
+                                        user.sendEmailVerification()
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            Log.d(TAG, "Email xác thực đã được gửi.");
+                                                            Toast.makeText(SignUp.this, "Vui lòng kiểm tra email để xác thực tài khoản của bạn.", Toast.LENGTH_SHORT).show();
+                                                        } else {
+                                                            Log.d(TAG, "Lỗi khi gửi email xác thực: ", task.getException());
+                                                        }
+                                                    }
+                                                });
+
                                         // Tạo thông tin người dùng trong Firestore với UID làm ID tài liệu
                                         NguoiDung newUser = new NguoiDung(email, name, soDT, soCCCD, ngayCap, finalRole, ngayTao, ngayCapNhat);
                                         newUser.setUid(uid);
@@ -177,11 +183,8 @@ public class SignUp extends AppCompatActivity {
                                                             // Gọi uploadImageToFirebaseStorage ở đây
                                                             uploadImageToFirebaseStorage(uid);
                                                             resetInputFields();
-                                                            Intent intent = new Intent(SignUp.this,Login.class);
-                                                            intent.putExtra("email",email);
-                                                            intent.putExtra("password",password);
-                                                            startActivity(intent);
-                                                            Toast.makeText(SignUp.this, "Đăng thành công ☑️", Toast.LENGTH_SHORT).show();
+                                                            // Không chuyển đến màn hình đăng nhập ngay lập tức
+                                                            // Thay vào đó, thông báo cho người dùng kiểm tra email
                                                         } else {
                                                             Log.d(TAG, "Error adding document", task.getException());
                                                         }
@@ -391,10 +394,10 @@ public class SignUp extends AppCompatActivity {
                                     firestore.collection("users").document(userId)
                                             .update("matTruocCCCD", user.getMatTruocCCCD()) // Sử dụng giá trị từ class NguoiDung
                                             .addOnSuccessListener(aVoid -> {
-                                                Toast.makeText(SignUp.this, "Upload ảnh mặt trước thành công", Toast.LENGTH_SHORT).show();
+//                                                Toast.makeText(SignUp.this, "Upload ảnh mặt trước thành công", Toast.LENGTH_SHORT).show();
                                             })
                                             .addOnFailureListener(e -> {
-                                                Toast.makeText(SignUp.this, "Upload ảnh mặt trước thất bại", Toast.LENGTH_SHORT).show();
+//                                                Toast.makeText(SignUp.this, "Upload ảnh mặt trước thất bại", Toast.LENGTH_SHORT).show();
                                             });
                                 } else {
                                     // Cập nhật URL ảnh mặt sau trong object NguoiDung
@@ -404,10 +407,10 @@ public class SignUp extends AppCompatActivity {
                                     firestore.collection("users").document(userId)
                                             .update("matSauCCCD", user.getMatSauCCCD()) // Sử dụng giá trị từ class NguoiDung
                                             .addOnSuccessListener(aVoid -> {
-                                                Toast.makeText(SignUp.this, "Upload ảnh mặt sau thành công", Toast.LENGTH_SHORT).show();
+//                                                Toast.makeText(SignUp.this, "Upload ảnh mặt sau thành công", Toast.LENGTH_SHORT).show();
                                             })
                                             .addOnFailureListener(e -> {
-                                                Toast.makeText(SignUp.this, "Upload ảnh mặt sau thất bại", Toast.LENGTH_SHORT).show();
+//                                                Toast.makeText(SignUp.this, "Upload ảnh mặt sau thất bại", Toast.LENGTH_SHORT).show();
                                             });
                                 }
                             }

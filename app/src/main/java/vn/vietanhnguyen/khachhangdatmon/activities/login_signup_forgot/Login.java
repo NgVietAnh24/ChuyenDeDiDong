@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -82,9 +83,16 @@ public class Login extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
-                                    FirebaseUser user = mAuth.getCurrentUser();
+                                    FirebaseUser  user = mAuth.getCurrentUser ();
 
-                                    // Lấy thông tin người dùng từ Firestore sau khi đăng nhập thành công
+                                    // Kiểm tra xem email đã được xác thực chưa
+                                    if (user != null && !user.isEmailVerified()) {
+                                        loading.cancel();
+                                        showAlert("Vui lòng xác thực email của bạn trước khi đăng nhập.");
+//                                        Toast.makeText(Login.this, "Vui lòng xác thực email của bạn trước khi đăng nhập.", Toast.LENGTH_SHORT).show();
+                                        return;
+                                    }
+
                                     firestore.collection("users").document(user.getUid())
                                             .get()
                                             .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -97,10 +105,9 @@ public class Login extends AppCompatActivity {
                                                             int role = document.getLong("roles").intValue(); // Lấy role từ Firestore
                                                             loading.cancel();
 
-                                                            if(role == 4){
+                                                            if (role == 4) {
                                                                 startActivity(new Intent(Login.this, Home.class));
                                                             }
-//
                                                         } else {
                                                             loading.cancel();
                                                             Toast.makeText(Login.this, "Người dùng không tồn tại trong Firestore", Toast.LENGTH_SHORT).show();
@@ -145,6 +152,15 @@ public class Login extends AppCompatActivity {
             }
         });
     }
+
+    private void showAlert(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setPositiveButton("OK", (dialog, id) -> dialog.dismiss());
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
 
     private void togglePasswordVisibility() {
         if (isPasswordVisible) {

@@ -1,6 +1,5 @@
 package vn.vietanhnguyen.khachhangdatmon.activities;
 
-
 import static android.content.ContentValues.TAG;
 
 import android.content.Intent;
@@ -10,7 +9,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,8 +24,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.checkerframework.checker.units.qual.A;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import vn.vietanhnguyen.khachhangdatmon.R;
 import vn.vietanhnguyen.khachhangdatmon.adapters.DanhMucAdapter;
@@ -39,12 +43,14 @@ public class DanhSachChonMon extends AppCompatActivity {
 
     List<MonAn> listMonAn;
     List<DanhMuc> listDanhMuc;
+    ArrayList<MonAn> listMonAnDaChon;  // Danh sách món đã chọn
     MonAnAdapter monAnAdapter;
     DanhMucAdapter danhMucAdapter;
 
     private EditText edtSearch;
     private RecyclerView listCategory, listFood;
-    private AppCompatButton btnMonDaChon;
+    public static AppCompatButton btnMonDaChon;
+    public static ImageView btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,18 +58,20 @@ public class DanhSachChonMon extends AppCompatActivity {
         setContentView(R.layout.activity_danh_sach_chon_mon);
         Event();
 
-
-        //Khởi tạo từ firebase
+        // Khởi tạo từ firebase
         firestore = FirebaseFirestore.getInstance();
 
-        // Dữ liệu được tryền từ home
+        // Dữ liệu được truyền từ home
         Intent intent = getIntent();
         String tableId = intent.getStringExtra("id");
         String tableName = intent.getStringExtra("name");
 
-        Log.d("ban","getDATA: "+tableId);
-        Log.d("ban","getDATA: "+tableName);
+        Log.d("ban", "getDATA: " + tableId);
+        Log.d("ban", "getDATA: " + tableName);
 
+
+
+        // Khởi tạo RecyclerView cho danh mục món ăn
         LinearLayoutManager layoutDanhMuc = new LinearLayoutManager(this);
         layoutDanhMuc.setOrientation(RecyclerView.HORIZONTAL);
         listCategory.setLayoutManager(layoutDanhMuc);
@@ -74,41 +82,79 @@ public class DanhSachChonMon extends AppCompatActivity {
                 filterByCategory(danhMuc.getName());
             }
         });
-
         listCategory.setAdapter(danhMucAdapter);
         docDulieuDanhMuc();
 
-        //
+        // Khởi tạo RecyclerView cho món ăn
         LinearLayoutManager layoutMonAn = new LinearLayoutManager(this);
         layoutMonAn.setOrientation(RecyclerView.VERTICAL);
         listFood.setLayoutManager(layoutMonAn);
 
-
-        //
+        // Danh sách món ăn và adapter
         listMonAn = new ArrayList<>();
+        listMonAnDaChon = new ArrayList<>();  // Khởi tạo danh sách món đã chọn
+        // Cập nhật phương thức onItemClick trong MonAnAdapter
         monAnAdapter = new MonAnAdapter(listMonAn, new MonAnAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(MonAn monAn) {
-
+                // Khi người dùng chọn món, thêm món vào danh sách món đã chọn
+                if (!listMonAnDaChon.contains(monAn)) {
+                    listMonAnDaChon.add(monAn);  // Thêm món vào danh sách đã chọn
+                    Toast.makeText(DanhSachChonMon.this, "Đã thêm món: " + monAn.getName(), Toast.LENGTH_SHORT).show();
+                    updateSelectedCount(); // Cập nhật số lượng món đã chọn
+                } else {
+                    Toast.makeText(DanhSachChonMon.this, "Món đã có trong danh sách", Toast.LENGTH_SHORT).show();
+                }
             }
-        });
+        }, firestore, tableId, DanhSachChonMon.this);
         listFood.setAdapter(monAnAdapter);
 
-
+        //TODO Tải dữ liệu món ăn
         docDulieuMonAn();
 
         btnMonDaChon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Cập nhật trạng thái bàn thành "Đang sử dụng"
+                firestore.collection("tables").document(tableId)
+                        .update("status", "Đang sử dụng")
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "Bàn đã được cập nhật trạng thái thành 'Đang sử dụng'");
+                                } else {
+                                    Log.d(TAG, "Lỗi khi cập nhật trạng thái bàn: ", task.getException());
+                                }
+                            }
+                        });
+
+                btnBack.setVisibility(View.GONE);
+
+                // Lưu danh sách món đã chọn lên Firestore
+//                luuMonAnDaChon(tableId);
+
+                // Chuyển sang màn hình danh sách món đã chọn
                 Intent intent = new Intent(DanhSachChonMon.this, DanhSachDaChon.class);
+                intent.putParcelableArrayListExtra("mon", listMonAnDaChon);  // Truyền danh sách món đã chọn
+                intent.putExtra("id", tableId);
+                intent.putExtra("name", tableName);
                 startActivity(intent);
             }
         });
 
+        // Sự kiện nhấn nút Back
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+        // Sự kiện tìm kiếm món ăn
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
@@ -118,9 +164,14 @@ public class DanhSachChonMon extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-
             }
         });
+    }
+
+
+    private void updateSelectedCount() {
+        String buttonText = "Món đã chọn (" + listMonAnDaChon.size() + ")";
+        btnMonDaChon.setText(buttonText);
     }
 
     private void filterByCategory(String categoryName) {
@@ -136,7 +187,6 @@ public class DanhSachChonMon extends AppCompatActivity {
         }
         monAnAdapter.filterList(filteredList);
     }
-
 
     private void filter(String text) {
         List<MonAn> filteredList = new ArrayList<>();
@@ -160,7 +210,6 @@ public class DanhSachChonMon extends AppCompatActivity {
                                 DanhMuc cateData = document.toObject(DanhMuc.class);
                                 listDanhMuc.add(cateData);
                             }
-                            Log.d("Getd", "Getting documents: ");
                             danhMucAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu mới
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
@@ -181,7 +230,6 @@ public class DanhSachChonMon extends AppCompatActivity {
                                 MonAn foodData = document.toObject(MonAn.class);
                                 listMonAn.add(foodData);
                             }
-                            Log.d("Get", "Getting documents: ");
                             monAnAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu mới
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
@@ -190,11 +238,11 @@ public class DanhSachChonMon extends AppCompatActivity {
                 });
     }
 
-
     private void Event() {
         edtSearch = findViewById(R.id.edtSearch);
         listCategory = findViewById(R.id.listCategory);
         listFood = findViewById(R.id.listFood);
         btnMonDaChon = findViewById(R.id.btnMonDaChon);
+        btnBack = findViewById(R.id.btnBack);
     }
 }

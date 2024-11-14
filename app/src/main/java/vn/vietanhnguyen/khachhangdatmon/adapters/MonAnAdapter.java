@@ -1,39 +1,51 @@
 package vn.vietanhnguyen.khachhangdatmon.adapters;
 
+import static android.content.ContentValues.TAG;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import vn.vietanhnguyen.khachhangdatmon.R;
 import vn.vietanhnguyen.khachhangdatmon.models.MonAn;
 
 public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> {
-    List<MonAn> list;
+    private List<MonAn> list;
     private OnItemClickListener onItemClickListener;
+    private FirebaseFirestore firestore;
+    private String tableId;
+    private Context context;
 
     public interface OnItemClickListener {
         void onItemClick(MonAn monAn);
     }
 
-    public MonAnAdapter(List<MonAn> list, OnItemClickListener onItemClickListener) {
+    public MonAnAdapter(List<MonAn> list, OnItemClickListener onItemClickListener, FirebaseFirestore firestore, String tableId, Context context) {
         this.list = list;
         this.onItemClickListener = onItemClickListener;
+        this.firestore = firestore;
+        this.tableId = tableId;
+        this.context = context;
     }
 
-
     @Override
-    public void onBindViewHolder(@NonNull MonAnAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MonAn monAn = list.get(position);
         holder.tvTenMon.setText(monAn.getName());
         holder.tvGiaMon.setText(monAn.getPrice() + " VND");
@@ -42,6 +54,14 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> 
                 .placeholder(R.drawable.image_error)
                 .error(R.drawable.image_error)
                 .into(holder.imgFood);
+
+        holder.itemView.setOnClickListener(view -> {
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(monAn);
+                // Lưu món ăn vào Firestore ngay lập tức
+                luuMonAnDaChon(monAn);
+            }
+        });
     }
 
     @Override
@@ -51,7 +71,7 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> 
 
     @NonNull
     @Override
-    public MonAnAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_mon_an, parent, false);
         return new ViewHolder(view);
     }
@@ -62,17 +82,35 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> 
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
             imgFood = itemView.findViewById(R.id.imgFood);
             tvTenMon = itemView.findViewById(R.id.tvTenMonAn);
             tvGiaMon = itemView.findViewById(R.id.tvGiaMonAn);
         }
     }
 
+    private void luuMonAnDaChon(MonAn monAn) {
+        Map<String, Object> foodData = new HashMap<>();
+        foodData.put("id", monAn.getId());
+        foodData.put("name", monAn.getName());
+        foodData.put("price", monAn.getPrice());
+        foodData.put("soLuong", 1);
+
+        // Lưu hình ảnh nếu cần
+        foodData.put("image", monAn.getImage());
+
+        firestore.collection("tables").document(tableId)
+                .update("selectedFoods", FieldValue.arrayUnion(foodData)) // Sử dụng arrayUnion để thêm món ăn vào mảng
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(context, "Đã thêm món: " + monAn.getName(), Toast.LENGTH_SHORT).show(); // Sử dụng context từ Activity
+                    } else {
+                        Log.d(TAG, "Lỗi khi thêm món ăn: ", task.getException());
+                    }
+                });
+    }
+
     public void filterList(List<MonAn> filteredList) {
         list = filteredList;
         notifyDataSetChanged();
     }
-
 }
-

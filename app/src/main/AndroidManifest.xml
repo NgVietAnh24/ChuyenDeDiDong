@@ -17,13 +17,16 @@
         android:theme="@style/Theme.ChuyenDe"
         tools:targetApi="31">
         <activity
-            android:name=".activities.ThongKeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.HomeDauBep"
+            android:name=".activities.MonDaChonActivity"
             android:exported="false" />
         <activity
             android:name=".activities.MainHienThiActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ThongKeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.DSMonAnActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

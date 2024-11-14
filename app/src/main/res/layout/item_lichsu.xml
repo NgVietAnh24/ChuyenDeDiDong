@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FDE8E8"
+    android:padding="8dp"
+    android:layout_marginBottom="8dp"> <!-- Thêm khoảng cách dưới mỗi item -->
+
+    <TextView
+        android:id="@+id/tvFoodName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="#000"
+        android:layout_marginBottom="4dp" /> <!-- Khoảng cách dưới TextView này -->
+
+    <TextView
+        android:id="@+id/tvThoiGian"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="#555" />
+
+</LinearLayout>

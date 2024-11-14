@@ -74,15 +74,7 @@ public class DanhSachMon extends AppCompatActivity {
         listCate.setAdapter(cateAdapter);
 
 
-//        monAnAdapter = new MonAnAdapter(DanhSachMon.this, foodListSearch);
-//        listMonAn.setAdapter(monAnAdapter);
-//        btnmondachon.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(DanhSachMon.this, MonAnDaChon.class);
-//                startActivity(intent); // Bắt đầu Activity mới
-//            }
-//        });
+
         Log.d("ABC","-----------------------");
 
         btnMonDaChon.setOnClickListener(new View.OnClickListener() {

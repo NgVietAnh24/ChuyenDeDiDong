@@ -70,19 +70,7 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.MonAnViewHol
         Log.d("MonAnAdapter", "Current foodList size: " + foodList.size());
         Log.d("MonAnAdapter", "Current foodListFull size: " + foodListFull.size());
 
-//        // Xử lý sự kiện nhấn vào item
-//        holder.itemView.setOnClickListener(v -> {
-//            if (onItemClickListener != null) {
-//                onItemClickListener.onItemClick(food);
-//            }
-//        });
 
-//        holder.itemView.setOnClickListener(v -> {
-//            if (!selectedFoods.contains(food)) {
-//                selectedFoods.add(food);  // Lưu món ăn đã chọn
-//                Toast.makeText(context, "Món đã chọn: " + food.getName(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
     }
 
     @Override

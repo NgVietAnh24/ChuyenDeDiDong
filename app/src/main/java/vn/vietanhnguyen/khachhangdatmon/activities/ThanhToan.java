@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -57,6 +58,7 @@ public class ThanhToan extends AppCompatActivity {
 
         firestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
+
 
         // Khởi tạo giao diện
         Event();
@@ -127,112 +129,115 @@ public class ThanhToan extends AppCompatActivity {
 
                     // Xử lý nút thanh toán
                     btnThanhToan.setOnClickListener(v -> {
+                        CreateOrder orderApi = new CreateOrder();
 
-                    CreateOrder orderApi = new CreateOrder();
+                        try {
+                            JSONObject data = orderApi.createOrder(totalString);
+                            String code = data.getString("returncode");
 
-                    try {
-                        JSONObject data = orderApi.createOrder(totalString);
-                        String code = data.getString("returncode");
+                            if (code.equals("1")) {
+                                String token = data.getString("zptranstoken");
+                                ZaloPaySDK.getInstance().payOrder(ThanhToan.this, token, "demozpdk://app", new PayOrderListener() {
+                                    @Override
+                                    public void onPaymentSucceeded(String s, String s1, String s2) {
+                                        Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
+                                        intent1.putExtra("result", "Thanh toán thành công");
+//                                        startActivity(intent1);
+                                        // Cập nhật trạng thái bàn thành "trống" sau khi thanh toán thành công
+                                        String banId = getIntent().getStringExtra("id"); // Lấy ID bàn từ Intent
+                                        firestore.collection("tables").document(banId)
+                                                .update("status", "Trống") // Cập nhật trạng thái bàn
+                                                .addOnCompleteListener(task -> {
+                                                    if (task.isSuccessful()) {
+                                                        Log.d("ThanhToan", "Cập nhật trạng thái bàn thành công.");
+                                                    } else {
+                                                        Log.d("ThanhToan", "Lỗi khi cập nhật trạng thái bàn: ", task.getException());
+                                                    }
+                                                });
+                                    }
 
-                        if (code.equals("1")) {
-                            String token = data.getString("zptranstoken");
-                            ZaloPaySDK.getInstance().payOrder(ThanhToan.this, token, "demozpdk://app", new PayOrderListener() {
-                                @Override
-                                public void onPaymentSucceeded(String s, String s1, String s2) {
-                                    Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
-                                    intent1.putExtra("result", "Thanh toán thành công");
-                                    intent1.putExtra("updateUI", true);
-                                    startActivity(intent1);
-                                    // Cập nhật trạng thái bàn thành "trống" sau khi thanh toán thành công
-                                    String banId = getIntent().getStringExtra("id"); // Lấy ID bàn từ Intent
-                                    firestore.collection("tables").document(banId)
-                                            .update("status", "Trống") // Cập nhật trạng thái bàn
-                                            .addOnCompleteListener(task -> {
-                                                if (task.isSuccessful()) {
-                                                    Log.d("ThanhToan", "Cập nhật trạng thái bàn thành công.");
-                                                } else {
-                                                    Log.d("ThanhToan", "Lỗi khi cập nhật trạng thái bàn: ", task.getException());
-                                                }
-                                            });
-                                }
+                                    @Override
+                                    public void onPaymentCanceled(String s, String s1) {
+                                        Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
+                                        intent1.putExtra("result", "Hủy thanh toán");
+                                    }
 
-                                @Override
-                                public void onPaymentCanceled(String s, String s1) {
-                                    Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
-                                    intent1.putExtra("result", "Hủy thanh toán");
-                                }
-
-                                @Override
-                                public void onPaymentError(ZaloPayError zaloPayError, String s, String s1) {
-                                    Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
-                                    intent1.putExtra("result", "lỗi thanh toán");
-                                }
-                            });
-                        }
-
-
-
-                        Intent intentId = getIntent();
-
-                        // Lưu thông tin hóa đơn vào Firestore
-                        Map<String, Object> invoiceData = new HashMap<>();
-                        invoiceData.put("ban_id", intentId.getStringExtra("id"));
-                        invoiceData.put("tong_tien", tongTien);
-                        invoiceData.put("gio_tao", time);
-                        invoiceData.put("ngay_tao", date);
-                        invoiceData.put("tinh_trang", "Đã thanh toán");
-                        invoiceData.put("ten_khach_hang", tenKH);
-                        invoiceData.put("so_dt", soDT);
-                        invoiceData.put("ghi_chu", "(Chuyển khoản) -" + ghiChu);
-
-                        firestore.collection("invoices").document(maHD)
-                                .set(invoiceData)
-                                .addOnCompleteListener(task1 -> {
-                                    if (task1.isSuccessful()) {
-//                                            Toast.makeText(this, "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
-
-                                    } else {
-                                        Log.d("ThanhToan", "Lỗi khi lưu thông tin thanh toán: ", task1.getException());
+                                    @Override
+                                    public void onPaymentError(ZaloPayError zaloPayError, String s, String s1) {
+                                        Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
+                                        intent1.putExtra("result", "lỗi thanh toán");
                                     }
                                 });
+                            }
 
-                        for (MonAn monAn : monDaChon) {
-                            Map<String, Object> invoiceItemData = new HashMap<>();
-                            invoiceItemData.put("ten_mon_an", monAn.getName());
-                            invoiceItemData.put("gia", Integer.parseInt(monAn.getPrice()));  // Đảm bảo monAn.getPrice() là kiểu String chứa số
-                            invoiceItemData.put("so_luong", monAn.getSoLuong());
-                            invoiceItemData.put("hoa_don_id", maHD);
 
-                            // Tạo một document id duy nhất cho từng món ăn, ví dụ sử dụng tên món ăn và mã hóa đơn
-                            String documentId = maHD + "_" + monAn.getName();
+                            Intent intentId = getIntent();
 
-                            firestore.collection("invoice_items").document(documentId)
-                                    .set(invoiceItemData)
+                            // Lưu thông tin hóa đơn vào Firestore
+                            Map<String, Object> invoiceData = new HashMap<>();
+                            invoiceData.put("ban_id", intentId.getStringExtra("id"));
+                            invoiceData.put("tong_tien", tongTien);
+                            invoiceData.put("gio_tao", time);
+                            invoiceData.put("ngay_tao", date);
+                            invoiceData.put("tinh_trang", "Đã thanh toán");
+                            invoiceData.put("ten_khach_hang", tenKH);
+                            invoiceData.put("so_dt", soDT);
+                            invoiceData.put("ghi_chu", "(Chuyển khoản) -" + ghiChu);
+
+                            firestore.collection("invoices").document(maHD)
+                                    .set(invoiceData)
                                     .addOnCompleteListener(task1 -> {
                                         if (task1.isSuccessful()) {
-//                                        Log.d("ThanhToan", "Lưu thành công thông tin món " + monAn.getName());
+//                                            Toast.makeText(this, "Thanh toán thành công!", Toast.LENGTH_SHORT).show();
+
                                         } else {
                                             Log.d("ThanhToan", "Lỗi khi lưu thông tin thanh toán: ", task1.getException());
                                         }
                                     });
+
+                            for (MonAn monAn : monDaChon) {
+                                Map<String, Object> invoiceItemData = new HashMap<>();
+                                invoiceItemData.put("ten_mon_an", monAn.getName());
+                                invoiceItemData.put("gia", Integer.parseInt(monAn.getPrice()));  // Đảm bảo monAn.getPrice() là kiểu String chứa số
+                                invoiceItemData.put("so_luong", monAn.getSoLuong());
+                                invoiceItemData.put("hoa_don_id", maHD);
+
+                                // Tạo một document id duy nhất cho từng món ăn, ví dụ sử dụng tên món ăn và mã hóa đơn
+                                String documentId = maHD + "_" + monAn.getName();
+
+                                firestore.collection("invoice_items").document(documentId)
+                                        .set(invoiceItemData)
+                                        .addOnCompleteListener(task1 -> {
+                                            if (task1.isSuccessful()) {
+                                                showAlert("Chúc quý khách ngon miệng ☺️");
+//                                        Log.d("ThanhToan", "Lưu thành công thông tin món " + monAn.getName());
+                                            } else {
+                                                Log.d("ThanhToan", "Lỗi khi lưu thông tin thanh toán: ", task1.getException());
+                                            }
+                                        });
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
 
-                });
+                    });
 
 
+                } else {
+                    Log.d("ThanhToan", "Không tìm thấy thông tin người dùng.");
+                }
             } else {
-                Log.d("ThanhToan", "Không tìm thấy thông tin người dùng.");
+                Log.d("ThanhToan", "Lỗi khi truy vấn thông tin người dùng: ", task.getException());
             }
-        } else {
-            Log.d("ThanhToan", "Lỗi khi truy vấn thông tin người dùng: ", task.getException());
-            }
+
         });
 
         // Xử lý nút quay lại
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v ->
+        {
+            finish();
+
+        });
     }
 
     @Override
@@ -241,6 +246,24 @@ public class ThanhToan extends AppCompatActivity {
         ZaloPaySDK.getInstance().onResult(intent);
     }
 
+    private void showAlert(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setPositiveButton("OK", (dialog, id) ->
+                {
+                    DanhSachDaChon.btnThanhToan.setVisibility(View.GONE);
+                    DanhSachDaChon.btnHuyDon.setVisibility(View.GONE);
+                    DanhSachDaChon.edtGhiChu.setEnabled(false);
+                    DanhSachDaChon.overlayView.setVisibility(View.VISIBLE);
+                    DanhSachDaChon.btnBackHome.setVisibility(View.VISIBLE);
+                    DanhSachDaChon.btnBack.setVisibility(View.GONE);
+                    btnThanhToan.setVisibility(View.GONE);
+                    dialog.dismiss();
+                });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
 
     private void Event() {
         btnBack = findViewById(R.id.backButton);

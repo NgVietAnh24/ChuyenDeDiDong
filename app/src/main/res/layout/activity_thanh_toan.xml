@@ -61,7 +61,7 @@
         android:layout_marginBottom="8dp"
         android:gravity="center"/>
 
-    <!-- Bảng chi tiết món ăn -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/itemsListView"
         android:layout_width="match_parent"
@@ -70,7 +70,7 @@
         android:dividerHeight="8dp"
         android:padding="8dp" />
 
-    <!-- Thông tin thanh toán -->
+
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

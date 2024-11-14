@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,10 +36,11 @@ import vn.vietanhnguyen.khachhangdatmon.adapters.DaChonAdapter;
 import vn.vietanhnguyen.khachhangdatmon.models.MonAn;
 
 public class DanhSachDaChon extends AppCompatActivity {
-    private ImageView btnBack;
-    public static Button btnHuyDon, btnThanhToan, btnBackHome;
+    public static ImageView btnBack;
+    public static AppCompatButton btnHuyDon, btnThanhToan, btnBackHome;
     public static RecyclerView listChonMon;
     public static EditText edtGhiChu;
+    public static View overlayView;
     private TextView txtDanhSachMon;
 
     private FirebaseFirestore firestore;
@@ -78,7 +80,7 @@ public class DanhSachDaChon extends AppCompatActivity {
             public void onMonDaChonUpdated(int newCount) {
                 updateSelectedCount(newCount); // Cập nhật số lượng mới
             }
-        },firestore, tableId);
+        }, firestore, tableId);
 
         listChonMon.setAdapter(daChonAdapter);
 
@@ -96,6 +98,7 @@ public class DanhSachDaChon extends AppCompatActivity {
                             Intent intent1 = new Intent(DanhSachDaChon.this, Home.class);
                             startActivity(intent1);
                             DanhSachChonMon.btnBack.setVisibility(View.VISIBLE);
+                            xoaTatCaMonDaChon(tableId);
                             Log.d("DanhSachDaChon", "Trạng thái bàn đã được cập nhật thành 'Trống'");
                             // Có thể thêm logic nếu muốn thông báo cho người dùng hoặc cập nhật UI.
                         } else {
@@ -116,7 +119,7 @@ public class DanhSachDaChon extends AppCompatActivity {
             Intent intent1 = new Intent(this, ThanhToan.class);
 //            intent1.putParcelableArrayListExtra("monDaChon", (ArrayList<MonAn>) listMonAnDaChon);
             intent1.putParcelableArrayListExtra("monDaChon", (ArrayList<? extends Parcelable>) listMonAnDaChon);
-            intent1.putExtra("id",tableId);
+            intent1.putExtra("id", tableId);
             intent1.putExtra("ghiChu", ghiChu);
             startActivity(intent1);
         });
@@ -134,24 +137,11 @@ public class DanhSachDaChon extends AppCompatActivity {
                 btnThanhToan.setVisibility(View.VISIBLE);
                 btnHuyDon.setVisibility(View.VISIBLE);
                 edtGhiChu.setEnabled(true);
-                listChonMon.setEnabled(true);
+                overlayView.setVisibility(View.GONE);
                 btnBackHome.setVisibility(View.GONE);
                 xoaTatCaMonDaChon(tableId);
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Intent intent = getIntent();
-        if (intent != null && intent.getBooleanExtra("updateUI", false)) {
-            btnHuyDon.setVisibility(View.GONE);
-            btnThanhToan.setVisibility(View.GONE);
-            edtGhiChu.setEnabled(false);
-            btnBackHome.setVisibility(View.VISIBLE);
-            listChonMon.setEnabled(false);
-        }
     }
 
     private void xoaTatCaMonDaChon(String tableId) {
@@ -246,6 +236,7 @@ public class DanhSachDaChon extends AppCompatActivity {
         btnThanhToan = findViewById(R.id.btnThanhToan);
         listChonMon = findViewById(R.id.listChonMon);
         edtGhiChu = findViewById(R.id.edtGhichu);
-        btnBackHome =findViewById(R.id.btnBackHome);
+        btnBackHome = findViewById(R.id.btnBackHome);
+        overlayView = findViewById(R.id.overlayView);
     }
 }

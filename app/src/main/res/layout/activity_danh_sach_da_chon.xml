@@ -45,19 +45,27 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-        <!-- RecyclerView Containers -->
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:orientation="vertical">
+            android:layout_marginTop="5dp">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/listChonMon"
                 android:layout_width="match_parent"
                 android:layout_height="500dp"
                 android:paddingBottom="10dp" />
-        </LinearLayout>
+
+            <View
+                android:id="@+id/overlayView"
+                android:visibility="gone"
+                android:layout_gravity="right"
+                android:layout_width="200dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:focusable="true" />
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -72,12 +80,12 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:padding="5dp"
-                android:gravity="start|top"
                 android:id="@+id/edtGhichu"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
-                android:background="@drawable/border_edt" />
+                android:background="@drawable/border_edt"
+                android:gravity="start|top"
+                android:padding="5dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -94,10 +102,10 @@
                 android:layout_margin="10dp"
                 android:background="@drawable/rounded_btn"
                 android:padding="10dp"
+                android:visibility="gone"
                 android:text="Về màn hình chính"
                 android:textColor="@color/textColor"
-                android:textSize="14sp"
-                android:visibility="gone" />
+                android:textSize="14sp" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnHuyDon"
@@ -108,7 +116,8 @@
                 android:padding="10dp"
                 android:text="Hủy đơn"
                 android:textColor="@color/textColor"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                 />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnThanhToan"
@@ -119,7 +128,8 @@
                 android:padding="10dp"
                 android:text="Thanh toán"
                 android:textColor="@color/textColor"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                 />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

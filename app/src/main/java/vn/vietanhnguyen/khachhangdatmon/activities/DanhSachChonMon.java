@@ -115,6 +115,8 @@ public class DanhSachChonMon extends AppCompatActivity {
         btnMonDaChon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
                 // Cập nhật trạng thái bàn thành "Đang sử dụng"
                 firestore.collection("tables").document(tableId)
                         .update("status", "Đang sử dụng")
@@ -130,7 +132,6 @@ public class DanhSachChonMon extends AppCompatActivity {
                         });
 
                 btnBack.setVisibility(View.GONE);
-
                 // Lưu danh sách món đã chọn lên Firestore
 //                luuMonAnDaChon(tableId);
 

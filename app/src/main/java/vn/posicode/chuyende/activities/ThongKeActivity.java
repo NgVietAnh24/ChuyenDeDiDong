@@ -42,11 +42,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.TrangThaiDanhSachBan.TableListActivity;
 import vn.posicode.chuyende.models.ThongKeModels;
 
 public class ThongKeActivity extends AppCompatActivity {
     private TextView tvTongTien;
-    private ImageButton btnBack;
+    private ImageButton btnBackManage;
     private Spinner spinYear;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private List<String> yearList;
@@ -73,7 +74,6 @@ public class ThongKeActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 selectedYear = yearList.get(i);
                 docDoanhThu(selectedYear);
-
                 prefs.edit().putString("selectedYear", selectedYear).apply();
             }
 
@@ -82,10 +82,10 @@ public class ThongKeActivity extends AppCompatActivity {
 
             }
         });
-        btnBack.setOnClickListener(new View.OnClickListener() {
+        btnBackManage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ThongKeActivity.this, MainHienThiActivity.class);
+                Intent intent = new Intent(ThongKeActivity.this, TableListActivity.class);
                 startActivity(intent);
             }
         });
@@ -95,7 +95,7 @@ public class ThongKeActivity extends AppCompatActivity {
     private void connectXML() {
         tvTongTien = findViewById(R.id.tvTongTien);
         spinYear = findViewById(R.id.spinYear);
-        btnBack = findViewById(R.id.btnBack);
+        btnBackManage = findViewById(R.id.btnBackManage);
         lineChartDoanhThu = findViewById(R.id.lineChartDoanhThu);
         lineChartDoanhThu.setDragEnabled(true);
         lineChartDoanhThu.setScaleEnabled(false);
@@ -168,6 +168,7 @@ public class ThongKeActivity extends AppCompatActivity {
                         spinYear.setSelection(0);
                         selectedYear = yearList.get(0);
                     }
+                    adapterYear.notifyDataSetChanged();
                     docDoanhThu(selectedYear);
 
                 }

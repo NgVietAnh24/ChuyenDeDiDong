@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +56,20 @@ public class DauBepFoodActivity extends AppCompatActivity {
 
         adapter = new DauBepFoodAdapter(daubepfoodlist, this);
         recyclerView.setAdapter(adapter);
+
+
+        // Khởi tạo ImageButton
+        ImageButton btnShowToolDaubep = findViewById(R.id.btnShowTool_daubep);
+
+        // Thiết lập sự kiện click
+        btnShowToolDaubep.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Tạo Intent để chuyển đến MonAnDaChon
+                Intent intent = new Intent(DauBepFoodActivity.this, MonAnDaChonActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -152,6 +167,88 @@ public class DauBepFoodActivity extends AppCompatActivity {
 //        });
 //    }
 
+
+
+
+//    public void showQuantityDialog(String foodId) {
+//        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog, null);
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setView(dialogView);
+//        builder.setCancelable(true);
+//
+//        TextView tvQuantity = dialogView.findViewById(R.id.tv_quantity);
+//        TextView btnDecrease = dialogView.findViewById(R.id.btn_decrease);
+//        TextView btnIncrease = dialogView.findViewById(R.id.btn_increase);
+//        Button btnDone = dialogView.findViewById(R.id.btn_done); // Nút "Đã xong"
+//
+//        // Lấy số lượng món ăn đã chọn từ `monDaChon`, mặc định là 1 nếu chưa có trong danh sách
+//        final int[] quantity = {monDaChon.getOrDefault(foodId, 1)};
+//        tvQuantity.setText(String.valueOf(quantity[0]));
+//
+//        btnDecrease.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (quantity[0] > 1) {  // Giới hạn không cho giảm dưới 1
+//                    quantity[0]--;
+//                    tvQuantity.setText(String.valueOf(quantity[0]));
+//                }
+//            }
+//        });
+//
+//        btnIncrease.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                quantity[0]++;
+//                tvQuantity.setText(String.valueOf(quantity[0]));
+//            }
+//        });
+//
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
+//
+//        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+//            @Override
+//            public void onDismiss(DialogInterface dialogInterface) {
+//                if (quantity[0] == 0) {
+//                    monDaChon.remove(foodId);
+//                } else {
+//                    monDaChon.put(foodId, quantity[0]);
+//                }
+//
+//                // Cập nhật tổng số lượng món đã chọn
+//                tongMonDaChon = 0;
+//                for (Integer qty : monDaChon.values()) {
+//                    tongMonDaChon += qty;
+//                }
+//            }
+//        });
+//
+//        // Xử lý sự kiện khi nút "Đã xong" được nhấn
+//        btnDone.setOnClickListener(v -> {
+//            // Lấy số lượng món ăn từ danh sách
+//            int totalQuantityInList = monDaChon.getOrDefault(foodId, 0);
+//            int remainingQuantity = totalQuantityInList - quantity[0];
+//
+//            // Cập nhật trạng thái món ăn trong Firestore
+//            updateFoodStatus(foodId, "Đã làm");
+//
+//            if (remainingQuantity > 0) {
+//                // Nếu còn món chưa làm
+//                Toast.makeText(this, "Còn " + remainingQuantity + " món chưa làm.", Toast.LENGTH_SHORT).show();
+//            } else {
+//                // Nếu đã hoàn thành tất cả
+//                Toast.makeText(this, "Tất cả món đã được làm xong!", Toast.LENGTH_SHORT).show();
+//                // Chuyển đến màn hình lịch sử đầu bếp (cần implement phương thức chuyển màn hình)
+//                goToHistoryScreen();
+//            }
+//
+//            dialog.dismiss(); // Đóng dialog sau khi nhấn nút "Đã xong"
+//        });
+//    }
+
+
+
     public void showQuantityDialog(String foodId) {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog, null);
 
@@ -168,52 +265,73 @@ public class DauBepFoodActivity extends AppCompatActivity {
         final int[] quantity = {monDaChon.getOrDefault(foodId, 1)};
         tvQuantity.setText(String.valueOf(quantity[0]));
 
-        btnDecrease.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (quantity[0] > 1) {  // Giới hạn không cho giảm dưới 1
-                    quantity[0]--;
-                    tvQuantity.setText(String.valueOf(quantity[0]));
-                }
+        btnDecrease.setOnClickListener(view -> {
+            if (quantity[0] > 1) {  // Giới hạn không cho giảm dưới 1
+                quantity[0]--;
+                tvQuantity.setText(String.valueOf(quantity[0]));
             }
         });
 
-        btnIncrease.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                quantity[0]++;
-                tvQuantity.setText(String.valueOf(quantity[0]));
-            }
+        btnIncrease.setOnClickListener(view -> {
+            quantity[0]++;
+            tvQuantity.setText(String.valueOf(quantity[0]));
         });
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                if (quantity[0] == 0) {
-                    monDaChon.remove(foodId);
-                } else {
-                    monDaChon.put(foodId, quantity[0]);
-                }
+        dialog.setOnDismissListener(dialogInterface -> {
+            if (quantity[0] == 0) {
+                monDaChon.remove(foodId);
+            } else {
+                monDaChon.put(foodId, quantity[0]);
+            }
 
-                // Cập nhật tổng số lượng món đã chọn
-                tongMonDaChon = 0;
-                for (Integer qty : monDaChon.values()) {
-                    tongMonDaChon += qty;
-                }
+            // Cập nhật tổng số lượng món đã chọn
+            tongMonDaChon = 0;
+            for (Integer qty : monDaChon.values()) {
+                tongMonDaChon += qty;
             }
         });
 
         // Xử lý sự kiện khi nút "Đã xong" được nhấn
+//        btnDone.setOnClickListener(v -> {
+//            // Lấy số lượng món ăn từ danh sách
+//            int totalQuantityInList = monDaChon.getOrDefault(foodId, 0);
+//            int remainingQuantity = totalQuantityInList - quantity[0];
+//
+//            // Cập nhật trạng thái món ăn trong Firestore
+//            updateFoodStatus(foodId, "Đã làm");
+//
+//            // Lưu món ăn vào lịch sử
+//            saveDishToHistory(foodId, quantity[0]);
+//
+//            if (remainingQuantity > 0) {
+//                // Nếu còn món chưa làm
+//                Toast.makeText(this, "Còn " + remainingQuantity + " món chưa làm.", Toast.LENGTH_SHORT).show();
+//            } else {
+//                // Nếu đã hoàn thành tất cả
+//                Toast.makeText(this, "Tất cả món đã được làm xong!", Toast.LENGTH_SHORT).show();
+//                // Chuyển đến màn hình lịch sử đầu bếp
+//                goToHistoryScreen();
+//            }
+//
+//            dialog.dismiss(); // Đóng dialog sau khi nhấn nút "Đã xong"
+//        });
         btnDone.setOnClickListener(v -> {
             // Lấy số lượng món ăn từ danh sách
             int totalQuantityInList = monDaChon.getOrDefault(foodId, 0);
             int remainingQuantity = totalQuantityInList - quantity[0];
 
+            Log.d("DauBepFoodActivity", "Total Quantity in List: " + totalQuantityInList);
+            Log.d("DauBepFoodActivity", "Quantity Selected: " + quantity[0]);
+            Log.d("DauBepFoodActivity", "Remaining Quantity: " + remainingQuantity);
+
             // Cập nhật trạng thái món ăn trong Firestore
             updateFoodStatus(foodId, "Đã làm");
+
+            // Lưu món ăn vào lịch sử
+            saveDishToHistory(foodId, quantity[0]);
 
             if (remainingQuantity > 0) {
                 // Nếu còn món chưa làm
@@ -221,12 +339,34 @@ public class DauBepFoodActivity extends AppCompatActivity {
             } else {
                 // Nếu đã hoàn thành tất cả
                 Toast.makeText(this, "Tất cả món đã được làm xong!", Toast.LENGTH_SHORT).show();
-                // Chuyển đến màn hình lịch sử đầu bếp (cần implement phương thức chuyển màn hình)
+                // Chuyển đến màn hình lịch sử đầu bếp
                 goToHistoryScreen();
             }
 
             dialog.dismiss(); // Đóng dialog sau khi nhấn nút "Đã xong"
         });
+
+    }
+
+    private void saveDishToHistory(String foodId, int quantity) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Tạo một đối tượng để lưu vào Firestore
+        Map<String, Object> dishData = new HashMap<>();
+        dishData.put("mon_an_id", foodId);
+        dishData.put("so_luong", quantity);
+        dishData.put("trang_thai", "Đã làm");
+        dishData.put("time", System.currentTimeMillis()); // Lưu thời gian hiện tại
+
+        // Lưu vào collection "dish_history"
+        db.collection("dish_history")
+                .add(dishData)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(this, "Món ăn đã được lưu vào lịch sử", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi lưu món ăn vào lịch sử: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void goToHistoryScreen() {

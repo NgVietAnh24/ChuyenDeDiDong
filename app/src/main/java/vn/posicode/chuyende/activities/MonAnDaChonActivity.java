@@ -1,5 +1,6 @@
 package vn.posicode.chuyende.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -64,16 +65,19 @@ public class MonAnDaChonActivity extends AppCompatActivity implements SelectedFo
         for (int i = 0; i < totalItems; i++) {
             SelectedFood food = foodList.get(i);
 
-            // Chỉ lưu trạng thái hiện tại của món ăn vào Firestore mà không thay đổi thuộc tính nào
+            // Lưu trạng thái của món ăn vào Firestore
             db.collection("selected_foods")
                     .document(food.getMon_an_id())
                     .set(food)
                     .addOnSuccessListener(aVoid -> {
                         completedCount[0]++;
 
-                        // Kiểm tra nếu tất cả món ăn đều đã được xử lý thành công
+                        // Nếu tất cả món ăn đều đã được xử lý thành công, chuyển qua màn hình DaubepFoodActivity
                         if (completedCount[0] == totalItems) {
                             Toast.makeText(MonAnDaChonActivity.this, "Tất cả trạng thái món ăn đã được lưu lại", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(MonAnDaChonActivity.this, DauBepFoodActivity.class);
+                            startActivity(intent);
+                            finish();  // Kết thúc MonAnDaChonActivity
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -81,6 +85,7 @@ public class MonAnDaChonActivity extends AppCompatActivity implements SelectedFo
                     });
         }
     }
+
 
 
     // Implement các phương thức xử lý sự kiện từ Adapter

@@ -2,19 +2,27 @@
 package vn.posicode.chuyende.activities;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.EventListener;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.DishHistory;
 import vn.posicode.chuyende.adapter.HistoryAdapter;
@@ -42,6 +50,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         // Lấy dữ liệu từ Firestore
        // loadDataFromFirestore();
+        loadHistoryData();
     }
 
 //    private void loadDataFromFirestore() {
@@ -76,6 +85,33 @@ public class HistoryActivity extends AppCompatActivity {
 //                    }
 //                });
 //    }
+
+
+
+    private void loadHistoryData() {
+        db.collection("dish_history")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            DishHistory history = document.toObject(DishHistory.class);
+                            if (history != null) {
+                                Object timeValue = document.get("time");
+                                if (timeValue instanceof Long) {
+                                    // Chuyển đổi từ Long thành định dạng HH:mm cho hiển thị
+                                    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                                    String formattedTime = dateFormat.format(new Date((Long) timeValue));
+                                    history.setTime(formattedTime); // Lưu lại thời gian dưới dạng chuỗi
+                                }
+                                dishHistoryList.add(history);
+                            }
+                        }
+                        historyAdapter.notifyDataSetChanged();
+                    } else {
+                        Log.d("HistoryActivity", "Error getting documents: ", task.getException());
+                    }
+                });
+    }
 
     private void onDishHistoryClick(DishHistory dishHistory) {
         // Xử lý sự kiện nhấn vào hóa đơn (nếu cần)

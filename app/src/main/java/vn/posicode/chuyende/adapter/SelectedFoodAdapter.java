@@ -112,6 +112,7 @@ public class SelectedFoodAdapter extends RecyclerView.Adapter<SelectedFoodAdapte
 //        });
         holder.btnChoose.setOnClickListener(v -> {
             if (listener != null) listener.onChooseClick(position);
+
         });
         holder.btnTake.setOnClickListener(v -> {
             if (listener != null) listener.onTakeClick(position);
@@ -122,6 +123,14 @@ public class SelectedFoodAdapter extends RecyclerView.Adapter<SelectedFoodAdapte
         holder.btnDecrease.setOnClickListener(v -> {
             if (listener != null) listener.onDecreaseClick(position);
         });
+
+
+
+
+
+
+
+
     }
 
     @Override

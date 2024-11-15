@@ -46,8 +46,10 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         DishHistory dishHistory = dishHistoryList.get(position);
+        holder.tvFoodName.setText(dishHistory.getMon_an_id());
+
+        holder.tvThoiGian.setText(dishHistory.getTime().toString());
         holder.tvFoodName.setText(dishHistory.getTen_mon_an());
-        holder.tvThoiGian.setText(dishHistory.getTime());
 
         holder.itemView.setOnClickListener(v -> {
             listener.onItemClick(dishHistory);

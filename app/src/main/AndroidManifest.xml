@@ -28,7 +28,7 @@
         <!--        Khai báo màn hình danh mục-->
         <activity android:name=".activities.CategoryActivity" />
         <activity android:name=".activities.DanhSachMon" />
-        <activity android:name=".activities.MainActivity" />
+        <activity android:name=".activities.MainQLyMonAnActivity" />
         <activity android:name=".activities.HistoryActivity" />
 
 <!--        <activity-->

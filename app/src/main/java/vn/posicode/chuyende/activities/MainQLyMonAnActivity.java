@@ -6,8 +6,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,22 +15,14 @@ import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -43,7 +33,7 @@ import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.Food;
 import vn.posicode.chuyende.adapter.FoodAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainQLyMonAnActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final String FOODS_COLLECTION = "foods";
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -71,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main_qlymonan);
 
         firestore = FirebaseFirestore.getInstance();
         storageReference = FirebaseStorage.getInstance().getReference(); // Khởi tạo Storage reference
@@ -177,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             } else {
                 Log.e(TAG, "Error getting documents: ", task.getException());
-                Toast.makeText(MainActivity.this, "Lỗi khi tải dữ liệu!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainQLyMonAnActivity.this, "Lỗi khi tải dữ liệu!", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -290,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
    //cap nhat lai id vua duoc set
                         documentReference.update("id", generatedId)
                                 .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(MainActivity.this, "Lưu thành công với ID: " + generatedId, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(MainQLyMonAnActivity.this, "Lưu thành công với ID: " + generatedId, Toast.LENGTH_SHORT).show();
                                     Log.d("Firestore", "DocumentSnapshot successfully written with ID: " + generatedId);
                                 })
                                 .addOnFailureListener(e -> {
@@ -394,17 +384,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showToast(String message) {
-        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainQLyMonAnActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 
     private void showOptionsMenu() {
-        PopupMenu popupMenu = new PopupMenu(MainActivity.this, findViewById(R.id.btnoptions));
+        PopupMenu popupMenu = new PopupMenu(MainQLyMonAnActivity.this, findViewById(R.id.btnoptions));
         popupMenu.getMenuInflater().inflate(R.menu.options_menu, popupMenu.getMenu());
 
         popupMenu.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.categoryID) {
                 showToast("Quản lý danh mục");
-                startActivity(new Intent(MainActivity.this, CategoryActivity.class));
+                startActivity(new Intent(MainQLyMonAnActivity.this, CategoryActivity.class));
                 return true;
             }
             return false;

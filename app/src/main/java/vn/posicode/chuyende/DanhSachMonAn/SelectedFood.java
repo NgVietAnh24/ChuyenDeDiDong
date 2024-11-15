@@ -30,7 +30,7 @@ public class SelectedFood implements Parcelable {
         this.price = price;
         this.imageUrl = imageUrl;
         this.quantity = 1;
-        this.status = "Chưa được đặt";
+        this.status = " Chưa được đặt";
     }
 
     // Các getter và setter
@@ -96,6 +96,45 @@ public class SelectedFood implements Parcelable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    // Phương thức kiểm tra tính hợp lệ
+    public boolean isValid() {
+        return foodId != null && !foodId.isEmpty() &&
+                foodName != null && !foodName.isEmpty() &&
+                price >= 0 &&
+                quantity > 0;
+    }
+
+    // Phương thức cập nhật trạng thái
+    public void updateStatus(String newStatus) {
+        this.status = newStatus;
+    }
+
+    // Phương thức in thông tin
+    @Override
+    public String toString() {
+        return "SelectedFood{" +
+                "id='" + id + '\'' +
+                ", foodId='" + foodId + '\'' +
+                ", tableId='" + tableId + '\'' +
+                ", foodName='" + foodName + '\'' +
+                ", price=" + price +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", quantity=" + quantity +
+                ", status='" + status + '\'' +
+                '}';
+    }
+
+    // Phương thức so sánh
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        SelectedFood that = (SelectedFood) obj;
+
+        return foodId != null ? foodId.equals(that.foodId) : that.foodId == null;
     }
 
     // Các phương thức Parcelable
@@ -171,9 +210,9 @@ public class SelectedFood implements Parcelable {
         selectedFood.setFoodId(document.getString("mon_an_id"));
         selectedFood.setTableId(document.getString("ban_id"));
         selectedFood.setFoodName(document.getString("ten_mon_an"));
-        selectedFood.setPrice(document.getDouble("gia"));
+        selectedFood.setPrice(document.contains("gia") ? document.getDouble("gia") : 0.0);
         selectedFood.setImageUrl(document.getString("hinh_anh"));
-        selectedFood.setQuantity(document.getLong("so_luong").intValue());
+        selectedFood.setQuantity(document.contains("so_luong") ? document.getLong("so_luong").intValue() : 1);
         selectedFood.setStatus(document.getString("trang_thai"));
         return selectedFood;
     }

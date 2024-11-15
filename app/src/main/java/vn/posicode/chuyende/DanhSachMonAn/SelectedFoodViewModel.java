@@ -42,4 +42,35 @@ public class SelectedFoodViewModel extends ViewModel {
     public void setSelectedFoodList(ArrayList<SelectedFood> foodList) {
         selectedFoodList.setValue(foodList);
     }
+
+    // Function to check if a food item is already selected
+    public boolean isFoodSelected(SelectedFood selectedFood) {
+        ArrayList<SelectedFood> currentList = selectedFoodList.getValue();
+        return currentList != null && currentList.contains(selectedFood);
+    }
+
+    // Function to clear the selected food list
+    public void clearSelectedFoodList() {
+        selectedFoodList.setValue(new ArrayList<>()); // Notify observers with an empty list
+    }
+
+    // Function to update a selected food item
+    public void updateSelectedFood(SelectedFood updatedFood) {
+        ArrayList<SelectedFood> currentList = selectedFoodList.getValue();
+        if (currentList != null) {
+            for (int i = 0; i < currentList.size(); i++) {
+                SelectedFood food = currentList.get(i);
+                if (food.getId().equals(updatedFood.getId())) {
+                    currentList.set(i, updatedFood); // Update the food item
+                    selectedFoodList.setValue(currentList); // Notify observers
+                    break;
+                }
+            }
+        }
+    }
+
+    // Function to get the current selected food list
+    public ArrayList<SelectedFood> getSelectedFoodListValue() {
+        return selectedFoodList.getValue();
+    }
 }

@@ -167,6 +167,8 @@ public class QLNhanVien extends AppCompatActivity {
                     role = 3;
                 } else if (selectedRole.equals("Quản lý")) {
                     role = 0;
+                } else if (selectedRole.equals("Khách hàng")) {
+                    role = 4;
                 }
 
                 // Đăng ký người dùng vào Firebase Authentication
@@ -263,6 +265,8 @@ public class QLNhanVien extends AppCompatActivity {
                     role = 3;
                 } else if (selectedRole.equals("Quản lý")) {
                     role = 0;
+                } else if (selectedRole.equals("Khách hàng")) {
+                    role = 4;
                 }
 
                 Map<String, Object> updates = new HashMap<>();
@@ -314,7 +318,7 @@ public class QLNhanVien extends AppCompatActivity {
         spArray.add("Phục vụ");
         spArray.add("Thu ngân");
         spArray.add("Đầu bếp");
-
+        spArray.add("Khách hàng");
 
         // Tạo Adapter cho Spinner
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(

@@ -125,6 +125,8 @@ public class NguoiDung {
                 return "Thu ngân";
             case 3:
                 return "Đầu bếp";
+            case 4:
+                return "Khách hàng";
             default:
                 return "Không xác định";
         }

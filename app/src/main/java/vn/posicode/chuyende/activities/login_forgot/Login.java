@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,7 +40,7 @@ public class Login extends AppCompatActivity {
     private FirebaseFirestore firestore;
     private TextInputEditText edtUsername, edtPassword;
     private Button btnLogin;
-    private TextView  btnForgot;
+    private TextView btnForgot;
     private Loading loading;
     private ImageView imgEye;
     private boolean isPasswordVisible = false;
@@ -107,7 +108,7 @@ public class Login extends AppCompatActivity {
                                                                     break;
                                                                 default:
                                                                     // Vai trò không xác định, quay về màn hình chính
-                                                                    startActivity(new Intent(Login.this, TableListActivity.class));
+                                                                    showAlert("Tài khoản không đủ quyền truy cập ⚠️");
                                                                     break;
                                                             }
                                                         } else {
@@ -146,6 +147,17 @@ public class Login extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void showAlert(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(message)
+                .setPositiveButton("OK", (dialog, id) ->
+                        dialog.dismiss()
+                );
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void togglePasswordVisibility() {

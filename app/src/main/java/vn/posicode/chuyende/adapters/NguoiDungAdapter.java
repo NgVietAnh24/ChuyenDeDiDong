@@ -72,6 +72,8 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
             holder.tvRole.setText("Thu ngân");
         } else if (user.getRoles() == 3) {
             holder.tvRole.setText("Đầu bếp");
+        } else if (user.getRoles() == 4) {
+            holder.tvRole.setText("Khách hàng");
         }
         holder.tvNgayTao.setText(user.getNgayTao());
         holder.tvNgayCapNhat.setText(user.getNgayCapNhat());

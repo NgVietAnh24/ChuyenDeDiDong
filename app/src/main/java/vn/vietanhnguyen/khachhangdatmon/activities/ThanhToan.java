@@ -55,16 +55,12 @@ public class ThanhToan extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thanh_toan);
+        Event();
 
         firestore = FirebaseFirestore.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
 
-
-        // Khởi tạo giao diện
-        Event();
-        // Nhận danh sách món đã chọn từ Intent
         List<MonAn> monDaChon = getIntent().getParcelableArrayListExtra("monDaChon");
-        // Sử dụng dữ liệu món ăn (cập nhật UI hoặc các thành phần khác)
         // Tính tổng tiền
         if (monDaChon != null) {
             tongTien = 0;
@@ -75,10 +71,8 @@ public class ThanhToan extends AppCompatActivity {
                 Log.d("TTT", "ssssssssssssssss " + gia);
             }
 
-            // Hiển thị tổng tiền
             tvTongTien.setText("Tổng tiền: " + tongTien + " VND");
 
-            // Setup the adapter with the updated list
             adapter = new MonAnThanhToanAdapter(monDaChon);
             recyclerViewMonAn.setLayoutManager(new LinearLayoutManager(this));
             recyclerViewMonAn.setAdapter(adapter);
@@ -86,7 +80,6 @@ public class ThanhToan extends AppCompatActivity {
 
         String totalString = String.format("%d", tongTien);
 
-        // Lấy UID của người dùng hiện tại
         String userId = firebaseAuth.getCurrentUser().getUid();
 
         // Truy vấn thông tin khách hàng từ Firestore
@@ -99,7 +92,6 @@ public class ThanhToan extends AppCompatActivity {
                     String tenKH = document.getString("tenNhanVien");
                     String soDT = document.getString("sDT");
 
-                    // Nhận dữ liệu ghi chú từ trường nhập trong màn hình đã chọn món
                     String ghiChu = getIntent().getStringExtra("ghiChu");
 
                     Date now = new Date();
@@ -108,10 +100,9 @@ public class ThanhToan extends AppCompatActivity {
                     String time = timeFormat.format(now);
                     String date = dateFormat.format(now);
 
-                    // Tạo mã hóa đơn tự động (ví dụ: sử dụng thời gian hiện tại hoặc một giá trị ngẫu nhiên)
                     String maHD = "HD" + System.currentTimeMillis(); // Mã hóa đơn dựa trên thời gian hiện tại
 
-                    // Hiển thị thông tin hóa đơn
+                    // Hiển thị thông tin
                     tvMaHD.setText("Mã hóa đơn: " + maHD);
                     tvTenKH.setText("Tên khách hàng: " + tenKH);
                     tvSoDT.setText("Số điện thoại: " + soDT);
@@ -127,7 +118,6 @@ public class ThanhToan extends AppCompatActivity {
                     // ZaloPay SDK Init
                     ZaloPaySDK.init(553, Environment.SANDBOX);
 
-                    // Xử lý nút thanh toán
                     btnThanhToan.setOnClickListener(v -> {
                         CreateOrder orderApi = new CreateOrder();
 
@@ -144,9 +134,9 @@ public class ThanhToan extends AppCompatActivity {
                                         intent1.putExtra("result", "Thanh toán thành công");
 //                                        startActivity(intent1);
                                         // Cập nhật trạng thái bàn thành "trống" sau khi thanh toán thành công
-                                        String banId = getIntent().getStringExtra("id"); // Lấy ID bàn từ Intent
+                                        String banId = getIntent().getStringExtra("id");
                                         firestore.collection("tables").document(banId)
-                                                .update("status", "Trống") // Cập nhật trạng thái bàn
+                                                .update("status", "Trống")
                                                 .addOnCompleteListener(task -> {
                                                     if (task.isSuccessful()) {
                                                         Log.d("ThanhToan", "Cập nhật trạng thái bàn thành công.");
@@ -170,10 +160,8 @@ public class ThanhToan extends AppCompatActivity {
                                 });
                             }
 
-
                             Intent intentId = getIntent();
 
-                            // Lưu thông tin hóa đơn vào Firestore
                             Map<String, Object> invoiceData = new HashMap<>();
                             invoiceData.put("ban_id", intentId.getStringExtra("id"));
                             invoiceData.put("tong_tien", tongTien);
@@ -202,7 +190,6 @@ public class ThanhToan extends AppCompatActivity {
                                 invoiceItemData.put("so_luong", monAn.getSoLuong());
                                 invoiceItemData.put("hoa_don_id", maHD);
 
-                                // Tạo một document id duy nhất cho từng món ăn, ví dụ sử dụng tên món ăn và mã hóa đơn
                                 String documentId = maHD + "_" + monAn.getName();
 
                                 firestore.collection("invoice_items").document(documentId)

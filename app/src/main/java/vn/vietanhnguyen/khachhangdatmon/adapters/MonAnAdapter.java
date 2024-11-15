@@ -94,8 +94,6 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> 
         foodData.put("name", monAn.getName());
         foodData.put("price", monAn.getPrice());
         foodData.put("soLuong", 1);
-
-        // Lưu hình ảnh nếu cần
         foodData.put("image", monAn.getImage());
 
         firestore.collection("tables").document(tableId)

@@ -107,6 +107,8 @@ public class Login extends AppCompatActivity {
 
                                                             if (role == 4) {
                                                                 startActivity(new Intent(Login.this, Home.class));
+                                                            }else {
+                                                                showAlert("Tài khoản không đủ quyền truy cập ⚠️");
                                                             }
                                                         } else {
                                                             loading.cancel();

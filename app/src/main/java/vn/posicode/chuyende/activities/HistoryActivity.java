@@ -1,4 +1,3 @@
-// HistoryActivity.java
 package vn.posicode.chuyende.activities;
 
 import android.os.Bundle;
@@ -11,17 +10,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.EventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.DishHistory;
@@ -32,7 +24,6 @@ public class HistoryActivity extends AppCompatActivity {
     private HistoryAdapter historyAdapter;
     private List<DishHistory> dishHistoryList;
     private FirebaseFirestore db;
-    private ListenerRegistration registration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,44 +40,8 @@ public class HistoryActivity extends AppCompatActivity {
         recyclerView.setAdapter(historyAdapter);
 
         // Lấy dữ liệu từ Firestore
-       // loadDataFromFirestore();
         loadHistoryData();
     }
-
-//    private void loadDataFromFirestore() {
-//        registration = db.collection("selected_foods")
-//                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onEvent(QuerySnapshot snapshots, FirebaseFirestoreException e) {
-//                        if (e != null) {
-//                            return; // Xử lý lỗi nếu có
-//                        }
-//
-//                        // Xóa danh sách cũ
-//                        dishHistoryList.clear();
-//                        if (snapshots != null) {
-//                            for (QueryDocumentSnapshot document : snapshots) {
-//                                // Lấy dữ liệu từ Firestore
-//                                String banId = document.getString("ban_id");
-//                                int gia = document.getLong("gia").intValue();
-//                                String hinhAnh = document.getString("hinh_anh");
-//                                String monAnId = document.getString("mon_an_id");
-//                                int soLuong = document.getLong("so_luong").intValue();
-//                                String tenMonAn = document.getString("ten_mon_an");
-//                                String trangThai = document.getString("trang_thai");
-//                                String time = document.getString("time");
-//
-//                                // Thêm vào danh sách
-//                                dishHistoryList.add(new DishHistory(banId, gia, hinhAnh, monAnId, soLuong, tenMonAn, trangThai, time));
-//                            }
-//                        }
-//                        // Thông báo adapter cập nhật dữ liệu
-//                        historyAdapter.notifyDataSetChanged();
-//                    }
-//                });
-//    }
-
-
 
     private void loadHistoryData() {
         db.collection("dish_history")
@@ -96,13 +51,6 @@ public class HistoryActivity extends AppCompatActivity {
                         for (DocumentSnapshot document : task.getResult()) {
                             DishHistory history = document.toObject(DishHistory.class);
                             if (history != null) {
-                                Object timeValue = document.get("time");
-                                if (timeValue instanceof Long) {
-                                    // Chuyển đổi từ Long thành định dạng HH:mm cho hiển thị
-                                    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                                    String formattedTime = dateFormat.format(new Date((Long) timeValue));
-                                    history.setTime(formattedTime); // Lưu lại thời gian dưới dạng chuỗi
-                                }
                                 dishHistoryList.add(history);
                             }
                         }
@@ -115,6 +63,7 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void onDishHistoryClick(DishHistory dishHistory) {
         // Xử lý sự kiện nhấn vào hóa đơn (nếu cần)
+        // Có thể hiển thị thông tin chi tiết hoặc thực hiện hành động khác
     }
 
     private void onDishHistoryLongClick(DishHistory dishHistory) {
@@ -130,26 +79,17 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     private void deleteDishHistory(DishHistory dishHistory) {
-        db.collection("selected_foods")
-                .whereEqualTo("mon_an_id", dishHistory.getMon_an_id())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            document.getReference().delete()
-                                    .addOnSuccessListener(aVoid -> {
-                                        Toast.makeText(this, "Hóa đơn đã được xóa", Toast.LENGTH_SHORT).show();
-                                        // Cập nhật danh sách sau khi xóa
-                                        dishHistoryList.remove(dishHistory);
-                                        historyAdapter.notifyDataSetChanged();
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        Toast.makeText(this, "Lỗi khi xóa hóa đơn", Toast.LENGTH_SHORT).show();
-                                    });
-                        }
-                    } else {
-                        Toast.makeText(this, "Lỗi khi tìm hóa đơn", Toast.LENGTH_SHORT).show();
-                    }
+        // Xóa tài liệu từ collection "dish_history"
+        db.collection("dish_history").document(dishHistory.getMon_an_id()) // Sử dụng ID của món ăn để xóa
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Hóa đơn đã được xóa", Toast.LENGTH_SHORT).show();
+                    // Cập nhật danh sách sau khi xóa
+                    dishHistoryList.remove(dishHistory);
+                    historyAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi xóa hóa đơn", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -157,8 +97,5 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         // Hủy đăng ký lắng nghe khi activity không còn hiển thị
-        if (registration != null) {
-            registration.remove();
-        }
     }
 }

@@ -13,15 +13,25 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +39,7 @@ import java.util.Map;
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.DauBepFoodAdapter;
 import vn.posicode.chuyende.adapter.DauBep_Food;
+import vn.posicode.chuyende.adapter.Food;
 
 public class DauBepFoodActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
@@ -48,7 +59,7 @@ public class DauBepFoodActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.listDauBep);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-
+        luuMonAnDauBep();
         if (daubepfoodlist == null) {
             daubepfoodlist = new ArrayList<>();
         }
@@ -66,7 +77,7 @@ public class DauBepFoodActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Tạo Intent để chuyển đến MonAnDaChon
-                Intent intent = new Intent(DauBepFoodActivity.this, MonAnDaChonActivity.class);
+                Intent intent = new Intent(DauBepFoodActivity.this, HistoryActivity.class);
                 startActivity(intent);
             }
         });
@@ -111,141 +122,11 @@ public class DauBepFoodActivity extends AppCompatActivity {
                 });
     }
 
-//    public void showQuantityDialog(String foodId) {
-//        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog, null);
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setView(dialogView);
-//        builder.setCancelable(true);
-//
-//        TextView tvQuantity = dialogView.findViewById(R.id.tv_quantity);
-//        TextView btnDecrease = dialogView.findViewById(R.id.btn_decrease);
-//        TextView btnIncrease = dialogView.findViewById(R.id.btn_increase);
-//
-//        // Lấy số lượng món ăn đã chọn từ `monDaChon`, mặc định là 1 nếu chưa có trong danh sách
-//        final int[] quantity = {monDaChon.getOrDefault(foodId, 1)};
-//        tvQuantity.setText(String.valueOf(quantity[0]));
-//
-//        btnDecrease.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (quantity[0] > 1) {  // Giới hạn không cho giảm dưới 1
-//                    quantity[0]--;
-//                    tvQuantity.setText(String.valueOf(quantity[0]));
-//                }
-//            }
-//        });
-//
-//        btnIncrease.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                quantity[0]++;
-//                tvQuantity.setText(String.valueOf(quantity[0]));
-//            }
-//        });
-//
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
-//
-//        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-//            @Override
-//            public void onDismiss(DialogInterface dialogInterface) {
-//                if (quantity[0] == 0) {
-//                    monDaChon.remove(foodId);
-//                } else {
-//                    monDaChon.put(foodId, quantity[0]);
-//                }
-//
-//                // Cập nhật tổng số lượng món đã chọn
-//                tongMonDaChon = 0;
-//                for (Integer quantity : monDaChon.values()) {
-//                    tongMonDaChon += quantity;
-//                }
-//
-//
-//            }
-//        });
-//    }
 
 
 
 
-//    public void showQuantityDialog(String foodId) {
-//        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog, null);
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setView(dialogView);
-//        builder.setCancelable(true);
-//
-//        TextView tvQuantity = dialogView.findViewById(R.id.tv_quantity);
-//        TextView btnDecrease = dialogView.findViewById(R.id.btn_decrease);
-//        TextView btnIncrease = dialogView.findViewById(R.id.btn_increase);
-//        Button btnDone = dialogView.findViewById(R.id.btn_done); // Nút "Đã xong"
-//
-//        // Lấy số lượng món ăn đã chọn từ `monDaChon`, mặc định là 1 nếu chưa có trong danh sách
-//        final int[] quantity = {monDaChon.getOrDefault(foodId, 1)};
-//        tvQuantity.setText(String.valueOf(quantity[0]));
-//
-//        btnDecrease.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (quantity[0] > 1) {  // Giới hạn không cho giảm dưới 1
-//                    quantity[0]--;
-//                    tvQuantity.setText(String.valueOf(quantity[0]));
-//                }
-//            }
-//        });
-//
-//        btnIncrease.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                quantity[0]++;
-//                tvQuantity.setText(String.valueOf(quantity[0]));
-//            }
-//        });
-//
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
-//
-//        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-//            @Override
-//            public void onDismiss(DialogInterface dialogInterface) {
-//                if (quantity[0] == 0) {
-//                    monDaChon.remove(foodId);
-//                } else {
-//                    monDaChon.put(foodId, quantity[0]);
-//                }
-//
-//                // Cập nhật tổng số lượng món đã chọn
-//                tongMonDaChon = 0;
-//                for (Integer qty : monDaChon.values()) {
-//                    tongMonDaChon += qty;
-//                }
-//            }
-//        });
-//
-//        // Xử lý sự kiện khi nút "Đã xong" được nhấn
-//        btnDone.setOnClickListener(v -> {
-//            // Lấy số lượng món ăn từ danh sách
-//            int totalQuantityInList = monDaChon.getOrDefault(foodId, 0);
-//            int remainingQuantity = totalQuantityInList - quantity[0];
-//
-//            // Cập nhật trạng thái món ăn trong Firestore
-//            updateFoodStatus(foodId, "Đã làm");
-//
-//            if (remainingQuantity > 0) {
-//                // Nếu còn món chưa làm
-//                Toast.makeText(this, "Còn " + remainingQuantity + " món chưa làm.", Toast.LENGTH_SHORT).show();
-//            } else {
-//                // Nếu đã hoàn thành tất cả
-//                Toast.makeText(this, "Tất cả món đã được làm xong!", Toast.LENGTH_SHORT).show();
-//                // Chuyển đến màn hình lịch sử đầu bếp (cần implement phương thức chuyển màn hình)
-//                goToHistoryScreen();
-//            }
-//
-//            dialog.dismiss(); // Đóng dialog sau khi nhấn nút "Đã xong"
-//        });
-//    }
+
 
 
 
@@ -296,9 +177,13 @@ public class DauBepFoodActivity extends AppCompatActivity {
 
         // Xử lý sự kiện khi nút "Đã xong" được nhấn
 //        btnDone.setOnClickListener(v -> {
-//            // Lấy số lượng món ăn từ danh sách
+//            // Cập nhật lại số lượng đã làm từ danh sách hiện tại
 //            int totalQuantityInList = monDaChon.getOrDefault(foodId, 0);
 //            int remainingQuantity = totalQuantityInList - quantity[0];
+//
+//            if (remainingQuantity < 0) {
+//                remainingQuantity = 0; // Giới hạn không cho số âm
+//            }
 //
 //            // Cập nhật trạng thái món ăn trong Firestore
 //            updateFoodStatus(foodId, "Đã làm");
@@ -309,7 +194,7 @@ public class DauBepFoodActivity extends AppCompatActivity {
 //            if (remainingQuantity > 0) {
 //                // Nếu còn món chưa làm
 //                Toast.makeText(this, "Còn " + remainingQuantity + " món chưa làm.", Toast.LENGTH_SHORT).show();
-//            } else {
+//            } else if (remainingQuantity == 0) {
 //                // Nếu đã hoàn thành tất cả
 //                Toast.makeText(this, "Tất cả món đã được làm xong!", Toast.LENGTH_SHORT).show();
 //                // Chuyển đến màn hình lịch sử đầu bếp
@@ -318,33 +203,40 @@ public class DauBepFoodActivity extends AppCompatActivity {
 //
 //            dialog.dismiss(); // Đóng dialog sau khi nhấn nút "Đã xong"
 //        });
+
+
+
+
         btnDone.setOnClickListener(v -> {
-            // Lấy số lượng món ăn từ danh sách
-            int totalQuantityInList = monDaChon.getOrDefault(foodId, 0);
-            int remainingQuantity = totalQuantityInList - quantity[0];
+            int totalQuantityInList = monDaChon.getOrDefault(foodId, 0); // Lấy số lượng đã chọn ban đầu
+            int remainingQuantity = totalQuantityInList - quantity[0]; // Số lượng còn lại
 
-            Log.d("DauBepFoodActivity", "Total Quantity in List: " + totalQuantityInList);
-            Log.d("DauBepFoodActivity", "Quantity Selected: " + quantity[0]);
-            Log.d("DauBepFoodActivity", "Remaining Quantity: " + remainingQuantity);
-
-            // Cập nhật trạng thái món ăn trong Firestore
-            updateFoodStatus(foodId, "Đã làm");
-
-            // Lưu món ăn vào lịch sử
-            saveDishToHistory(foodId, quantity[0]);
-
-            if (remainingQuantity > 0) {
-                // Nếu còn món chưa làm
+            if (quantity[0] < totalQuantityInList) {
+                // Nếu số lượng nhập chưa đủ
                 Toast.makeText(this, "Còn " + remainingQuantity + " món chưa làm.", Toast.LENGTH_SHORT).show();
+                btnDone.setEnabled(false); // Làm mờ nút nếu số lượng không đủ
             } else {
-                // Nếu đã hoàn thành tất cả
-                Toast.makeText(this, "Tất cả món đã được làm xong!", Toast.LENGTH_SHORT).show();
-                // Chuyển đến màn hình lịch sử đầu bếp
-                goToHistoryScreen();
-            }
+                // Nếu đủ số lượng, thực hiện cập nhật
+                btnDone.setEnabled(true); // Bật lại nút "Đã xong" khi đủ số lượng
 
-            dialog.dismiss(); // Đóng dialog sau khi nhấn nút "Đã xong"
+                // Cập nhật trạng thái món ăn trong Firestore
+                updateFoodStatus(foodId, "Đã làm");
+
+                // Lưu món ăn vào lịch sử
+                saveDishToHistory(foodId, quantity[0]);
+
+                // Kiểm tra nếu đã hoàn thành tất cả
+                if (remainingQuantity == 0) {
+                    Toast.makeText(this, "Tất cả món đã được làm xong!", Toast.LENGTH_SHORT).show();
+                    goToHistoryScreen(); // Chuyển đến màn hình lịch sử đầu bếp
+                }
+
+                dialog.dismiss(); // Đóng dialog khi hoàn thành
+            }
         });
+
+
+
 
     }
 
@@ -368,6 +260,72 @@ public class DauBepFoodActivity extends AppCompatActivity {
                     Toast.makeText(this, "Lỗi khi lưu món ăn vào lịch sử: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
+    private void luuMonAnDauBep() {
+//        Map<String, Object> foodData = new HashMap<>();
+//        foodData.put("id", food.getId());
+//        foodData.put("name", food.getName());
+//        foodData.put("price", food.getPrice());
+//        foodData.put("soLuong", 1);
+//        foodData.put("image", food.getImage());
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        String time = dateFormat.format(now);
+
+        String fId= String.valueOf(System.currentTimeMillis());
+
+        Map<String, Object> foodData = new HashMap<>();
+        foodData.put("id", fId);
+        foodData.put("name", "Lau cua");
+        foodData.put("price", "123000VND");
+        foodData.put("soLuong", 1);
+        foodData.put("time", time);
+
+        foodData.put("image", "https://firebasestorage.googleapis.com/v0/b/vietanh-38a14.appspot.com/o/Food%2FZZMRinyJerpGcRW6zXfE.jpg?alt=media&token=69882f5b-ebec-464f-9eed-a95ccf222334"
+                );
+
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("foodChefs").add(foodData)
+                .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentReference> task) {
+                        Log.d("ThanhCong","Fall");
+                    }
+                });
+    }
+
+//    private void luuMonAnDauBep() {
+//        // Danh sách các món ăn để thêm vào Firestore
+//        List<DauBep_Food> foodList = new ArrayList<>();
+//        foodList.add(new DauBep_Food("1", "Lau cua", 123000, "https://firebasestorage.googleapis.com/v0/b/vietanh-38a14.appspot.com/o/Food%2FZZMRinyJerpGcRW6zXfE.jpg?alt=media&token=69882f5b-ebec-464f-9eed-a95ccf222334"));
+//        foodList.add(new Food("2", "Pho Bo", 50000, "https://example.com/image_pho_bo.jpg"));
+//        foodList.add(new Food("3", "Com tam", 30000, "https://example.com/image_com_tam.jpg"));
+//        // Thêm nhiều món ăn khác vào danh sách...
+//
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        for (DauBep_Food food : foodList) {
+//            Map<String, Object> foodData = new HashMap<>();
+//            foodData.put("id", food.getId());
+//            foodData.put("name", food.getName());
+//            foodData.put("price", food.getPrice() + " VND"); // Đảm bảo giá là chuỗi
+//            foodData.put("soLuong", 1);
+//            foodData.put("time", new SimpleDateFormat("HH:mm").format(new Date()));
+//            foodData.put("image", food.getImage());
+//
+//            // Thêm món ăn vào Firestore
+//            db.collection("foodChefs").add(foodData)
+//                    .addOnCompleteListener(task -> {
+//                        if (task.isSuccessful()) {
+//                            Log.d("ThanhCong", "Món ăn đã được thêm thành công: " + food.getName());
+//                        } else {
+//                            Log.d("ThatBai", "Lỗi khi thêm món ăn: ", task.getException());
+//                        }
+//                    });
+//        }
+//    }
 
     private void goToHistoryScreen() {
         // Implement logic để chuyển đến màn hình lịch sử đầu bếp

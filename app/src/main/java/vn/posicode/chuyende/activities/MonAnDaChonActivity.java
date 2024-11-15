@@ -1,5 +1,6 @@
 package vn.posicode.chuyende.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -59,8 +60,20 @@ public class MonAnDaChonActivity extends AppCompatActivity implements SelectedFo
     }
 
     private void handleLamTatCa() {
+        if (foodList.isEmpty()) {
+            Toast.makeText(this, "Không có món ăn nào để lưu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         int totalItems = foodList.size();
         int[] completedCount = {0}; // Biến đếm số lần lưu thành công
+        btnLuuTatCa.setEnabled(false); // Vô hiệu hóa nút
+
+        // Hiển thị ProgressDialog
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Đang lưu dữ liệu...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
         for (int i = 0; i < totalItems; i++) {
             SelectedFood food = foodList.get(i);
@@ -70,20 +83,25 @@ public class MonAnDaChonActivity extends AppCompatActivity implements SelectedFo
                     .document(food.getMon_an_id())
                     .set(food)
                     .addOnSuccessListener(aVoid -> {
-                        completedCount[0]++;
+                                completedCount[0]++;
 
-                        // Nếu tất cả món ăn đều đã được xử lý thành công, chuyển qua màn hình DaubepFoodActivity
-                        if (completedCount[0] == totalItems) {
-                            Toast.makeText(MonAnDaChonActivity.this, "Tất cả trạng thái món ăn đã được lưu lại", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(MonAnDaChonActivity.this, DauBepFoodActivity.class);
-                            startActivity(intent);
-                            finish();  // Kết thúc MonAnDaChonActivity
-                        }
+                                // Nếu tất cả món ăn đều đã được xử lý thành công
+                                if (completedCount[0] == totalItems) {
+                                    progressDialog.dismiss(); // Đóng ProgressDialog
+                                    progressDialog.dismiss(); // Đóng ProgressDialog
+                                    Toast.makeText(MonAnDaChonActivity.this, "Tất cả trạng thái món ăn đã được lưu lại", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(MonAnDaChonActivity.this, DauBepFoodActivity.class);
+                                    startActivity(intent);
+                                    finish();  // Kết thúc MonAnDaChonActivity
+                                }
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(MonAnDaChonActivity.this, "Lỗi khi lưu trạng thái món ăn", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss(); // Đóng ProgressDialog
+                        Toast.makeText(MonAnDaChonActivity.this, "Lỗi khi lưu trạng thái món ăn: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        btnLuuTatCa.setEnabled(true); // Kích hoạt lại nút
                     });
         }
+
     }
 
 

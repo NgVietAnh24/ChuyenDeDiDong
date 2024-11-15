@@ -93,7 +93,7 @@ public class DishHistory {
     private String ten_mon_an;
     private int so_luong;
     private String trang_thai;
-    private String time;
+    private Long time;
     private String mon_an_id;
 
     public String getTen_mon_an() {
@@ -120,11 +120,11 @@ public class DishHistory {
         this.trang_thai = trang_thai;
     }
 
-    public String getTime() {
+    public Long getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(Long time) {
         this.time = time;
     }
 
@@ -136,14 +136,14 @@ public class DishHistory {
         this.mon_an_id = mon_an_id;
     }
 
-    public DishHistory(String ten_mon_an, int so_luong, String trang_thai, String time, String mon_an_id) {
-        this.ten_mon_an = ten_mon_an;
-        this.so_luong = so_luong;
-        this.trang_thai = trang_thai;
-        this.time = time;
-        this.mon_an_id = mon_an_id;
+    public DishHistory() {
     }
 
-    public DishHistory() {
+    public DishHistory(String mon_an_id, Long time, String trang_thai, int so_luong, String ten_mon_an) {
+        this.mon_an_id = mon_an_id;
+        this.time = time;
+        this.trang_thai = trang_thai;
+        this.so_luong = so_luong;
+        this.ten_mon_an = ten_mon_an;
     }
 }

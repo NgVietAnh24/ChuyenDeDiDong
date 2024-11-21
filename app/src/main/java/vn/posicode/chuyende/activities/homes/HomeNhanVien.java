@@ -27,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import vn.posicode.chuyende.DanhSachMonAn.FoodMenuActivity;
+//import vn.posicode.chuyende.DanhSachMonAn.FoodMenuActivity;
+import vn.posicode.chuyende.DanhSachMonAn.DanhSachChonMon;
 import vn.posicode.chuyende.Manage.ManageNhanVien;
 import vn.posicode.chuyende.R;
 
@@ -237,7 +238,7 @@ public class HomeNhanVien extends AppCompatActivity {
                                     (currentStatus.equals("Trống") ||
                                             currentStatus.equals("Đã đặt") ||
                                             currentStatus.equals("Đang sử dụng"))) {
-                                Intent intent = new Intent(HomeNhanVien.this, FoodMenuActivity.class);
+                                Intent intent = new Intent(HomeNhanVien.this, DanhSachChonMon.class);
                                 intent.putExtra("tableName", tableName);
                                 intent.putExtra("tableDescription", tableDescription);
                                 intent.putExtra("documentId", document.getId());

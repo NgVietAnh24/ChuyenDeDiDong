@@ -21,7 +21,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_text_reservation_name"
+                android:id="@+id/edtReservationName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Tên"
@@ -36,7 +36,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_text_reservation_phone"
+                android:id="@+id/edtReservationPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Số điện thoại"

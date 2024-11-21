@@ -36,7 +36,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
 
     private TextView titleTextView, timeTextView, dateTextView, totalTextView, amountReceivedTextView, changeTextView;
     private TextView customerNameTextView, customerPhoneTextView;
-    private TextView invoiceIdTextView; // Thêm biến này
+    private TextView invoiceIdTextView; // Variable for invoice ID TextView
     private Button paymentButton;
     private ListView itemsListView;
 
@@ -70,7 +70,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         changeTextView = findViewById(R.id.changeTextView);
         customerNameTextView = findViewById(R.id.customerNameTextView);
         customerPhoneTextView = findViewById(R.id.customerPhoneTextView);
-        invoiceIdTextView = findViewById(R.id.invoiceIdTextView); // Khởi tạo TextView cho mã hóa đơn
+        invoiceIdTextView = findViewById(R.id.invoiceIdTextView); // Initialize TextView for invoice ID
         paymentButton = findViewById(R.id.paymentButton);
         itemsListView = findViewById(R.id.itemsListView);
 
@@ -117,7 +117,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Log .e(TAG, "No items found for this invoice");
+                        Log.e(TAG, "No items found for this invoice");
                     } else {
                         for (DocumentSnapshot document : queryDocumentSnapshots) {
                             String name = document.getString("ten_mon_an");
@@ -140,7 +140,6 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                     Toast.makeText(this, "Lỗi khi tải danh sách món", Toast.LENGTH_SHORT).show();
                 });
     }
-
     private void displayInvoiceDetails() {
         if (selectedInvoice == null) {
             Log.e(TAG, "Selected invoice is null");
@@ -161,7 +160,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
             customerPhoneTextView.setText("Số điện thoại: " +
                     (selectedInvoice.getCustomerPhone() != null ? selectedInvoice.getCustomerPhone() : "N/A"));
 
-            // Xử lý hiển thị ghi chú
+            // Handle note display
             TextView noteTextView = findViewById(R.id.noteTextView);
             String note = selectedInvoice.getNote();
             if (note != null && !note.isEmpty()) {
@@ -216,7 +215,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         TextView btnClose = dialog.findViewById(R.id.btnClose);
         TextView totalAmountValue = dialog.findViewById(R.id.totalAmountValue);
 
-        // Format tổng tiền theo locale Việt Nam
+        // Format total amount according to Vietnamese locale
         Locale vietnameseLocale = new Locale("vi", "VN");
         NumberFormat currencyFormatter = NumberFormat.getNumberInstance(vietnameseLocale);
         currencyFormatter.setGroupingUsed(true);
@@ -225,19 +224,16 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         titleTextView.setText("Tính tiền");
         totalAmountValue.setText(currencyFormatter.format(selectedInvoice.getTotal()) + " VND");
 
-        // Áp dụng CurrencyTextWatcher
+        // Apply CurrencyTextWatcher
         CurrencyTextWatcher currencyTextWatcher = new CurrencyTextWatcher(edtTienThu);
         edtTienThu.addTextChangedListener(currencyTextWatcher);
 
         btnThanhToan.setOnClickListener(v -> {
-            // Sử dụng phương thức getNumericValue() để lấy giá trị thực
             double tienThu = currencyTextWatcher.getNumericValue();
 
             if (tienThu > 0) {
                 if (tienThu >= selectedInvoice.getTotal()) {
                     double tienDu = tienThu - selectedInvoice.getTotal();
-
-                    // Hiển thị thông báo xác nhận
                     showConfirmPaymentDialog(tienThu, tienDu, dialog, currencyTextWatcher);
                 } else {
                     Toast.makeText(this, "Số tiền không đủ", Toast.LENGTH_SHORT).show();
@@ -247,7 +243,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
             }
         });
 
-        // Sử dụng TextView làm nút đóng
+        // Use TextView as close button
         btnClose.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
@@ -284,9 +280,9 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         updates.put("tien_thu", amountReceived);
         updates.put("tien_du", amountReceived - selectedInvoice.getTotal());
 
-        // Nếu muốn giữ lại ghi chú cũ
+        // Keep the old note if it exists
         if (selectedInvoice.getNote() != null && !selectedInvoice.getNote().isEmpty()) {
-            updates.put ("ghi_chu", selectedInvoice.getNote());
+            updates.put("ghi_chu", selectedInvoice.getNote());
         }
 
         db.collection("invoices").document(selectedInvoice.getId())
@@ -325,7 +321,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // Đặt kết quả trả về nếu cần
+        // Set result if needed
         setResult(RESULT_OK);
         super.onBackPressed();
     }

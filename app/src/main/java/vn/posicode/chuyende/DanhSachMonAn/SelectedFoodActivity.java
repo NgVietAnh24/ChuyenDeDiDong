@@ -424,20 +424,20 @@
 //        }
 //    }
 //
-////    @Override
-////    protected void onSaveInstanceState(Bundle outState) {
-////        super.onSaveInstanceState(outState);
-////        outState.putParcelableArrayList("selectedFoodList", selectedFoodList);
-////    }
-////
-////    @Override
-////    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-////        super.onRestoreInstanceState(savedInstanceState);
-////        selectedFoodList = savedInstanceState.getParcelableArrayList("selectedFoodList");
-////        if (selectedFoodList != null) {
-////            for (SelectedFood selectedFood : selectedFoodList) {
-////                addFoodView(selectedFood);
-////            }
-////        }
-////    }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        outState.putParcelableArrayList("selectedFoodList", selectedFoodList);
+//    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        selectedFoodList = savedInstanceState.getParcelableArrayList("selectedFoodList");
+//        if (selectedFoodList != null) {
+//            for (SelectedFood selectedFood : selectedFoodList) {
+//                addFoodView(selectedFood);
+//            }
+//        }
+//    }
 //}

@@ -114,7 +114,15 @@ public class DanhSachDaChon extends AppCompatActivity {
         // Xử lý sự kiện cho nút Thanh toán
         btnThanhToan.setOnClickListener(v -> {
             String ghiChu = edtGhiChu.getText().toString();
-            taoHoaDon(tableId, ghiChu); // Gọi phương thức tạo hóa đơn
+
+            // Prepare the intent to start InvoiceDetailActivity
+            Intent intent1 = new Intent(this, InvoiceDetailActivity.class);
+            intent1.putParcelableArrayListExtra("monDaChon", (ArrayList<? extends Parcelable>) listMonAnDaChon);
+            intent1.putExtra("id", tableId);
+            intent1.putExtra("ghiChu", ghiChu);
+
+            // Start InvoiceDetailActivity
+            startActivity(intent1);
         });
 
         btnBack.setOnClickListener(v -> {
@@ -132,38 +140,6 @@ public class DanhSachDaChon extends AppCompatActivity {
             btnBackHome.setVisibility(View.GONE);
             xoaTatCaMonDaChon(tableId);
         });
-    }
-
-    private void taoHoaDon(String tableId, String ghiChu) {
-        Map<String, Object> invoiceData = new HashMap<>();
-        invoiceData.put("ban_id", tableId);
-        invoiceData.put("ghi_chu", ghiChu);
-        invoiceData.put("ngay_tao", System.currentTimeMillis());
-        invoiceData.put("tinh_trang", "Chưa thanh toán");
-
-        // Tính tổng tiền
-        double total = 0;
-        for (Food food : listMonAnDaChon) {
-            // Chuyển đổi giá từ String sang double
-            double price = Double.parseDouble(food.getPrice()); // Chuyển đổi
-            total += price * food.getSoLuong(); // Nhân với số lượng
-        }
-        invoiceData.put("tong_tien", total);
-
-        // Tạo hóa đơn trong Firestore
-        firestore.collection("invoices").add(invoiceData)
-                .addOnSuccessListener(documentReference -> {
-                    Log.d(TAG, "Hóa đơn đã được tạo với ID: " + documentReference.getId());
-                    Toast.makeText(DanhSachDaChon.this, "Hóa đơn đã được tạo", Toast.LENGTH_SHORT).show();
-                    // Chuyển sang màn hình chi tiết hóa đơn
-                    Intent intent = new Intent(DanhSachDaChon.this, InvoiceDetailActivity.class);
-                    intent.putExtra("invoiceId", documentReference.getId());
-                    startActivity(intent);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Lỗi khi tạo hóa đơn: ", e);
-                    Toast.makeText(DanhSachDaChon.this, "Lỗi khi tạo hóa đơn", Toast.LENGTH_SHORT).show();
-                });
     }
 
     private void xoaTatCaMonDaChon(String tableId) {

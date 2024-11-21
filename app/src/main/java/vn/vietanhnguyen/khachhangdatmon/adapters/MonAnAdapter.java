@@ -91,13 +91,17 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> 
     private void luuMonAnDaChon(MonAn monAn) {
         Map<String, Object> foodData = new HashMap<>();
         foodData.put("id", monAn.getId());
+        foodData.put("ban_id", tableId);
         foodData.put("name", monAn.getName());
         foodData.put("price", monAn.getPrice());
         foodData.put("soLuong", 1);
+        foodData.put("time", "");
+        foodData.put("status", "");
         foodData.put("image", monAn.getImage());
 
-        firestore.collection("tables").document(tableId)
-                .update("selectedFoods", FieldValue.arrayUnion(foodData)) // Sử dụng arrayUnion để thêm món ăn vào mảng
+        // Tạo một tài liệu mới trong bảng selected_foods
+        firestore.collection("selectedFoods").document() // Tạo một tài liệu mới với ID tự động
+                .set(foodData) // Sử dụng set để lưu dữ liệu
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(context, "Đã thêm món: " + monAn.getName(), Toast.LENGTH_SHORT).show(); // Sử dụng context từ Activity

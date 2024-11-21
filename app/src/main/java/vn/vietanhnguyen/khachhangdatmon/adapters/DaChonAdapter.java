@@ -1,19 +1,24 @@
 package vn.vietanhnguyen.khachhangdatmon.adapters;
 
+import static android.content.ContentValues.TAG;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
-import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,56 +56,82 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
         if (monAn.getSoLuong() == 0) {
             monAn.setSoLuong(1);
         }
+        if (monAn.getStatus().equals("Đang làm") || monAn.getStatus().equals("Đã xong")) {
+            holder.btnHuy.setEnabled(true);
+            holder.btnHuy.setAlpha(1);
+            holder.btnXoa.setAlpha(0.5f);
+            holder.btnXoa.setEnabled(false);
+            holder.btnLamMon.setAlpha(0.5f);
+            holder.btnLamMon.setEnabled(false);
+            holder.btnTang.setAlpha(0.5f);
+            holder.btnTang.setEnabled(false);
+            holder.btnGiam.setAlpha(0.5f);
+            holder.btnGiam.setEnabled(false);
+        } else if (monAn.getStatus().equals("Đang chuẩn bị")) {
+            holder.btnHuy.setEnabled(false);
+            holder.btnHuy.setAlpha(0.5f);
+            holder.btnLamMon.setAlpha(0.5f);
+            holder.btnLamMon.setEnabled(false);
+            holder.btnTang.setAlpha(0.5f);
+            holder.btnTang.setEnabled(false);
+            holder.btnGiam.setAlpha(0.5f);
+            holder.btnGiam.setEnabled(false);
+        }else {
+            holder.btnHuy.setEnabled(false);
+            holder.btnHuy.setAlpha(0.5f);
+        }
 
         holder.tvTenMon.setText(monAn.getName());
         holder.tvGia.setText(String.valueOf(monAn.getPrice()));
         holder.tvSoLuong.setText(String.valueOf(monAn.getSoLuong()));
+        holder.tvStatus.setText(monAn.getStatus());
 
         Glide.with(holder.itemView.getContext())
-                .load(monAn.getImage()) // Lấy URL hình ảnh từ đối tượng MonAn
+                .load(monAn.getImage())
                 .placeholder(R.drawable.image_error)
                 .into(holder.imgFood);
 
         // Xử lý tăng số lượng
         holder.btnTang.setOnClickListener(v -> {
-            int currentQuantity = Integer.parseInt(holder.tvSoLuong.getText().toString());
-            currentQuantity++;  // Tăng số lượng
-            holder.tvSoLuong.setText(String.valueOf(currentQuantity));
-            monAn.setSoLuong(currentQuantity);  // Cập nhật số lượng trong MonAn
-            listMonDaChon.set(position, monAn); // Đảm bảo lưu lại vào danh sách
-            Log.d("DaChonAdapter", "Số lượng hiện tại của món " + monAn.getName() + ": " + monAn.getSoLuong());
+            int currentQuantity = monAn.getSoLuong();
+            monAn.setSoLuong(currentQuantity + 1);
+            holder.tvSoLuong.setText(String.valueOf(monAn.getSoLuong()));
+            suaSoLuongMonAn(tableId, monAn);
+            listener.onMonDaChonUpdated(listMonDaChon.size());
         });
 
         // Xử lý giảm số lượng
         holder.btnGiam.setOnClickListener(v -> {
-            int currentQuantity = Integer.parseInt(holder.tvSoLuong.getText().toString());
+            int currentQuantity = monAn.getSoLuong();
             if (currentQuantity > 1) {
-                currentQuantity--;  // Giảm số lượng
-                holder.tvSoLuong.setText(String.valueOf(currentQuantity));
-                monAn.setSoLuong(currentQuantity);  // Cập nhật số lượng trong MonAn
-                listMonDaChon.set(position, monAn); // Đảm bảo lưu lại vào danh sách
-                Log.d("DaChonAdapter", "Số lượng hiện tại của món " + monAn.getName() + ": " + monAn.getSoLuong());
+                monAn.setSoLuong(currentQuantity - 1);
+                holder.tvSoLuong.setText(String.valueOf(monAn.getSoLuong()));
+                suaSoLuongMonAn(tableId, monAn);
+                listener.onMonDaChonUpdated(listMonDaChon.size());
             }
         });
 
         // Xử lý xóa món ăn
         holder.btnXoa.setOnClickListener(v -> {
-
-            // Gọi phương thức xóa món ăn khỏi Firestore
-            xoaMonAnTuFirestore(tableId, monAn);
-
-            // Xóa món ăn khỏi danh sách hiển thị
+            xoaMonAnTuFirestore(tableId, monAn.getId()); // Truyền vào ID món ăn
             listMonDaChon.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, listMonDaChon.size());
-
-            // Gọi listener để cập nhật số lượng món đã chọn
-            if (listener != null) {
-                listener.onMonDaChonUpdated(listMonDaChon.size());
-            }
+            listener.onMonDaChonUpdated(listMonDaChon.size());
         });
 
+        holder.btnLamMon.setOnClickListener(v -> {
+            lamMonAn(tableId, monAn);
+        });
 
+        holder.btnHuy.setOnClickListener(v -> {
+            holder.offbg.setVisibility(View.VISIBLE);
+            holder.btnTang.setEnabled(false);
+            holder.btnGiam.setEnabled(false);
+            holder.btnLamMon.setEnabled(false);
+            holder.btnXoa.setEnabled(false);
+            holder.btnDaLay.setEnabled(false);
+        });
     }
 
     @Override
@@ -109,9 +140,10 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTenMon, tvSoLuong, tvGia;
-        AppCompatButton btnTang, btnGiam, btnXoa;
+        TextView tvTenMon, tvSoLuong, tvGia, tvStatus;
+        AppCompatButton btnTang, btnGiam, btnXoa, btnLamMon, btnHuy, btnDaLay;
         ShapeableImageView imgFood;
+        View offbg;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -119,31 +151,110 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
             tvTenMon = itemView.findViewById(R.id.tvTenMonAnDaChon);
             tvSoLuong = itemView.findViewById(R.id.tvSoLuong);
             tvGia = itemView.findViewById(R.id.tvGiaMonAnDaChon);
+            tvStatus = itemView.findViewById(R.id.tvTrangThai);
             btnTang = itemView.findViewById(R.id.btnTang);
             btnGiam = itemView.findViewById(R.id.btnGiam);
             btnXoa = itemView.findViewById(R.id.btnXoa);
+            btnLamMon = itemView.findViewById(R.id.btnLamMon);
+            btnHuy = itemView.findViewById(R.id.btnHuy);
+            offbg = itemView.findViewById(R.id.offbg);
+            btnDaLay = itemView.findViewById(R.id.btnDaLay);
         }
     }
 
-    private void xoaMonAnTuFirestore(String tableId, MonAn monAn) {
-        // Tạo một Map để lưu thông tin món ăn cần xóa
-        Map<String, Object> foodData = new HashMap<>();
-        foodData.put("id", monAn.getId());
-        foodData.put("name", monAn.getName());
-        foodData.put("price", monAn.getPrice());
-        foodData.put("soLuong", monAn.getSoLuong());
-        foodData.put("image", monAn.getImage());
+    private void lamMonAn(String tableId, MonAn monAn) {
+        Date now = new Date();
+        SimpleDateFormat time = new SimpleDateFormat("HH:mm");
+        String formattedTime = time.format(now);
 
-        // Cập nhật danh sách món đã chọn trong Firestore
-        firestore.collection("tables").document(tableId)
-                .update("selectedFoods", FieldValue.arrayRemove(foodData))
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", "Đang chuẩn bị");
+        updates.put("time", formattedTime);
+
+        // Tìm tài liệu theo ban_id và id món ăn
+        firestore.collection("selectedFoods")
+                .whereEqualTo("ban_id", tableId)
+                .whereEqualTo("id", monAn.getId())
+                .get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Log.d("DaChonAdapter", "Món ăn đã được xóa khỏi Firestore: " + monAn.getName());
+                    if (task.isSuccessful() && task.getResult() != null && task.getResult().size() > 0) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            // Cập nhật trạng thái trong tài liệu
+                            firestore.collection("selectedFoods")
+                                    .document(document.getId()) // Lấy ID của tài liệu
+                                    .update(updates)
+                                    .addOnCompleteListener(updateTask -> {
+                                        if (updateTask.isSuccessful()) {
+                                            Log.d(TAG, "Trạng thái món ăn đã được cập nhật thành công.");
+                                            // Cập nhật lại trạng thái trên giao diện nếu cần
+                                            monAn.setStatus("Đang chuẩn bị"); // Cập nhật trạng thái trong đối tượng món ăn
+                                            notifyItemChanged(listMonDaChon.indexOf(monAn)); // Cập nhật lại item trong RecyclerView
+                                        } else {
+                                            Log.e(TAG, "Lỗi cập nhật trạng thái món ăn: ", updateTask.getException());
+                                        }
+                                    });
+                        }
                     } else {
-                        Log.d("DaChonAdapter", "Lỗi khi xóa món ăn khỏi Firestore: ", task.getException());
+                        Log.e(TAG, "Không tìm thấy món ăn để cập nhật trạng thái: ", task.getException());
+                    }
+                });
+    }
+
+    private void xoaMonAnTuFirestore(String tableId, String monAnId) {
+        // Tìm tài liệu theo ban_id và monAnId
+        firestore.collection("selectedFoods")
+                .whereEqualTo("ban_id", tableId)
+                .whereEqualTo("id", monAnId) // Tìm kiếm theo ID món ăn
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && task.getResult().size() > 0) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            // Xóa tài liệu của món ăn
+                            firestore.collection("selectedFoods")
+                                    .document(document.getId()) // Lấy ID của tài liệu
+                                    .delete() // Xóa tài liệu
+                                    .addOnCompleteListener(deleteTask -> {
+                                        if (deleteTask.isSuccessful()) {
+                                            Log.d(TAG, "Món ăn đã được xóa thành công.");
+                                        } else {
+                                            Log.e(TAG, "Lỗi xóa món ăn: ", deleteTask.getException());
+                                        }
+                                    });
+                        }
+                    } else {
+                        Log.e(TAG, "Không tìm thấy món ăn hoặc có lỗi: ", task.getException());
+                    }
+                });
+    }
+
+
+    private void suaSoLuongMonAn(String tableId, MonAn monAn) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("soLuong", monAn.getSoLuong());
+
+        // Cập nhật tài liệu của món ăn
+        firestore.collection("selectedFoods")
+                .whereEqualTo("ban_id", tableId)
+                .whereEqualTo("id", monAn.getId())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null && task.getResult().size() > 0) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            // Cập nhật số lượng trong tài liệu
+                            firestore.collection("selectedFoods")
+                                    .document(document.getId()) // Lấy ID của tài liệu
+                                    .update(updates)
+                                    .addOnCompleteListener(updateTask -> {
+                                        if (updateTask.isSuccessful()) {
+                                            Log.d(TAG, "Số lượng món ăn đã được cập nhật thành công.");
+                                        } else {
+                                            Log.e(TAG, "Lỗi cập nhật số lượng món ăn: ", updateTask.getException());
+                                        }
+                                    });
+                        }
+                    } else {
+                        Log.e(TAG, "Không tìm thấy món ăn để cập nhật số lượng: ", task.getException());
                     }
                 });
     }
 }
-

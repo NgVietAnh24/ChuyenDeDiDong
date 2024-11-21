@@ -4,6 +4,7 @@ import static android.content.ContentValues.TAG;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,7 +22,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -39,6 +43,7 @@ import vn.vietanhnguyen.khachhangdatmon.models.MonAn;
 
 
 public class DanhSachChonMon extends AppCompatActivity {
+
     FirebaseFirestore firestore;
 
     List<MonAn> listMonAn;
@@ -101,7 +106,7 @@ public class DanhSachChonMon extends AppCompatActivity {
                 if (!listMonAnDaChon.contains(monAn)) {
                     listMonAnDaChon.add(monAn);  // Thêm món vào danh sách đã chọn
                     Toast.makeText(DanhSachChonMon.this, "Đã thêm món: " + monAn.getName(), Toast.LENGTH_SHORT).show();
-                    updateSelectedCount(); // Cập nhật số lượng món đã chọn
+                    // Gọi hàm để cập nhật số lượng món đã chọn từ Firestore
                 } else {
                     Toast.makeText(DanhSachChonMon.this, "Món đã có trong danh sách", Toast.LENGTH_SHORT).show();
                 }
@@ -109,38 +114,61 @@ public class DanhSachChonMon extends AppCompatActivity {
         }, firestore, tableId, DanhSachChonMon.this);
         listFood.setAdapter(monAnAdapter);
 
+        // Cập nhật số lượng món đã chọn
+        updateSelectedCount(tableId);
+
         //TODO Tải dữ liệu món ăn
         docDulieuMonAn();
 
         btnMonDaChon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
                 // Cập nhật trạng thái bàn thành "Đang sử dụng"
-                firestore.collection("tables").document(tableId)
-                        .update("status", "Đang sử dụng")
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("status", "Đang sử dụng"); // Cập nhật trạng thái bàn
+
+                firestore.collection("tables") // Giả sử bạn có bộ sưu tập tables
+                        .document(tableId) // ID của bàn
+                        .update(updates)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Log.d(TAG, "Bàn đã được cập nhật trạng thái thành 'Đang sử dụng'");
+                                    // Cập nhật thành công trạng thái bàn
+                                    Log.d(TAG, "Trạng thái bàn đã được cập nhật thành công.");
+
+                                    // Lấy danh sách món đã chọn từ bảng selected_foods theo tableId
+                                    firestore.collection("selectedFoods")
+                                            .whereEqualTo("ban_id", tableId) // Lọc theo tableId
+                                            .get()
+                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                    if (task.isSuccessful()) {
+                                                        List<MonAn> selectedFoods = new ArrayList<>();
+                                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                                            MonAn monAn = document.toObject(MonAn.class); // Chuyển đổi tài liệu thành đối tượng MonAn
+                                                            selectedFoods.add(monAn);
+                                                        }
+
+                                                        // Chuyển sang màn hình danh sách món đã chọn
+                                                        Intent intent = new Intent(DanhSachChonMon.this, DanhSachDaChon.class);
+                                                        intent.putParcelableArrayListExtra("mon", (ArrayList<? extends Parcelable>) selectedFoods);  // Truyền danh sách món đã chọn
+                                                        intent.putExtra("id", tableId);
+                                                        intent.putExtra("name", tableName);
+                                                        startActivity(intent);
+                                                    } else {
+                                                        Log.d(TAG, "Lỗi khi lấy danh sách món đã chọn: ", task.getException());
+                                                    }
+                                                }
+                                            });
+
+                                    btnBack.setVisibility(View.GONE);
                                 } else {
                                     Log.d(TAG, "Lỗi khi cập nhật trạng thái bàn: ", task.getException());
                                 }
                             }
                         });
-
-                btnBack.setVisibility(View.GONE);
-                // Lưu danh sách món đã chọn lên Firestore
-//                luuMonAnDaChon(tableId);
-
-                // Chuyển sang màn hình danh sách món đã chọn
-                Intent intent = new Intent(DanhSachChonMon.this, DanhSachDaChon.class);
-                intent.putParcelableArrayListExtra("mon", listMonAnDaChon);  // Truyền danh sách món đã chọn
-                intent.putExtra("id", tableId);
-                intent.putExtra("name", tableName);
-                startActivity(intent);
             }
         });
 
@@ -170,9 +198,25 @@ public class DanhSachChonMon extends AppCompatActivity {
     }
 
 
-    private void updateSelectedCount() {
-        String buttonText = "Món đã chọn (" + listMonAnDaChon.size() + ")";
-        btnMonDaChon.setText(buttonText);
+    private void updateSelectedCount(String tableId) {
+        firestore.collection("selectedFoods")
+                .whereEqualTo("ban_id", tableId)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Lỗi khi lắng nghe thay đổi: ", e);
+                            return;
+                        }
+
+                        int count = 0;
+                        if (value != null) {
+                            count = value.size(); // Đếm số lượng món đã chọn
+                        }
+                        String buttonText = "Món đã chọn (" + count + ")";
+                        btnMonDaChon.setText(buttonText);
+                    }
+                });
     }
 
     private void filterByCategory(String categoryName) {

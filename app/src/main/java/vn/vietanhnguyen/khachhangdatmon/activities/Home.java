@@ -11,11 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -134,10 +131,7 @@ public class Home extends AppCompatActivity {
                         list.clear();
                         for (QueryDocumentSnapshot document : value) {
                             Ban tableData = document.toObject(Ban.class);
-                            // Kiểm tra nếu trạng thái là "Trống" thì mới thêm vào danh sách
-                            if ("Trống".equals(tableData.getStatus())) {
                                 list.add(tableData);
-                            }
                         }
                         // Sắp xếp list tăng dần theo số thứ tự của bàn
                         Collections.sort(list, new Comparator<Ban>() {

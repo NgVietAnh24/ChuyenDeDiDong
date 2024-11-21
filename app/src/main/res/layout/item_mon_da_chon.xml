@@ -11,78 +11,98 @@
         android:id="@+id/itemLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:background="@drawable/item_background"
+        android:gravity="center"
         android:orientation="horizontal"
         android:padding="10dp">
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imgFood"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2.2"
-            android:background="@drawable/image_food"
-            android:scaleType="fitXY"
-            app:shapeAppearanceOverlay="@style/RoundedImageView" />
-
-
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="15dp"
-            android:layout_weight="2"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvTenMonAnDaChon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hamburger"
-                android:textColor="@color/textFood"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvGiaMonAnDaChon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="50.000đ"
-                android:textColor="@color/textPrice"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="15dp"
-            android:layout_weight="4"
-            android:orientation="vertical"
-            >
-
-            <TextView
-                android:id="@+id/tvTrangThai"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Đang chuẩn bị"
-                android:textColor="@color/textRole" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="5dp"
-                android:orientation="vertical">
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btnXoa"
-                    android:layout_width="60dp"
-                    android:layout_height="30dp"
-                    android:background="@drawable/rounded_btn"
-                    android:text="xóa"
-                    android:textColor="@color/textColor" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgFood"
+                    android:layout_width="100dp"
+                    android:layout_height="70dp"
+                    android:background="@drawable/image_food"
+                    android:scaleType="fitXY"
+                    app:shapeAppearanceOverlay="@style/RoundedImageView" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="15dp"
+                    android:layout_weight="2"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvTenMonAnDaChon"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Hamburger"
+                        android:textColor="@color/textFood"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvGiaMonAnDaChon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="50.000đ"
+                        android:textColor="@color/textPrice"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvTrangThai"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@color/textRole" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btnXoa"
+                            android:layout_width="60dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/rounded_btn"
+                            android:text="xóa"
+                            android:layout_marginBottom="5dp"
+                            android:textColor="@color/textColor" />
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/btnHuy"
+                            android:layout_width="60dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/rounded_btn"
+                            android:text="hủy"
+                            android:textColor="@color/textColor" />
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
 
             </LinearLayout>
 
@@ -118,11 +138,48 @@
                     android:text="+"
                     android:textColor="@color/textColor"
                     android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:layout_marginLeft="5dp"
+                    android:orientation="horizontal">
+
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnLamMon"
+                        android:layout_width="80dp"
+                        android:layout_height="30dp"
+                        android:layout_marginRight="20dp"
+                        android:background="@drawable/rounded_btn"
+                        android:text="Làm món"
+                        android:textColor="@color/textColor" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnDaLay"
+                        android:layout_width="60dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="16dp"
+                        android:background="@drawable/rounded_btn"
+                        android:text="Đã lấy"
+                        android:textColor="@color/textColor" />
+                </LinearLayout>
             </LinearLayout>
-
-
         </LinearLayout>
 
+
+
+
     </LinearLayout>
+
+    <View
+        android:id="@+id/offbg"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="match_parent"
+        android:background="@color/textRole"
+        android:alpha="0.4"
+        />
 
 </androidx.cardview.widget.CardView>

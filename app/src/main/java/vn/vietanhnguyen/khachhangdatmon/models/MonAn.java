@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import java.util.Objects;
 
 public class MonAn implements Parcelable {
-    private String id, name, price, image, category_id, category_name;
+    private String id, name, price, image, category_id, category_name, status, time, ban_id, documentId;
     private int soLuong;
 
     public MonAn() {
@@ -28,7 +28,11 @@ public class MonAn implements Parcelable {
         image = in.readString();
         category_id = in.readString();
         category_name = in.readString();
+        status = in.readString();
         soLuong = in.readInt();
+        time = in.readString();
+        ban_id = in.readString();
+        documentId = in.readString();
     }
 
 
@@ -59,6 +63,10 @@ public class MonAn implements Parcelable {
         dest.writeString(image != null ? image : "");
         dest.writeString(category_id != null ? category_id : "");
         dest.writeString(category_name != null ? category_name : "");
+        dest.writeString(status != null ? status : "");
+        dest.writeString(time != null ? time : "");
+        dest.writeString(ban_id != null ? ban_id : "");
+        dest.writeString(documentId != null ? documentId : "");
         dest.writeInt(soLuong);
     }
 
@@ -77,6 +85,39 @@ public class MonAn implements Parcelable {
     }
 
     // Các phương thức getter và setter
+
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
+    }
+
+    public String getBan_id() {
+        return ban_id;
+    }
+
+    public void setBan_id(String ban_id) {
+        this.ban_id = ban_id;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public int getSoLuong() {
         return soLuong;

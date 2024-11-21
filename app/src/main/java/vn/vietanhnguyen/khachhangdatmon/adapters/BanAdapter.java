@@ -1,23 +1,28 @@
 package vn.vietanhnguyen.khachhangdatmon.adapters;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 import vn.vietanhnguyen.khachhangdatmon.R;
+import vn.vietanhnguyen.khachhangdatmon.activities.Home;
 import vn.vietanhnguyen.khachhangdatmon.models.Ban;
 
 
 public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
     private List<Ban> list;
     private OnItemClickListener onItemClickListener;
+    Context context;
 
     public interface OnItemClickListener{
         void onItemClick(Ban ban);
@@ -59,7 +64,12 @@ public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onItemClickListener.onItemClick(ban);
+                if(ban.getStatus().equals("Trống")) {
+                    onItemClickListener.onItemClick(ban);
+                }else {
+//                    showAlert("Đã có khách");
+//                    Toast.makeText(Home.this,"c", Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -83,5 +93,13 @@ public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
             tvMoTa = itemView.findViewById(R.id.tvMoTa);
             vState = itemView.findViewById(R.id.vState);
         }
+    }
+
+    private void showAlert(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message)
+                .setPositiveButton("OK", (dialog, id) -> dialog.dismiss());
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }

@@ -13,6 +13,12 @@
         android:theme="@style/Theme.KhachHangDatMon"
         tools:targetApi="31">
         <activity
+            android:name=".activities.LichSuDauBep"
+            android:exported="false" />
+        <!-- <activity -->
+        <!-- android:name=".activities.HomeDauBep" -->
+        <!-- android:exported="false" /> -->
+        <activity
             android:name=".activities.ThanhToan"
             android:exported="true"
             android:label="Merchant Demo"
@@ -30,8 +36,8 @@
         </activity>
         <activity
             android:name=".activities.DanhSachDaChon"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.DanhSachChonMon"
             android:exported="false" />
@@ -40,15 +46,14 @@
             android:exported="false" />
         <activity
             android:name=".activities.login_signup_forgot.ForgotPass"
-            android:exported="false" />
-        <activity
-            android:name=".activities.Home"
-            android:exported="false" />
+            android:exported="false" /> <!-- <activity -->
+        <!-- android:name=".activities.Home" -->
+        <!-- android:exported="false" /> -->
         <activity
             android:name=".activities.login_signup_forgot.SignUp"
             android:exported="false" />
         <activity
-            android:name=".activities.login_signup_forgot.Login"
+            android:name=".activities.HomeDauBep"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

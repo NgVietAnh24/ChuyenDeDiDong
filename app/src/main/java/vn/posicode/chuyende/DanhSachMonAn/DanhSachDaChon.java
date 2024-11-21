@@ -1,10 +1,10 @@
 package vn.posicode.chuyende.DanhSachMonAn;
 
 import static android.content.ContentValues.TAG;
-
 import static vn.posicode.chuyende.DanhSachMonAn.DanhSachChonMon.btnMonDaChon;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -15,19 +15,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +33,6 @@ import java.util.Map;
 import vn.posicode.chuyende.ChiTietHoaDon.InvoiceDetailActivity;
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.TrangThaiDanhSachBan.TableListActivity;
-import vn.posicode.chuyende.models.MonAn;
 
 public class DanhSachDaChon extends AppCompatActivity {
     public static ImageView btnBack;
@@ -102,7 +99,6 @@ public class DanhSachDaChon extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Intent intent1 = new Intent(DanhSachDaChon.this, TableListActivity.class);
                             startActivity(intent1);
-                            DanhSachChonMon.btnBack.setVisibility(View.VISIBLE);
                             xoaTatCaMonDaChon(tableId);
                             Log.d("DanhSachDaChon", "Trạng thái bàn đã được cập nhật thành 'Trống'");
                         } else {
@@ -114,15 +110,8 @@ public class DanhSachDaChon extends AppCompatActivity {
         // Xử lý sự kiện cho nút Thanh toán
         btnThanhToan.setOnClickListener(v -> {
             String ghiChu = edtGhiChu.getText().toString();
-
-            // Prepare the intent to start InvoiceDetailActivity
-            Intent intent1 = new Intent(this, InvoiceDetailActivity.class);
-            intent1.putParcelableArrayListExtra("monDaChon", (ArrayList<? extends Parcelable>) listMonAnDaChon);
-            intent1.putExtra("id", tableId);
-            intent1.putExtra("ghiChu", ghiChu);
-
-            // Start InvoiceDetailActivity
-            startActivity(intent1);
+            createNewInvoice(tableId, ghiChu, listMonAnDaChon);
+            capNhatSelectedFoods(tableId, listMonAnDaChon); // Cập nhật danh sách món đã chọn vào bảng selectedFoods
         });
 
         btnBack.setOnClickListener(v -> {
@@ -142,14 +131,131 @@ public class DanhSachDaChon extends AppCompatActivity {
         });
     }
 
+    private void createNewInvoice(String tableId, String ghiChu, List<Food> listMonAnDaChon) {
+        // Lấy thông tin nhân viên đang đăng nhập
+        String currentStaffId = getCurrentStaffId();
+        String currentStaffName = getCurrentStaffName();
+
+        // Tạo một hóa đơn mới
+        Map<String, Object> invoiceData = new HashMap<>();
+        invoiceData.put("ban_id", tableId);
+        invoiceData.put("ghi_chu", ghiChu);
+        invoiceData.put("tinh_trang", "Chưa thanh toán");
+
+        // Thêm ngày giờ chi tiết
+        Date currentDate = new Date();
+        invoiceData.put("ngay_tao", currentDate);
+        invoiceData.put("gio_tao", currentDate);
+
+        // Thêm thông tin nhân viên
+        invoiceData.put("nv_id", currentStaffId);
+        invoiceData.put("ten_nv", currentStaffName);
+
+        // Thêm thông tin khách hàng (mặc định)
+        invoiceData.put("ten_khach_hang", "");
+        invoiceData.put("so_dt", "");
+
+        // Tính tổng tiền
+        double tongTien = 0;
+        for (Food food : listMonAnDaChon) {
+            tongTien += Double.parseDouble(food.getPrice()) * food.getSoLuong();
+        }
+        invoiceData.put("tong_tien", tongTien);
+
+        // Thêm danh sách items vào hóa đơn
+        List<Map<String, Object>> itemsList = new ArrayList<>();
+        for (Food food : listMonAnDaChon) {
+            Map<String, Object> itemData = new HashMap<>();
+            itemData.put("name", food.getName());
+            itemData.put("quantity", food.getSoLuong());
+            itemData.put("price", Double.parseDouble(food.getPrice()));
+            itemsList.add(itemData);
+        }
+        invoiceData.put("items", itemsList);
+
+        // Thêm hóa đơn vào Firestore
+        firestore.collection("invoices")
+                .add(invoiceData)
+                .addOnSuccessListener(documentReference -> {
+                    String invoiceId = documentReference.getId();
+
+                    // Thêm các item của hóa đơn
+                    addInvoiceItems(invoiceId, listMonAnDaChon);
+
+                    // Chuyển sang InvoiceDetailActivity
+                    Intent intent = new Intent(this, InvoiceDetailActivity.class);
+                    intent.putExtra("invoiceId", invoiceId);
+                    startActivity(intent);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi tạo hóa đơn", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void addInvoiceItems(String invoiceId, List<Food> listMonAnDaChon) {
+        for (Food food : listMonAnDaChon) {
+            Map<String, Object> itemData = new HashMap<>();
+            itemData.put("hoa_don_id", invoiceId);
+            itemData.put("ten_mon_an", food.getName());
+            itemData.put("so_luong", food.getSoLuong());
+            itemData.put("gia", Double.parseDouble(food.getPrice()));
+
+            firestore.collection("invoice_items")
+                    .add(itemData)
+                    .addOnFailureListener(e -> {
+                        Log.e("InvoiceItems", "Lỗi khi thêm item: " + e.getMessage());
+                    });
+        }
+    }
+
     private void xoaTatCaMonDaChon(String tableId) {
+        // Xóa món đã chọn khỏi bảng "tables"
         firestore.collection("tables").document(tableId)
                 .update("selectedFoods", FieldValue.delete())
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Log.d("ThanhToan", "Đã xóa tất cả các món đã chọn khỏi Firestore.");
+                        Log.d("ThanhToan", "Đã xóa tất cả các món đã chọn khỏi bảng 'tables'.");
                     } else {
-                        Log.d("ThanhToan", "Lỗi khi xóa món đã chọn khỏi Firestore: ", task.getException());
+                        Log.d("ThanhToan", "Lỗi khi xóa món đã chọn khỏi bảng 'tables': ", task.getException());
+                    }
+                });
+
+        // Xóa món đã chọn khỏi bảng "selectedFoods"
+        firestore.collection("selectedFoods").document(tableId)
+                .update("selectedFoods", FieldValue.delete())
+                .addOnCompleteListener(task -> {
+                    if ( task.isSuccessful()) {
+                        Log.d("ThanhToan", "Đã xóa tất cả các món đã chọn khỏi bảng 'selectedFoods'.");
+                    } else {
+                        Log.d("ThanhToan", "Lỗi khi xóa món đã chọn khỏi bảng 'selectedFoods': ", task.getException());
+                    }
+                });
+    }
+
+    private void capNhatSelectedFoods(String tableId, List<Food> listMonAnDaChon) {
+        List<Map<String, Object>> updatedFoods = new ArrayList<>();
+
+        for (Food monAn : listMonAnDaChon) {
+            Map<String, Object> foodData = new HashMap<>();
+            foodData.put("id", monAn.getId());
+            foodData.put("name", monAn.getName());
+            foodData.put("price", monAn.getPrice());
+            foodData.put("soLuong", monAn.getSoLuong());
+            foodData.put("image", monAn.getImage());
+            foodData.put("trangThai", monAn.getTrangThai() != null ? monAn.getTrangThai() : "Chưa làm");
+            updatedFoods.add(foodData);
+        }
+
+        // Cập nhật danh sách món đã chọn vào bảng "selectedFoods"
+        firestore.collection("selectedFoods").document(tableId)
+                .set(new HashMap<String, Object>() {{
+                    put("selectedFoods", updatedFoods);
+                }})
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Danh sách món đã chọn đã được cập nhật thành công vào bảng 'selectedFoods'.");
+                    } else {
+                        Log.d(TAG, "Lỗi khi cập nhật danh sách món đã chọn vào bảng 'selectedFoods': ", task.getException());
                     }
                 });
     }
@@ -165,13 +271,7 @@ public class DanhSachDaChon extends AppCompatActivity {
             foodData.put("soLuong", monAn.getSoLuong());
             foodData.put("image", monAn.getImage());
 
-            // Thêm trạng thái
-            foodData.put("trangThai",
-                    monAn.getTrangThai() != null ?
-                            monAn.getTrangThai() :
-                            "Chưa làm"
-            );
-
+            foodData.put("trangThai", monAn.getTrangThai() != null ? monAn.getTrangThai() : "Chưa làm");
             updatedFoods.add(foodData);
         }
 
@@ -204,14 +304,7 @@ public class DanhSachDaChon extends AppCompatActivity {
                                     monAn.setPrice(((String) foodData.get("price")));
                                     monAn.setSoLuong(((Long) foodData.get("soLuong")).intValue());
                                     monAn.setImage((String) foodData.get("image"));
-
-                                    // Thêm phần trạng thái
-                                    monAn.setTrangThai(
-                                            foodData.containsKey("trangThai") ?
-                                                    (String) foodData.get("trangThai") :
-                                                    "Chưa làm"  // Giá trị mặc định nếu không có
-                                    );
-
+                                    monAn.setTrangThai(foodData.containsKey("trangThai") ? (String) foodData.get("trangThai") : "Chưa làm");
                                     listMonAnDaChon.add(monAn);
                                 }
                                 daChonAdapter.notifyDataSetChanged();
@@ -227,6 +320,7 @@ public class DanhSachDaChon extends AppCompatActivity {
                     }
                 });
     }
+
     private void updateSelectedCount(int newCount) {
         String buttonText = "Món đã chọn (" + newCount + ")";
         btnMonDaChon.setText(buttonText);
@@ -241,5 +335,15 @@ public class DanhSachDaChon extends AppCompatActivity {
         edtGhiChu = findViewById(R.id.edtGhichu);
         btnBackHome = findViewById(R.id.btnBackHome);
         overlayView = findViewById(R.id.overlayView);
+    }
+
+    private String getCurrentStaffId() {
+        SharedPreferences prefs = getSharedPreferences("User  Info", MODE_PRIVATE);
+        return prefs.getString("staffId", "staff_default_id");
+    }
+
+    private String getCurrentStaffName() {
+        SharedPreferences prefs = getSharedPreferences("User  Info", MODE_PRIVATE);
+        return prefs.getString("staffName", "Nhân Viên Mặc Định");
     }
 }

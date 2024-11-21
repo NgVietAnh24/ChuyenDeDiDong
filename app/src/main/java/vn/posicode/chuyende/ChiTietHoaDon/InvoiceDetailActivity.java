@@ -20,7 +20,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -89,7 +91,12 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                         try {
                             selectedInvoice = Invoice.fromFirestore(documentSnapshot);
                             if (selectedInvoice != null) {
-                                loadInvoiceItems();
+                                // Kiểm tra nếu items đã được load từ Firestore
+                                if (selectedInvoice.getItems() == null || selectedInvoice.getItems().isEmpty()) {
+                                    loadInvoiceItems();
+                                } else {
+                                    displayInvoiceDetails();
+                                }
                             } else {
                                 throw new Exception("Failed to parse invoice");
                             }
@@ -116,30 +123,32 @@ public class InvoiceDetailActivity extends AppCompatActivity {
                 .whereEqualTo("hoa_don_id", invoiceId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        Log.e(TAG, "No items found for this invoice");
-                    } else {
-                        for (DocumentSnapshot document : queryDocumentSnapshots) {
-                            String name = document.getString("ten_mon_an");
-                            Long quantityLong = document.getLong("so_luong");
-                            int quantity = quantityLong != null ? quantityLong.intValue() : 0;
-                            Double priceDouble = document.getDouble("gia");
-                            double price = priceDouble != null ? priceDouble : 0.0;
+                    List<Invoice.InvoiceItem> items = new ArrayList<>();
+                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+                        String name = document.getString("ten_mon_an");
+                        Long quantityLong = document.getLong("so_luong");
+                        int quantity = quantityLong != null ? quantityLong.intValue() : 0;
+                        Double priceDouble = document.getDouble("gia");
+                        double price = priceDouble != null ? priceDouble : 0.0;
 
-                            if (name != null) {
-                                selectedInvoice.addItem(new Invoice.InvoiceItem(name, quantity, price));
-                                Log.d(TAG, "Added item: " + name + ", quantity: " + quantity + ", price: " + price);
-                            }
+                        if (name != null) {
+                            items.add(new Invoice.InvoiceItem(name, quantity, price));
+                            Log.d(TAG, "Added item: " + name + ", quantity: " + quantity + ", price: " + price);
                         }
-                        Log.d(TAG, "Items loaded successfully: " + selectedInvoice.getItems());
-                        displayInvoiceDetails();
                     }
+
+                    // Set items directly to the invoice
+                    selectedInvoice.setItems(items);
+
+                    displayInvoiceDetails();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error loading invoice items", e);
                     Toast.makeText(this, "Lỗi khi tải danh sách món", Toast.LENGTH_SHORT).show();
+                    displayInvoiceDetails(); // Vẫn hiển thị chi tiết hóa đơn ngay cả khi không load được items
                 });
     }
+
     private void displayInvoiceDetails() {
         if (selectedInvoice == null) {
             Log.e(TAG, "Selected invoice is null");
@@ -205,6 +214,7 @@ public class InvoiceDetailActivity extends AppCompatActivity {
         if (window != null) {
             WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
             layoutParams.copyFrom(window.getAttributes());
+            layoutParams.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
             layoutParams.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
             window.setAttributes(layoutParams);
         }

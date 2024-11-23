@@ -12,11 +12,15 @@ public class Food implements Parcelable {
     private String categoryName;
     private String tableId;
     private int soLuong;
-    private String trangThai;
+    private String status;
+    private int soLuongDaLay;
+    private long time;
 
     public Food() {
-        this.trangThai = "Chưa làm";
+        this.status = "Chưa làm";
         this.soLuong = 1;
+        this.soLuongDaLay = 0;
+        this.time = System.currentTimeMillis();
     }
 
     public Food(String id, String name, String price, String image,
@@ -28,8 +32,10 @@ public class Food implements Parcelable {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
         this.tableId = tableId;
-        this.trangThai = "Chưa làm";
+        this.status = "Chưa làm";
         this.soLuong = 1;
+        this.soLuongDaLay = 0;
+        this.time = System.currentTimeMillis();
     }
 
     // Getters và Setters
@@ -57,10 +63,16 @@ public class Food implements Parcelable {
     public int getSoLuong() { return soLuong; }
     public void setSoLuong(int soLuong) { this.soLuong = soLuong; }
 
-    public String getTrangThai() {
-        return trangThai != null ? trangThai : "Chưa làm";
+    public String getStatus() {
+        return status != null ? status : "Chưa làm";
     }
-    public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+    public void setStatus(String status) { this.status = status; }
+
+    public int getSoLuongDaLay() { return soLuongDaLay; }
+    public void setSoLuongDaLay(int soLuongDaLay) { this.soLuongDaLay = soLuongDaLay; }
+
+    public long getTime() { return time; }
+    public void setTime(long time) { this.time = time; }
 
     // Phương thức hỗ trợ
     public double getPriceAsDouble() {
@@ -81,7 +93,9 @@ public class Food implements Parcelable {
         categoryName = in.readString();
         tableId = in.readString();
         soLuong = in.readInt();
-        trangThai = in.readString();
+        status = in.readString();
+        soLuongDaLay = in.readInt();
+        time = in.readLong();
     }
 
     @Override
@@ -94,7 +108,9 @@ public class Food implements Parcelable {
         dest.writeString(categoryName);
         dest.writeString(tableId);
         dest.writeInt(soLuong);
-        dest.writeString(trangThai);
+        dest.writeString(status);
+        dest.writeInt(soLuongDaLay);
+        dest.writeLong(time);
     }
 
     @Override
@@ -125,16 +141,30 @@ public class Food implements Parcelable {
 
         for (String tt : trangThaiHopLe) {
             if (tt.equals(trangThaiMoi)) {
-                this.trangThai = trangThaiMoi;
+                this.status = trangThaiMoi;
                 return;
             }
         }
 
-        this.trangThai = "Chưa làm";
+        this.status = "Chưa làm";
     }
 
     public boolean kiemTraTrangThai(String trangThaiCanKiemTra) {
-        return this.trangThai.equals(trangThaiCanKiemTra);
+        return this.status.equals(trangThaiCanKiemTra);
+    }
+
+    // Phương thức hỗ trợ tăng số lượng đã lấy
+    public void tangSoLuongDaLay(int soLuong) {
+        this.soLuongDaLay += soLuong;
+        // Đảm bảo không vượt quá số lượng ban đầu
+        if (this.soLuongDaLay > this.soLuong) {
+            this.soLuongDaLay = this.soLuong;
+        }
+    }
+
+    // Kiểm tra xem đã lấy đủ số lượng chưa
+    public boolean daDayDuSoLuong() {
+        return this.soLuongDaLay >= this.soLuong;
     }
 
     // Phương thức so sánh
@@ -149,5 +179,18 @@ public class Food implements Parcelable {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    // Phương thức toString để dễ debug
+    @Override
+    public String toString() {
+        return "Food{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", price='" + price + '\'' +
+                ", soLuong=" + soLuong +
+                ", status='" + status + '\'' +
+                ", soLuongDaLay=" + soLuongDaLay +
+                '}';
     }
 }

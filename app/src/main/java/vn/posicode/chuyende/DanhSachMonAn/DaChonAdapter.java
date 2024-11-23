@@ -61,7 +61,7 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
         holder.tvTenMon.setText(monAn.getName());
         holder.tvGia.setText(String.valueOf(monAn.getPrice()));
         holder.tvSoLuong.setText(String.valueOf(monAn.getSoLuong()));
-        holder.tvTrangThai.setText(monAn.getTrangThai());
+        holder.tvTrangThai.setText(monAn.getStatus());
 
         // Tải hình ảnh
         Glide.with(holder.itemView.getContext())
@@ -119,7 +119,7 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
     private void capNhatTrangThaiMonAn(int position, String trangThai) {
         if (position >= 0 && position < listMonDaChon.size()) {
             Food monAn = listMonDaChon.get(position);
-            monAn.setTrangThai(trangThai);
+            monAn.setStatus(trangThai);
             notifyItemChanged(position);
             capNhatTrangThaiTrenFirestore(monAn);
         }
@@ -184,7 +184,7 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
         foodData.put("price", monAn.getPrice());
         foodData.put("soLuong", monAn.getSoLuong());
         foodData.put("image", monAn.getImage());
-        foodData.put("trangThai", monAn.getTrangThai());
+        foodData.put("trangThai", monAn.getStatus());
         return foodData;
     }
 

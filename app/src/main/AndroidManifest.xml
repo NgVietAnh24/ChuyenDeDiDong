@@ -108,6 +108,10 @@
             android:name=".DanhSachMonAn.DanhSachDaChon"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".ChiTietHoaDon.CreateInvoiceActivity"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

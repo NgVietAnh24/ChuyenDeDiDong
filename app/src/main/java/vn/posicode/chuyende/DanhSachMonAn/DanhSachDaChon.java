@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import vn.posicode.chuyende.ChiTietHoaDon.InvoiceDetailActivity;
+import vn.posicode.chuyende.ChiTietHoaDon.CreateInvoiceActivity;
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.TrangThaiDanhSachBan.TableListActivity;
 
@@ -182,8 +182,8 @@ public class DanhSachDaChon extends AppCompatActivity {
                     // Thêm các item của hóa đơn
                     addInvoiceItems(invoiceId, listMonAnDaChon);
 
-                    // Chuyển sang InvoiceDetailActivity
-                    Intent intent = new Intent(this, InvoiceDetailActivity.class);
+                    // Chuyển sang CreateInvoiceActivity
+                    Intent intent = new Intent(this, CreateInvoiceActivity.class);
                     intent.putExtra("invoiceId", invoiceId);
                     startActivity(intent);
                 })
@@ -237,16 +237,22 @@ public class DanhSachDaChon extends AppCompatActivity {
 
         for (Food monAn : listMonAnDaChon) {
             Map<String, Object> foodData = new HashMap<>();
+            foodData.put("ban_id", tableId);
             foodData.put("id", monAn.getId());
             foodData.put("name", monAn.getName());
             foodData.put("price", monAn.getPrice());
             foodData.put("soLuong", monAn.getSoLuong());
             foodData.put("image", monAn.getImage());
-            foodData.put("trangThai", monAn.getTrangThai() != null ? monAn.getTrangThai() : "Chưa làm");
+
+            // Thêm các trường mới
+            foodData.put("soLuongDaLay", monAn.getSoLuongDaLay());
+            foodData.put("status", monAn.getStatus());
+            foodData.put("time", monAn.getTime());
+
             updatedFoods.add(foodData);
         }
 
-        // Cập nhật danh sách món đã chọn vào bảng "selectedFoods"
+        // Sử dụng set() thay vì update()
         firestore.collection("selectedFoods").document(tableId)
                 .set(new HashMap<String, Object>() {{
                     put("selectedFoods", updatedFoods);
@@ -265,18 +271,26 @@ public class DanhSachDaChon extends AppCompatActivity {
 
         for (Food monAn : listMonAnDaChon) {
             Map<String, Object> foodData = new HashMap<>();
+            foodData.put("ban_id", tableId);
             foodData.put("id", monAn.getId());
             foodData.put("name", monAn.getName());
             foodData.put("price", monAn.getPrice());
             foodData.put("soLuong", monAn.getSoLuong());
             foodData.put("image", monAn.getImage());
 
-            foodData.put("trangThai", monAn.getTrangThai() != null ? monAn.getTrangThai() : "Chưa làm");
+            // Thêm các trường mới
+            foodData.put("soLuongDaLay", monAn.getSoLuongDaLay());
+            foodData.put("status", monAn.getStatus());
+            foodData.put("time", monAn.getTime());
+
             updatedFoods.add(foodData);
         }
 
+        // Sử dụng set() thay vì update()
         firestore.collection("tables").document(tableId)
-                .update("selectedFoods", updatedFoods)
+                .set(new HashMap<String, Object>() {{
+                    put("selectedFoods", updatedFoods);
+                }}, com.google.firebase.firestore.SetOptions.merge())
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "Số lượng và trạng thái món ăn đã được cập nhật thành công");
@@ -299,12 +313,23 @@ public class DanhSachDaChon extends AppCompatActivity {
                                 listMonAnDaChon.clear();
                                 for (Map<String, Object> foodData : selectedFoods) {
                                     Food monAn = new Food();
+                                    monAn.setTableId((String) foodData.get("ban_id")); // Thêm ban_id
                                     monAn.setId((String) foodData.get("id"));
                                     monAn.setName((String) foodData.get("name"));
                                     monAn.setPrice(((String) foodData.get("price")));
                                     monAn.setSoLuong(((Long) foodData.get("soLuong")).intValue());
                                     monAn.setImage((String) foodData.get("image"));
-                                    monAn.setTrangThai(foodData.containsKey("trangThai") ? (String) foodData.get("trangThai") : "Chưa làm");
+
+                                    // Thêm các trường mới
+                                    monAn.setSoLuongDaLay(foodData.containsKey("soLuongDaLay") ?
+                                            ((Long) foodData.get("soLuongDaLay")).intValue() : 0);
+                                    monAn.setStatus(foodData.containsKey("status") ?
+                                            (String) foodData.get("status") : "Chưa làm");
+                                    monAn.setTime(foodData.containsKey("time") ?
+                                            (Long) foodData.get("time") : System.currentTimeMillis());
+
+//                                    monAn.setStatus(foodData.containsKey("trangThai") ?
+//                                            (String) foodData.get("trangThai") : "Chưa làm");
                                     listMonAnDaChon.add(monAn);
                                 }
                                 daChonAdapter.notifyDataSetChanged();

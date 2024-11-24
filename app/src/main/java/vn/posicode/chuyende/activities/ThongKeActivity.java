@@ -25,6 +25,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -73,7 +74,6 @@ public class ThongKeActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 selectedYear = yearList.get(i);
                 docDoanhThu(selectedYear);
-
                 prefs.edit().putString("selectedYear", selectedYear).apply();
             }
 
@@ -169,7 +169,6 @@ public class ThongKeActivity extends AppCompatActivity {
                         selectedYear = yearList.get(0);
                     }
                     docDoanhThu(selectedYear);
-
                 }
             }
         });
@@ -273,14 +272,18 @@ public class ThongKeActivity extends AppCompatActivity {
                             String hdId = document.getId();
                             Date ngayTaoDate = null;
                             if (document.contains("ngay_tao")) {
-                                String ngayTaoString = document.getString("ngay_tao");
-                                if (ngayTaoString != null) {
+                                if (document.get("ngay_tao") instanceof String) {
+                                    String ngayTaoString = document.getString("ngay_tao");
                                     try {
-                                        // Giả sử ngày được lưu dưới dạng "dd/MM/yyyy"
                                         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                                         ngayTaoDate = sdf.parse(ngayTaoString);
                                     } catch (Exception e) {
                                         Log.w("Firestore", "Lỗi khi chuyển đổi ngày: " + ngayTaoString, e);
+                                    }
+                                } else if (document.get("ngay_tao") instanceof Timestamp) {
+                                    Timestamp ngayTaoTimestamp = document.getTimestamp("ngay_tao");
+                                    if (ngayTaoTimestamp != null) {
+                                        ngayTaoDate = ngayTaoTimestamp.toDate();
                                     }
                                 }
                             }

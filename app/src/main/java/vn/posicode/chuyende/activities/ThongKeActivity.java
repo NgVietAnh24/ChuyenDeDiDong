@@ -203,7 +203,7 @@ public class ThongKeActivity extends AppCompatActivity {
                             updateLineChart();
                             DecimalFormat deci = new DecimalFormat("#,###");
                             String tongTienDeciMal = deci.format(tongTienNam);
-                            tvTongTien.setText("Tổng tiền trong năm: " + tongTienDeciMal);
+                            tvTongTien.setText("Tổng tiền trong năm: " + tongTienDeciMal + "đ");
                         }
                     }
                 });

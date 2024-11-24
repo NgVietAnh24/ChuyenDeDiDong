@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import vn.posicode.chuyende.R;
@@ -33,7 +34,9 @@ public class MonDaBan_Adapter extends RecyclerView.Adapter<MonDaBan_Adapter.View
         MonDaBanModels monAnModel = list_monDaBan.get(position);
         holder.tvTenMon.setText(monAnModel.getTenMon());
         holder.tvSoLuong.setText(String.valueOf(monAnModel.getSoLuong()));
-        holder.tvTongTien.setText(String.valueOf(monAnModel.getTongTien()));
+        DecimalFormat deci = new DecimalFormat("#,###");
+        String tongTienDeciMal = deci.format(monAnModel.getTongTien());
+        holder.tvTongTien.setText(tongTienDeciMal + "đ");
         holder.tvNgay.setText(monAnModel.getNgay());
     }
 

@@ -1,6 +1,7 @@
 package vn.posicode.chuyende.activities;
 
 import android.app.DatePickerDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -33,13 +34,16 @@ import vn.posicode.chuyende.models.MonDaBanModels;
 
 public class ThongKeMonDaBan extends AppCompatActivity {
     private RecyclerView recMonDaBan;
-    private ImageButton btnCalendar,btnBack;
+    private ImageButton btnCalendar, btnBack;
     private TextView tv_nullMonDaChon;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<MonDaBanModels> listMonDaBan = new ArrayList<>();
     private MonDaBan_Adapter monDaBan_adapter;
-    private String ngayHienTai = ngayHienTai();
-   private Calendar selectedDate = Calendar.getInstance();
+    private Calendar selectedDate = Calendar.getInstance();
+    private String selectedDateStr;
+    private SharedPreferences prefs;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +56,10 @@ public class ThongKeMonDaBan extends AppCompatActivity {
         recMonDaBan.setAdapter(monDaBan_adapter);
         recMonDaBan.setLayoutManager(gridLayoutManager);
         //  docMonDaBan();
-        locDanhSach(ngayHienTai);
+        prefs = getSharedPreferences("ThongKeMonDaBanPrefs", MODE_PRIVATE);
+        selectedDateStr = prefs.getString("selectedDate", null);
+
+        locDanhSach(selectedDateStr);
 //        Mở dialog datetime
         btnCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,7 +150,7 @@ public class ThongKeMonDaBan extends AppCompatActivity {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                     String selectedDateString = sdf.format(selectedDate.getTime());
 //            loc danh sach theo ngay
-                    if (selectedDateString != null) {
+                    if (!selectedDateString.equals(selectedDateStr)) {
                         locDanhSach(selectedDateString);
                     }
                 }, year, month, day);
@@ -186,6 +193,7 @@ public class ThongKeMonDaBan extends AppCompatActivity {
                     String formattedDate = ngayTaoDate != null ? sdf.format(ngayTaoDate) : "###";
                     if (selectedDate.equals(formattedDate)) {
                         check = true;
+                        prefs.edit().putString("selectedDate", selectedDate).apply();
                         db.collection("invoice_items")
                                 .whereEqualTo("hoa_don_id", hoaDonId)
                                 .addSnapshotListener((itemsSnapshots, itemsError) -> {
@@ -223,17 +231,11 @@ public class ThongKeMonDaBan extends AppCompatActivity {
         for (MonDaBanModels daBanModels : listMonDaBan) {
             if (daBanModels.getTenMon().equals(tenMon) && daBanModels.getNgay().equals(ngayBan)) {
                 daBanModels.setSoLuong(daBanModels.getSoLuong() + soLuong);
-                daBanModels.setTongTien(daBanModels.getTongTien() + gia);
+                daBanModels.setTongTien(daBanModels.getTongTien() + (soLuong * gia));
                 return;
             }
         }
         listMonDaBan.add(new MonDaBanModels(tenMon, soLuong, soLuong * gia, ngayBan));
-    }
-
-    //    loc ngay hien tai
-    private String ngayHienTai() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        return sdf.format(new Date());
     }
 
 }

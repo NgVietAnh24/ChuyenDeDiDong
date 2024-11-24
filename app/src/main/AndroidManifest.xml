@@ -17,16 +17,22 @@
         android:theme="@style/Theme.ChuyenDe"
         tools:targetApi="31">
         <activity
+            android:name=".activities.ThongKeMonDaBan"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ChuaThanhToanActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.MonDaChonActivity"
             android:exported="false" />
         <activity
             android:name=".activities.MainHienThiActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.ThongKeActivity"
+            android:name=".activities.DSMonAnActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.DSMonAnActivity"
+            android:name=".activities.ThongKeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

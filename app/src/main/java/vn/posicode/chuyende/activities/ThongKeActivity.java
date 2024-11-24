@@ -47,7 +47,7 @@ import vn.posicode.chuyende.models.ThongKeModels;
 
 public class ThongKeActivity extends AppCompatActivity {
     private TextView tvTongTien;
-    private ImageButton btnBack;
+    private ImageButton btnBack,btnShowTool;
     private Spinner spinYear;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private List<String> yearList;
@@ -55,12 +55,13 @@ public class ThongKeActivity extends AppCompatActivity {
     private LineChart lineChartDoanhThu;
     private List<ThongKeModels> doanhThuList;
     private String selectedYear;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thong_ke);
         connectXML();
+//
+
         doanhThuList = new ArrayList<>();
         yearList = new ArrayList<>();
         ghiDuLieuTuInVoices();
@@ -89,6 +90,13 @@ public class ThongKeActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        btnShowTool.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ThongKeActivity.this, ThongKeMonDaBan.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -96,6 +104,7 @@ public class ThongKeActivity extends AppCompatActivity {
         tvTongTien = findViewById(R.id.tvTongTien);
         spinYear = findViewById(R.id.spinYear);
         btnBack = findViewById(R.id.btnBack);
+        btnShowTool = findViewById(R.id.btnShowTool);
         lineChartDoanhThu = findViewById(R.id.lineChartDoanhThu);
         lineChartDoanhThu.setDragEnabled(true);
         lineChartDoanhThu.setScaleEnabled(false);

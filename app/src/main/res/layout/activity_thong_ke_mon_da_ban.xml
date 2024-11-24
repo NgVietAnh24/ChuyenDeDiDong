@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".activities.ThongKeMonDaBan">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        >
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="20dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/back" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Các món đã bán "
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:textSize="30sp"
+            android:textColor="@color/dark_red"
+            android:textStyle="bold"
+            />
+        <ImageButton
+            android:id="@+id/btnCalendar"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:background="@drawable/calendar" />
+    </LinearLayout>
+<!--    Phần hiển thị -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/item_background_thongke"
+        android:padding="8dp">
+
+        <!-- Tên món -->
+        <TextView
+            android:id="@+id/tv_tenMonDaBan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:text="Tên món"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- Số lượng -->
+        <TextView
+            android:id="@+id/tv_soLuongDaBan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:text="Số lượng"
+            android:textSize="14sp" />
+
+        <!-- Tổng tiền -->
+        <TextView
+            android:id="@+id/tv_TongTienDaBan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:text="Tổng tiền"
+            android:textSize="14sp" />
+
+        <!-- Ngày -->
+        <TextView
+            android:id="@+id/tv_NgayDaBan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:text="Ngày"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recMonDaBan"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <TextView
+        android:id="@+id/tv_nullMonDaChon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Không có dữ liệu cho ngày hôm nay !"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        />
+
+</LinearLayout>

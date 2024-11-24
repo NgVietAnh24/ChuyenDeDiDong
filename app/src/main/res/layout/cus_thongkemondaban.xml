@@ -1,0 +1,48 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/item_background_thongke"
+    android:padding="8dp">
+
+    <!-- Tên món -->
+    <TextView
+        android:id="@+id/tv_tenMonDaBan"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:gravity="center"
+        android:text="Tên món"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Số lượng -->
+    <TextView
+        android:id="@+id/tv_soLuongDaBan"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:text="Số lượng"
+        android:textSize="14sp" />
+
+    <!-- Tổng tiền -->
+    <TextView
+        android:id="@+id/tv_TongTienDaBan"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:text="Tổng tiền"
+        android:textSize="14sp" />
+
+    <!-- Ngày -->
+    <TextView
+        android:id="@+id/tv_NgayDaBan"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:text="Ngày"
+        android:textSize="14sp" />
+</LinearLayout>

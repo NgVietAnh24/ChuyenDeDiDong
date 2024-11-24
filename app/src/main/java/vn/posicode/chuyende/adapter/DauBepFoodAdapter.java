@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -71,14 +72,30 @@ public class DauBepFoodAdapter extends RecyclerView.Adapter<DauBepFoodAdapter.Vi
 
         // Xử lý sự kiện nút "Đang làm"
         holder.btnDangLam.setOnClickListener(v -> {
-            activity.updateFoodStatus(food.getMonAnId(), "Đang làm");
+            updateFoodStatus(food.getMonAnId(), "Đang làm");
             Toast.makeText(holder.itemView.getContext(), "Cập nhật trạng thái: Đang làm", Toast.LENGTH_SHORT).show();
         });
+
     }
 
     @Override
     public int getItemCount() {
         return selectedFoodList.size();
+    }
+
+    // Cập nhật trạng thái món ăn trong Firebase
+    private void updateFoodStatus(String foodId, String status) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Cập nhật trạng thái món ăn trong Firebase
+        db.collection("foodChefs").document(foodId)
+                .update("trang_thai", status) // Cập nhật trường "trang_thai"
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(activity, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(activity, "Cập nhật thất bại!", Toast.LENGTH_SHORT).show();
+                });
     }
 
     // ViewHolder cho RecyclerView

@@ -65,7 +65,15 @@
             android:gravity="center"
             android:text="Số lượng"
             android:textSize="14sp" />
-
+        <!-- Đơn giá -->
+        <TextView
+            android:id="@+id/tv_donGiaDaBan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:gravity="center"
+            android:text="Đơn giá"
+            android:textSize="14sp" />
         <!-- Tổng tiền -->
         <TextView
             android:id="@+id/tv_TongTienDaBan"

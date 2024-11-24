@@ -11,25 +11,20 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.MonDaBan_Adapter;
-import vn.posicode.chuyende.adapter.MonDaChon_Adapter;
 import vn.posicode.chuyende.models.MonDaBanModels;
 
 public class ThongKeMonDaBan extends AppCompatActivity {
@@ -207,7 +202,7 @@ public class ThongKeMonDaBan extends AppCompatActivity {
                                             String tenMon = item.getString("ten_mon_an");
                                             int soLuong = item.getLong("so_luong").intValue();
                                             int gia = item.getLong("gia").intValue();
-                                            capNhatSoLuong(tenMon, soLuong, gia, formattedDate);
+                                            capNhatSoLuong(tenMon, soLuong, gia,soLuong * gia, formattedDate);
                                         }
                                         monDaBan_adapter.notifyDataSetChanged();
                                     }
@@ -224,18 +219,15 @@ public class ThongKeMonDaBan extends AppCompatActivity {
             }
         });
     }
-
-
     //kiem tra mon trung
-    private void capNhatSoLuong(String tenMon, int soLuong, int gia, String ngayBan) {
+    private void capNhatSoLuong(String tenMon, int soLuong, int gia,int tongTien, String ngayBan) {
         for (MonDaBanModels daBanModels : listMonDaBan) {
             if (daBanModels.getTenMon().equals(tenMon) && daBanModels.getNgay().equals(ngayBan)) {
                 daBanModels.setSoLuong(daBanModels.getSoLuong() + soLuong);
-                daBanModels.setTongTien(daBanModels.getTongTien() + (soLuong * gia));
+                daBanModels.setTongTien(daBanModels.getTongTien() + tongTien);
                 return;
             }
         }
-        listMonDaBan.add(new MonDaBanModels(tenMon, soLuong, soLuong * gia, ngayBan));
+        listMonDaBan.add(new MonDaBanModels(tenMon, soLuong, gia, tongTien, ngayBan));
     }
-
 }

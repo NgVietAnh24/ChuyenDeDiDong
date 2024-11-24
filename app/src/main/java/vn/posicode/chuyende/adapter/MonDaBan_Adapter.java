@@ -35,6 +35,8 @@ public class MonDaBan_Adapter extends RecyclerView.Adapter<MonDaBan_Adapter.View
         holder.tvTenMon.setText(monAnModel.getTenMon());
         holder.tvSoLuong.setText(String.valueOf(monAnModel.getSoLuong()));
         DecimalFormat deci = new DecimalFormat("#,###");
+        String donGiaDec = deci.format(monAnModel.getGia());
+        holder.tvGia.setText(donGiaDec + "đ");
         String tongTienDeciMal = deci.format(monAnModel.getTongTien());
         holder.tvTongTien.setText(tongTienDeciMal + "đ");
         holder.tvNgay.setText(monAnModel.getNgay());
@@ -46,7 +48,7 @@ public class MonDaBan_Adapter extends RecyclerView.Adapter<MonDaBan_Adapter.View
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTenMon, tvSoLuong, tvTongTien, tvNgay;
+        TextView tvTenMon, tvSoLuong, tvTongTien, tvNgay,tvGia;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -54,6 +56,7 @@ public class MonDaBan_Adapter extends RecyclerView.Adapter<MonDaBan_Adapter.View
             tvSoLuong = itemView.findViewById(R.id.tv_soLuongDaBan);
             tvTongTien = itemView.findViewById(R.id.tv_TongTienDaBan);
             tvNgay = itemView.findViewById(R.id.tv_NgayDaBan);
+            tvGia = itemView.findViewById(R.id.tv_donGiaDaBan);
         }
     }
 }

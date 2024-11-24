@@ -4,15 +4,17 @@ public class MonDaBanModels {
     private String tenMon;
     private int soLuong;
     private int tongTien;
+    private int gia;
     private String ngay;
 
     public MonDaBanModels() {
     }
 
-    public MonDaBanModels(String tenMon, int soLuong, int tongTien, String ngay) {
+    public MonDaBanModels(String tenMon, int soLuong, int gia, int tongTien, String ngay) {
         this.tenMon = tenMon;
         this.soLuong = soLuong;
         this.tongTien = tongTien;
+        this.gia = gia;
         this.ngay = ngay;
     }
 
@@ -38,6 +40,14 @@ public class MonDaBanModels {
 
     public void setTongTien(int tongTien) {
         this.tongTien = tongTien;
+    }
+
+    public int getGia() {
+        return gia;
+    }
+
+    public void setGia(int gia) {
+        this.gia = gia;
     }
 
     public String getNgay() {

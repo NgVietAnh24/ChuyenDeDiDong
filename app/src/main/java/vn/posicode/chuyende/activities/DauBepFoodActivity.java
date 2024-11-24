@@ -92,7 +92,7 @@ public class DauBepFoodActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         // Truy vấn collection "selected_foods"
-        db.collection("selected_foods")
+        db.collection("selectedFoods")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -110,7 +110,7 @@ public class DauBepFoodActivity extends AppCompatActivity {
 
     public void updateFoodStatus(String foodId, String status) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("selected_foods").document(foodId)
+        db.collection("selectedFoods").document(foodId)
                 .update("trang_thai", status)
                 .addOnSuccessListener(aVoid -> {
                     // Cập nhật thành công

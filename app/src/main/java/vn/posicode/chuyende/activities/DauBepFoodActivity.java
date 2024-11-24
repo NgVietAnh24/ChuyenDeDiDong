@@ -82,7 +82,12 @@ public class DauBepFoodActivity extends AppCompatActivity {
                         daubepfoodlist.clear();
                         for (DocumentSnapshot document : task.getResult()) {
                             DauBep_Food food = document.toObject(DauBep_Food.class);
-                            if (food != null) daubepfoodlist.add(food);
+                            if (food != null) {
+                                daubepfoodlist.add(food);
+                            }
+                        }
+                        if (daubepfoodlist.isEmpty()) {
+                            Log.w("DauBepFoodActivity", "No data found");
                         }
                         adapter.notifyDataSetChanged();
                     } else {
@@ -90,6 +95,7 @@ public class DauBepFoodActivity extends AppCompatActivity {
                     }
                 });
     }
+
 
     public void showQuantityDialog(String foodId) {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog, null);

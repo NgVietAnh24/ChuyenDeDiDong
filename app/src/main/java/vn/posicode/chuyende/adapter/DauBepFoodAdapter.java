@@ -1,6 +1,5 @@
 package vn.posicode.chuyende.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,78 +8,89 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.activities.DauBepFoodActivity;
 
 public class DauBepFoodAdapter extends RecyclerView.Adapter<DauBepFoodAdapter.ViewHolder> {
-    private List<DauBep_Food> selectedFoodList;
-    private DauBepFoodActivity activity;
-  //  private Context context; // Thêm biến Context
+    private final List<DauBep_Food> selectedFoodList; // Danh sách món ăn
+    private final DauBepFoodActivity activity;        // Activity liên quan
 
     public DauBepFoodAdapter(List<DauBep_Food> selectedFoodList, DauBepFoodActivity activity) {
         this.selectedFoodList = selectedFoodList;
         this.activity = activity;
-       // this.context = activity; // Gán context từ activity
     }
 
-
-
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Inflate layout item_daubep
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_daubep, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         DauBep_Food food = selectedFoodList.get(position);
 
-        // Set data cho các TextView và Button
-        holder.tvTen.setText(food.getTen_mon_an());
-        holder.tvSoLuong.setText("Số lượng: " + food.getSo_luong());
-        holder.tvThoiGian.setText(food.getTime());
+        // Set dữ liệu cho các TextView
+        holder.tvTen.setText(food.getTenMonAn());
+        holder.tvSoLuong.setText("Số lượng: " + food.getSoLuong());
 
-        // Set hình ảnh nếu có URL
-        if (food.getHinh_anh() != null && !food.getHinh_anh().isEmpty()) {
-            Glide.with(holder.itemView.getContext())
-                    .load(food.getHinh_anh()) // Đảm bảo URL là hợp lệ
-                    .into(holder.imageAnh);
+        // Định dạng thời gian từ long sang HH:mm
+        try {
+            long time = Long.parseLong(food.getTime());
+            String formattedTime = new SimpleDateFormat("HH:mm").format(new Date(time));
+            holder.tvThoiGian.setText("Thời gian: " + formattedTime);
+        } catch (NumberFormatException e) {
+            holder.tvThoiGian.setText("Thời gian: Không xác định");
         }
 
-        // Xử lý sự kiện cho các nút bấm nếu cần
+        // Load hình ảnh với Glide
+        if (food.getHinhAnh() != null && !food.getHinhAnh().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(food.getHinhAnh())
+                    .placeholder(R.drawable.anhloi) // Hình mặc định khi tải
+                    .into(holder.imageAnh);
+        } else {
+            holder.imageAnh.setImageResource(R.drawable.anhloi);
+        }
+
+        // Xử lý sự kiện nút "Đã xong"
         holder.btnDaxong.setOnClickListener(v -> {
-           // activity.setSelectedFoodId(food.getMon_an_id());  // Lưu foodId vào selectedFoodId
-            activity.showQuantityDialog(food.getMon_an_id());
+            activity.showQuantityDialog(food.getMonAnId());
         });
 
+        // Xử lý sự kiện nút "Đang làm"
         holder.btnDangLam.setOnClickListener(v -> {
-            // Xử lý khi nhấn nút "Đang làm"
-            activity.updateFoodStatus(food.getMon_an_id(), "Đang làm");
+            activity.updateFoodStatus(food.getMonAnId(), "Đang làm");
+            Toast.makeText(holder.itemView.getContext(), "Cập nhật trạng thái: Đang làm", Toast.LENGTH_SHORT).show();
         });
     }
-
 
     @Override
     public int getItemCount() {
         return selectedFoodList.size();
     }
-    // ViewHolder class
+
+    // ViewHolder cho RecyclerView
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTen, tvSoLuong, tvThoiGian;
         Button btnDaxong, btnDangLam;
         ImageView imageAnh;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            // Ánh xạ các thành phần từ item_daubep layout
+            // Ánh xạ các view từ layout item_daubep
             tvTen = itemView.findViewById(R.id.tvTen);
             tvSoLuong = itemView.findViewById(R.id.tvSoLuong);
             tvThoiGian = itemView.findViewById(R.id.tvThoiGian);

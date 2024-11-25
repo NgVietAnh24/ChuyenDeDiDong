@@ -1,5 +1,7 @@
 package vn.posicode.chuyende.activities.homes;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,275 +19,170 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-
-//import vn.posicode.chuyende.DanhSachMonAn.FoodMenuActivity;
-import vn.posicode.chuyende.DanhSachMonAn.DanhSachChonMon;
-import vn.posicode.chuyende.Manage.ManageNhanVien;
 import vn.posicode.chuyende.R;
+import vn.posicode.chuyende.activities.DanhSachChonMon;
+import vn.posicode.chuyende.activities.login_forgot.Login;
+import vn.posicode.chuyende.adapters.BanChonAdapter;
+import vn.posicode.chuyende.models.Ban;
 
 public class HomeNhanVien extends AppCompatActivity {
+    FirebaseAuth mAuth;
+    FirebaseFirestore firestore;
+    private List<Ban> list;
+    private List<Ban> listBan;
 
-    private FirebaseFirestore firestore;
-    private BroadcastReceiver updateTableReceiver;
-    private List<QueryDocumentSnapshot> originalTableList = new ArrayList<>();
-    private EditText searchBar;
+    private BanChonAdapter banAdapter;
+    private EditText edtSearch;
+    private ImageView btnLogout;
+    private RecyclerView listTable;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_nhan_vien_layout); // Đảm bảo rằng layout này đúng
+        setContentView(R.layout.home_nhan_vien_layout);
+        Event();
 
-        FirebaseApp.initializeApp(this);
+        // Khởi tạo Firebase
+        mAuth = FirebaseAuth.getInstance();
         firestore = FirebaseFirestore.getInstance();
 
-        searchBar = findViewById(R.id.searchBar);
-        searchBar.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(RecyclerView.VERTICAL);
+        listTable.setLayoutManager(layoutManager);
 
+        list = new ArrayList<>();
+
+        listBan = new ArrayList<>(list);// lấy danh sách bàn gốc
+
+        banAdapter = new BanChonAdapter(list, new BanChonAdapter.OnItemClickListener() {
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterTables(s.toString());
+            public void onItemClick(Ban ban) {
+                Intent intent = new Intent(HomeNhanVien.this, DanhSachChonMon.class);
+                intent.putExtra("id", ban.getId());
+                intent.putExtra("name", ban.getName());
+                startActivity(intent);
+            }
+        }, this);
+        listTable.setAdapter(banAdapter);
+        Log.d("JJ", "getData: " + list);
+        docDulieu();
+
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuth.signOut();
+                // Chuyển người dùng về màn hình đăng nhập
+                Intent intent = new Intent(HomeNhanVien.this, Login.class);
+                startActivity(intent);
+                finish();  // Đóng màn hình hiện tại
+            }
+        });
+
+        // Xử lý tìm kiếm
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
-        });
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-        loadTableData();
+            }
 
-        ImageButton backButton = findViewById(R.id.backmngButton);
-        backButton.setOnClickListener(v -> finish());
-
-        ImageButton manageButton = findViewById(R.id.backmngButton);
-        manageButton.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeNhanVien.this, ManageNhanVien.class);
-            startActivity(intent);
-        });
-
-        // Đăng ký BroadcastReceiver
-        updateTableReceiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals("UPDATE_TABLE_STATUS")) {
-                    String tableName = intent.getStringExtra("tableName");
-                    String status = intent.getStringExtra("status");
-                    updateTableUI(tableName, status);
+            public void afterTextChanged(Editable editable) {
+                filter(editable.toString());
+            }
+        });
+
+
+    }
+
+    private void filter(String text) {
+        list.clear();
+        if (text.isEmpty()) {
+            list.addAll(listBan);
+        } else {
+            for (Ban ban : listBan) {
+                if (ban.getName().toLowerCase().contains(text.toLowerCase())) {
+                    list.add(ban);
                 }
             }
-        };
-
-        IntentFilter filter = new IntentFilter("UPDATE_TABLE_STATUS");
-        registerReceiver(updateTableReceiver, filter);
+        }
+        banAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Hủy đăng ký BroadcastReceiver
-        unregisterReceiver(updateTableReceiver);
-    }
-
-    private void loadTableData() {
-        LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
-
+    public void docDulieu() {
         firestore.collection("tables")
-                .addSnapshotListener((snapshots, e) -> {
-                    if (e != null) {
-                        Log.e("TableListActivity", "Lỗi lắng nghe: ", e);
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Log.d(TAG, "Error getting documents: ", error);
                         return;
                     }
-
-                    if (snapshots != null) {
-                        originalTableList.clear();
-                        tableListLayout.removeAllViews();
-                        List<QueryDocumentSnapshot> tableList = new ArrayList<>();
-
-                        for (QueryDocumentSnapshot document : snapshots) {
-                            if (document.getString("name") != null) {
-                                tableList.add(document);
-                                originalTableList.add(document);
-                            }
+                    if (value != null) {
+                        list.clear();
+                        for (QueryDocumentSnapshot document : value) {
+                            Ban tableData = document.toObject(Ban.class);
+                            list.add(tableData);
                         }
+                        // Sắp xếp list tăng dần theo số thứ tự của bàn
+                        Collections.sort(list, new Comparator<Ban>() {
+                            @Override
+                            public int compare(Ban ban1, Ban ban2) {
+                                try {
+                                    // Lấy số bàn từ tên và chuyển thành số nguyên
+                                    int num1 = Integer.parseInt(ban1.getName().replaceAll("[^0-9]", ""));
+                                    int num2 = Integer.parseInt(ban2.getName().replaceAll("[^0-9]", ""));
+                                    return Integer.compare(num1, num2);
+                                } catch (NumberFormatException e) {
+                                    return ban1.getName().compareTo(ban2.getName());
+                                }
+                            }
+                        });
+                        listBan.clear();
+                        listBan.addAll(list);
 
-                        Collections.sort(tableList, (t1, t2) -> {
-                            String name1 = t1.getString("name");
-                            String name2 = t2.getString("name");
-
-                            if (name1 == null) return -1;
-                            if (name2 == null) return 1;
-
-                            try {
-                                String num1 = name1.replaceAll("[^0-9]", "");
-                                String num2 = name2.replaceAll("[^0-9]", "");
-
-                                if (num1.isEmpty()) return -1;
-                                if (num2.isEmpty()) return 1;
-
-                                return Integer.compare(
-                                        Integer.parseInt(num1),
-                                        Integer.parseInt(num2)
-                                );
-                            } catch (NumberFormatException e1) {
-                                return name1.compareTo(name2);
+                        // Sắp xếp listBan tăng dần theo số thứ tự của bàn
+                        Collections.sort(listBan, new Comparator<Ban>() {
+                            @Override
+                            public int compare(Ban ban1, Ban ban2) {
+                                try {
+                                    // Lấy số bàn từ tên và chuyển thành số nguyên
+                                    int num1 = Integer.parseInt(ban1.getName().replaceAll("[^0-9]", ""));
+                                    int num2 = Integer.parseInt(ban2.getName().replaceAll("[^0-9]", ""));
+                                    return Integer.compare(num1, num2);
+                                } catch (NumberFormatException e) {
+                                    return ban1.getName().compareTo(ban2.getName());
+                                }
                             }
                         });
 
-                        for (QueryDocumentSnapshot document : tableList) {
-                            String tableName = document.getString("name");
-                            String tableDescription = document.getString("description");
-                            String tableStatus = document.getString("status");
-
-                            if (tableName != null && tableDescription != null && tableStatus != null) {
-                                addTableToLayout(tableName, tableDescription, tableStatus);
-                            }
-                        }
+                        Log.d(TAG, "Updated and sorted documents: " + list.size());
+                        banAdapter.notifyDataSetChanged();
                     }
                 });
     }
 
-    private void filterTables(String searchText) {
-        LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
-        tableListLayout.removeAllViews();
 
-        List<QueryDocumentSnapshot> filteredList = new ArrayList<>();
-
-        for (QueryDocumentSnapshot document : originalTableList) {
-            String tableName = document.getString("name");
-            String tableDescription = document.getString("description");
-            String tableStatus = document.getString("status");
-
-            if (tableName != null &&
-                    (tableName.toLowerCase().contains(searchText.toLowerCase()) ||
-                            tableDescription.toLowerCase().contains(searchText.toLowerCase()) ||
-                            tableStatus.toLowerCase().contains(searchText.toLowerCase()))) {
-                filteredList.add(document);
-            }
-        }
-
-        Collections.sort(filteredList, (t1, t2) -> {
-            String name1 = t1.getString("name");
-            String name2 = t2.getString("name");
-
-            if (name1 == null) return -1;
-            if (name2 == null) return 1;
-
-            try {
-                String num1 = name1.replaceAll("[^0-9]", "");
-                String num2 = name2.replaceAll("[^0-9]", "");
-
-                if (num1.isEmpty()) return -1;
-                if (num2.isEmpty()) return 1;
-
-                return Integer.compare(
-                        Integer.parseInt(num1),
-                        Integer.parseInt(num2)
-                );
-            } catch (NumberFormatException e1) {
-                return name1.compareTo(name2);
-            }
-        });
-
-        for (QueryDocumentSnapshot document : filteredList) {
-            String tableName = document.getString("name");
-            String tableDescription = document.getString("description");
-            String tableStatus = document.getString("status");
-
-            if (tableName != null && tableDescription != null && tableStatus != null) {
-                addTableToLayout(tableName, tableDescription, tableStatus);
-            }
-        }
+    public void Event() {
+        btnLogout = findViewById(R.id.btnSkill);
+        listTable = findViewById(R.id.listTableNV);
+        edtSearch = findViewById(R.id.edtSearch);
     }
 
-    private void addTableToLayout(String tableName, String tableDescription, String tableStatus) {
-        LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
-        View tableView = getLayoutInflater().inflate(R.layout.table_item_tablelist, null);
-
-        TextView tableNameTextView = tableView.findViewById(R.id.tableNameTextView);
-        TextView tableDescriptionTextView = tableView.findViewById(R.id.tableDescriptionTextView);
-        ImageView tableStatusImage = tableView.findViewById (R.id.tableStatusImage);
-
-        tableNameTextView.setText(tableName);
-        tableDescriptionTextView.setText(tableDescription);
-
-        updateTableStatusUI(tableStatusImage, tableStatus);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(0, 0, 0, 8);
-        tableView.setLayoutParams(params);
-
-        tableView.setOnClickListener(v -> {
-            firestore.collection("tables")
-                    .whereEqualTo("name", tableName)
-                    .get()
-                    .addOnSuccessListener(queryDocumentSnapshots -> {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
-                            String currentStatus = document.getString("status");
-                            if (currentStatus != null &&
-                                    (currentStatus.equals("Trống") ||
-                                            currentStatus.equals("Đã đặt") ||
-                                            currentStatus.equals("Đang sử dụng"))) {
-                                Intent intent = new Intent(HomeNhanVien.this, DanhSachChonMon.class);
-                                intent.putExtra("tableName", tableName);
-                                intent.putExtra("tableDescription", tableDescription);
-                                intent.putExtra("documentId", document.getId());
-                                startActivity(intent);
-                            } else {
-                                Toast.makeText(this,
-                                        "Không thể truy cập thông tin bàn!",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this,
-                                "Lỗi khi kiểm tra trạng thái bàn",
-                                Toast.LENGTH_SHORT).show();
-                        Log.e("TableList", "Error checking table status", e);
-                    });
-        });
-
-        tableListLayout.addView(tableView);
-    }
-
-    private void updateTableStatusUI(ImageView statusImage, String status) {
-        switch (status) {
-            case "Đã đặt":
-                statusImage.setImageResource(R.drawable.circle_yellow);
-                break;
-            case "Đang sử dụng":
-                statusImage.setImageResource(R.drawable.circle_red);
-                break;
-            case "Trống":
-            default:
-                statusImage.setImageResource(R.drawable.circle_grey);
-                break;
-        }
-    }
-
-    private void updateTableUI(String tableName, String status) {
-        LinearLayout tableListLayout = findViewById(R.id.tableListLayout);
-        for (int i = 0; i < tableListLayout.getChildCount(); i++) {
-            View tableView = tableListLayout.getChildAt(i);
-            TextView tableNameTextView = tableView.findViewById(R.id.tableNameTextView);
-            if (tableNameTextView.getText().toString().equals(tableName)) {
-                ImageView tableStatusImage = tableView.findViewById(R.id.tableStatusImage);
-                updateTableStatusUI(tableStatusImage, status);
-                break;
-            }
-        }
-    }
 }

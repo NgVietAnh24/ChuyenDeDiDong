@@ -1,0 +1,36 @@
+<!-- res/layout/dialog_complete_food.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvTitleText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Thông báo"
+        android:textSize="18sp"
+        android:inputType="number"
+        android:layout_gravity="center" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <EditText
+            android:id="@+id/edtQuantity"
+            android:layout_width="330dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="6"
+            android:focusable="false"
+            android:gravity="center"
+            android:inputType="text"
+            android:background="@null"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

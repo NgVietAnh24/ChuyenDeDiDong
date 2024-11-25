@@ -57,7 +57,7 @@
             android:background="@color/textColorTitle" />
 
         <TextView
-            android:id="@+id/tv_ql_monan"
+            android:id="@+id/btn_ql_monan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Quản lý món ăn"
@@ -73,7 +73,7 @@
             android:background="@color/textColorTitle" />
 
         <TextView
-            android:id="@+id/tv_ql_ban"
+            android:id="@+id/btn_ql_ban"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Quản lý bàn"
@@ -89,7 +89,7 @@
             android:background="@color/textColorTitle" />
 
         <TextView
-            android:id="@+id/tv_ql_hoadon"
+            android:id="@+id/btn_ql_hoadon"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Quản lý hóa đơn"
@@ -105,7 +105,7 @@
             android:background="@color/textColorTitle" />
 
         <TextView
-            android:id="@+id/tv_thongke"
+            android:id="@+id/btn_thongke"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Thống kê"

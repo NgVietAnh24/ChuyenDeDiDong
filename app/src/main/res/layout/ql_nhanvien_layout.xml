@@ -16,7 +16,7 @@
             android:id="@+id/btnBack"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:background="@drawable/ic_back_arrow"
+            android:background="@drawable/back"
             android:scaleType="fitXY" />
 
         <TextView
@@ -239,6 +239,8 @@
             android:layout_marginLeft="20dp"
             android:background="@drawable/rounded_btn"
             android:text="Sửa"
+            android:enabled="false"
+            android:alpha="0.5"
             android:textColor="@color/textColor"
             android:textSize="14sp" />
     </LinearLayout>

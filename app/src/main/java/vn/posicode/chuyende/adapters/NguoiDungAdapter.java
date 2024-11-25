@@ -90,18 +90,21 @@ public class NguoiDungAdapter extends RecyclerView.Adapter<NguoiDungAdapter.View
             public void onClick(View view) {
                 int previousPosition = selectedPosition;
 
-                // If the same item is clicked again, deselect it
                 if (selectedPosition == pos) {
                     selectedPosition = -1; // Deselect
                     ((QLNhanVien) view.getContext()).resetInputFields();
                     ((QLNhanVien) view.getContext()).btnThem.setAlpha(1f);
                     ((QLNhanVien) view.getContext()).btnThem.setEnabled(true);
+                    ((QLNhanVien) view.getContext()).btnSua.setEnabled(false);
+                    ((QLNhanVien) view.getContext()).btnSua.setAlpha(0.5f);
                 } else {
-                    // Select new position and set UI changes accordingly
                     selectedPosition = pos;
                     ((QLNhanVien) view.getContext()).btnThem.setEnabled(false);
                     ((QLNhanVien) view.getContext()).btnThem.setAlpha(0.5f);
-                    onItemClickListener.onItemClick(user); // Callback to display user data
+                    ((QLNhanVien) view.getContext()).btnSua.setEnabled(true);
+                    ((QLNhanVien) view.getContext()).btnSua.setAlpha(1);
+
+                    onItemClickListener.onItemClick(user);
                 }
 
                 // Update previous and new positions

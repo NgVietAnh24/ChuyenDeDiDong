@@ -53,7 +53,7 @@ public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
 
         } else {
             // Xử lý trường hợp state là null
-            holder.vState.setBackgroundResource(R.drawable.item_background_selector); // Hoặc một màu khác phù hợp
+            holder.vState.setBackgroundResource(R.drawable.item_background_selector);
         }
 //        Log.d("ABC","Trạng Thái: "+ban.getStatus());
     }
@@ -64,7 +64,7 @@ public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
     @NonNull
     @Override
     public BanAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_table, parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_table_chon, parent,false);
         return new ViewHolder(view);
     }
 

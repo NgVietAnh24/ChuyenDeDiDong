@@ -4,14 +4,13 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" /> <!-- Đặt thành false nếu camera không bắt buộc -->
+        android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
-
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <application
@@ -22,7 +21,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChuyenDe">
         <activity
-            android:name=".activities.login_forgot.Login"
+            android:name=".activities.manages.ThongKeMonDaBan"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ThanhToan"
+            android:exported="false" />
+        <activity
+            android:name=".activities.homes.HomeQuanLy"
+            android:exported="false" />
+        <activity
+            android:name=".activities.LichSuDauBep"
+            android:exported="false" />
+        <activity
+            android:name=".activities.Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,16 +42,31 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.DatMonAn"
+            android:name=".activities.manages.InvoiceDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.login_forgot.Login"
+            android:exported="false" />
+        <activity
+            android:name=".activities.manages.InvoiceListActivity"
             android:exported="false" />
         <activity
             android:name=".activities.manages.QLBan"
             android:exported="false" />
         <activity
+            android:name=".activities.manages.QLDanhMuc"
+            android:exported="false" />
+        <activity
+            android:name=".activities.manages.QLMonAn"
+            android:exported="false" />
+        <activity
             android:name=".activities.login_forgot.ForgotPassword"
             android:exported="false" />
         <activity
-            android:name=".TrangThaiDanhSachBan.TableListActivity"
+            android:name=".activities.DanhSachDaChon"
+            android:exported="false" />
+        <activity
+            android:name=".activities.DanhSachChonMon"
             android:exported="false" />
         <activity
             android:name=".activities.homes.HomeNhanVien"
@@ -55,63 +81,8 @@
             android:name=".activities.manages.QLNhanVien"
             android:exported="false" />
         <activity
-            android:name=".activities.DanhSachDaChon"
+            android:name=".activities.manages.QLThongKe"
             android:exported="false" />
-
-<!--        <activity-->
-<!--            android:name=".TrangThaiDanhSachBan.TableListActivity"-->
-<!--            android:exported="true">-->
-<!--        </activity>-->
-
-        <activity
-            android:name=".QuanLyHoaDon.InvoiceListActivity"
-            android:exported="true">
-        </activity>
-
-        <activity
-            android:name=".ChiTietHoaDon.InvoiceDetailActivity"
-            android:exported="true">
-        </activity>
-
-        <activity
-            android:name=".QuanLyBan.MainActivity"
-            android:exported="true">
-        </activity>
-
-        <activity
-            android:name=".Manage.ManageActivity"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".Manage.ManageNhanVien"
-            android:exported="true">
-        </activity>
-<!--        <activity-->
-<!--            android:name=".DanhSachMonAn.FoodMenuActivity"-->
-<!--            android:exported="true">-->
-<!--        </activity>-->
-
-<!--        <activity-->
-<!--            android:name=".DanhSachMonAn.SelectedFoodActivity"-->
-<!--            android:exported="true">-->
-<!--        </activity>-->
-
-        <activity
-            android:name=".activities.ThongKeActivity"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".DanhSachMonAn.DanhSachChonMon"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".DanhSachMonAn.DanhSachDaChon"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".ChiTietHoaDon.CreateInvoiceActivity"
-            android:exported="true">
-        </activity>
     </application>
 
 </manifest>

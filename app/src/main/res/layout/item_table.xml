@@ -1,53 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:padding="12dp"
-    android:background="#FFEAEA"
-    android:layout_marginBottom="8dp">
-
-    <ImageView
-        android:id="@+id/tableStatusImage"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:contentDescription="Trạng thái bàn"
-        android:layout_marginEnd="12dp" />
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="5dp"
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:background="@drawable/item_background"
+        android:padding="10dp">
 
         <TextView
-            android:id="@+id/tableNameTextV"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvTenBan"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Tên bàn"
-            android:textSize="18sp"
+            android:layout_weight="4"
+            android:textColor="@color/textColorTitle"
             android:textStyle="bold"
-            android:textColor="#D43B3B" />
+            android:textSize="@dimen/textSize"
+            android:text="Bàn 1" />
 
         <TextView
-            android:id="@+id/tableDescriptionTV"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvMoTa"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Mô tả bàn"
-            android:textSize="14sp"
-            android:textColor="#666666" />
+            android:layout_weight="5"
+            android:textStyle="bold"
+            android:textColor="@color/textRole"
+            android:text="1 - 4 người" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <View
+                android:id="@+id/vState"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/rounded_trang_thai"/>
+        </LinearLayout>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/deleteButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Xóa"
-        android:backgroundTint="#D43B3B"
-        android:textColor="#FFFFFF"
-        android:layout_marginStart="12dp"
-        android:paddingVertical="6dp"
-        android:paddingHorizontal="12dp" />
-</LinearLayout>
+</androidx.cardview.widget.CardView>

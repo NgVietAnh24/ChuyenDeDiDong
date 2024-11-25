@@ -14,7 +14,6 @@ import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -56,8 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import vn.posicode.chuyende.Manage.ManageActivity;
 import vn.posicode.chuyende.R;
-import vn.posicode.chuyende.activities.homes.HomeQuanLy;
 import vn.posicode.chuyende.adapters.NguoiDungAdapter;
 import vn.posicode.chuyende.models.NguoiDung;
 
@@ -83,7 +82,6 @@ public class QLNhanVien extends AppCompatActivity {
 
     private boolean isPasswordVisible = false;
     private String selectedUser;
-    private ArrayList<String> spArray;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -214,6 +212,13 @@ public class QLNhanVien extends AppCompatActivity {
             }
         });
 
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(RESULT_OK); // Trả về kết quả OK
+                finish(); // Kết thúc Activity
+            }
+        });
 
         btnSua.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -270,6 +275,7 @@ public class QLNhanVien extends AppCompatActivity {
                 updates.put("soCCCD", soCCCD);
                 updates.put("ngayCap", ngayCap);
                 updates.put("roles", role);
+                updates.put("vaiTro", selectedRole);
                 updates.put("ngayCapNhat", ngayCapNhat);
 
                 firestore.collection("users").document(currentUserId)
@@ -306,16 +312,26 @@ public class QLNhanVien extends AppCompatActivity {
         listNhanVien.setAdapter(nguoiDungAdapter);
 
 
-
         // Tạo danh sách dữ liệu cho Spinner
-        spArray = new ArrayList<>();
+        ArrayList<String> spArray = new ArrayList<>();
+        spArray.add("Quản lý");
+        spArray.add("Phục vụ");
+        spArray.add("Thu ngân");
+        spArray.add("Đầu bếp");
+        spArray.add("Khách hàng");
 
-        // Lấy dữ liệu từ Firestore
-        layDuLieuTuFirestore();
+        // Tạo Adapter cho Spinner
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_list_item_1, spArray);
+
+        // Gán Adapter cho Spinner
+        spVaiTro.setAdapter(spinnerArrayAdapter);
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(QLNhanVien.this, ManageActivity.class);
+                startActivity(intent);
                 finish();
             }
         });
@@ -356,45 +372,6 @@ public class QLNhanVien extends AppCompatActivity {
         });
 
 
-    }
-
-    private void layDuLieuTuFirestore() {
-        firestore.collection("roles")
-                .get()
-                .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    // Lấy tên vai trò từ trường roleName
-                                    String roleName = document.getString("name");
-                                    if (roleName != null) {
-                                        spArray.add(roleName); // Thêm vào ArrayList
-                                    }
-                                }
-
-                                // Tạo ArrayAdapter và thiết lập cho Spinner
-                                ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spArray);
-                                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                spVaiTro.setAdapter(adapter);
-
-                                // Thiết lập OnItemSelectedListener
-                                spVaiTro.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                                    @Override
-                                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                        // Lấy item đã chọn
-//                                        String selectedItem = parent.getItemAtPosition(position).toString();
-//                                        Toast.makeText(QLNhanVien.this, "Vai trò: " + selectedItem, Toast.LENGTH_SHORT).show();
-                                    }
-
-                                    @Override
-                                    public void onNothingSelected(AdapterView<?> parent) {
-                                        // Không làm gì cả
-                                    }
-                                });
-                            } else {
-                                Toast.makeText(QLNhanVien.this, "Lỗi khi lấy dữ liệu: " + task.getException(), Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                );
     }
 
     public void resetInputFields() {

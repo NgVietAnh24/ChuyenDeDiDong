@@ -1,9 +1,0 @@
-<!-- res/menu/skill_menu.xml -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/historys"
-        android:title="Lịch sử"/>
-    <item
-        android:id="@+id/logout"
-        android:title="Đăng xuất"/>
-</menu>

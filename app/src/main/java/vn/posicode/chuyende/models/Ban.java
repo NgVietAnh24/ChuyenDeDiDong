@@ -2,15 +2,16 @@ package vn.posicode.chuyende.models;
 
 
 public class Ban {
-    private String id;
-    private String name;
-    private String description;
-    private String status;
+    String id;
+    String name;
+    String description;
+    String status;
 
     public Ban() {
     }
 
-    public Ban(String name, String description, String status) {
+    public Ban(String id, String name, String description, String status) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
@@ -48,3 +49,31 @@ public class Ban {
         this.status = status;
     }
 }
+
+
+//class DatTruoc extends Ban {
+//    private String tenNguoiDat;
+//    private String soDT;
+//
+//    public DatTruoc(String tenBan, String moTa, String state, int datTruocId, String tenNguoiDat, String soDT) {
+//        super(name, moTa, state, datTruocId);
+//        this.tenNguoiDat = tenNguoiDat;
+//        this.soDT = soDT;
+//    }
+//
+//    public String getTenNguoiDat() {
+//        return tenNguoiDat;
+//    }
+//
+//    public void setTenNguoiDat(String tenNguoiDat) {
+//        this.tenNguoiDat = tenNguoiDat;
+//    }
+//
+//    public String getSoDT() {
+//        return soDT;
+//    }
+//
+//    public void setSoDT(String soDT) {
+//        this.soDT = soDT;
+//    }
+//}

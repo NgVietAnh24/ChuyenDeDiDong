@@ -20,11 +20,11 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import vn.posicode.chuyende.ChiTietHoaDon.InvoiceDetailActivity;
+import vn.posicode.chuyende.QuanLyHoaDon.Invoice;
+import vn.posicode.chuyende.QuanLyHoaDon.InvoiceAdapter;
+import vn.posicode.chuyende.QuanLyHoaDon.SortType;
 import vn.posicode.chuyende.R;
-import vn.posicode.chuyende.activities.manages.InvoiceDetailActivity;
-import vn.posicode.chuyende.activities.manages.SortType;
-import vn.posicode.chuyende.adapters.InvoiceAdapter;
-import vn.posicode.chuyende.models.Invoice;
 
 public class HomeThuNgan extends AppCompatActivity {
     private static final String TAG = "InvoiceListActivity";
@@ -41,7 +41,7 @@ public class HomeThuNgan extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.home_thu_ngan_layout);
+        setContentView(R.layout.activity_invoice_list);
 
         db = FirebaseFirestore.getInstance();
 
@@ -84,7 +84,7 @@ public class HomeThuNgan extends AppCompatActivity {
     private void setupViews() {
         // Thiết lập tiêu đề
         TextView titleTextView = findViewById(R.id.titleTextView);
-        titleTextView.setText(tableName != null ? "Hóa đơn của " + tableName : "Thu ngân");
+        titleTextView.setText(tableName != null ? "Hóa đơn của " + tableName : "Tất cả hóa đơn");
 
         // Thiết lập nút quay lại
         ImageButton backButton = findViewById(R.id.backButton);

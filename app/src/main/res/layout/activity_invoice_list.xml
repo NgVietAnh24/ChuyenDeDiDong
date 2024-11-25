@@ -28,7 +28,7 @@
                 android:layout_height="40dp"
                 android:scaleType="fitCenter"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/back"
+                android:src="@drawable/ic_menu"
                 android:contentDescription="Quay lại" />
 
             <TextView

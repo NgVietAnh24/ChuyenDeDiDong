@@ -1,102 +1,67 @@
 package vn.posicode.chuyende.adapters;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.List;
 
 import vn.posicode.chuyende.R;
-import vn.posicode.chuyende.activities.manages.QLMonAn;
 import vn.posicode.chuyende.models.MonAn;
 
-public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.FoodViewHolder> {
+public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> {
+    List<MonAn> list;
+    private OnItemClickListener onItemClickListener;
 
-    private List<MonAn> foodList; // Danh sách các món ăn sẽ hiển thị
-    private OnItemClickListener onItemClickListener; // Listener để xử lý sự kiện click
-    private Context context; // Context để sử dụng trong Glide
-
-    // Constructor
-    public MonAnAdapter(Context context, List<MonAn> foodList) {
-        this.context = context; // Lưu lại context
-        this.foodList = foodList; // Lưu danh sách món ăn
-    }
-
-    // Tạo interface để xử lý sự kiện click
     public interface OnItemClickListener {
-        void onItemClick(int position);
+        void onItemClick(MonAn monAn);
     }
 
-    // Thêm setter cho listener
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.onItemClickListener = listener;
+    public MonAnAdapter(List<MonAn> list, OnItemClickListener onItemClickListener) {
+        this.list = list;
+        this.onItemClickListener = onItemClickListener;
     }
+
 
     @Override
-    public FoodViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // Tạo ViewHolder mới bằng cách inflating layout item_food
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_mon_an, parent, false);
-        return new FoodViewHolder(view);
-    }
+    public void onBindViewHolder(@NonNull MonAnAdapter.ViewHolder holder, int position) {
+        MonAn monAn = list.get(position);
+        holder.tvTenMon.setText(monAn.getName());
+        holder.tvGiaMon.setText(monAn.getPrice());
+//        holder.imgFood.setBackgroundResource(Integer.valueOf(monAn.getImage()));
+//        Log.d("img", "get img: "+monAn.getImage());
 
-    @Override
-    public void onBindViewHolder(FoodViewHolder holder, int position) {
-        // Gán dữ liệu cho ViewHolder tại vị trí tương ứng
-        MonAn food = foodList.get(position);
-        holder.foodName.setText(food.getName());
-        holder.foodPrice.setText(food.getPrice() + " VND");  // Có thể định dạng lại giá trị tiền tệ nếu cần
-
-        String imageUrl = food.getImage(); // Lấy URL hình ảnh từ getImage()
-        Log.d("FoodAdapter", "Image URL: " + imageUrl);// Ghi log URL hình ảnh
-
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            // Sử dụng Glide để tải ảnh từ URL
-            Glide.with(context)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.image_food)  // Hiển thị ảnh mặc định khi đang tải
-                    .error(R.drawable.image_error)   // Hiển thị ảnh lỗi khi không tải được ảnh
-                    .into(holder.foodImage); // Đặt hình ảnh vào ImageView
-        } else {
-            // Đặt hình ảnh mặc định nếu không có URL
-            holder.foodImage.setImageResource(R.drawable.image_food);
-        }
-        int pos = position;
-        // Thêm sự kiện click cho từng item
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onItemClickListener != null) {
-                    onItemClickListener.onItemClick(pos);
-                }else {
-                    ((QLMonAn) v.getContext()).resetInputFields();
-                }
-            }
-        });
     }
 
     @Override
     public int getItemCount() {
-        // Trả về số lượng món ăn trong danh sách
-        return foodList.size();
+        return list.size();
     }
 
-    public static class FoodViewHolder extends RecyclerView.ViewHolder {
-        ImageView foodImage; // ImageView để hiển thị hình ảnh món ăn
-        TextView foodName, foodPrice; // TextView để hiển thị tên món ăn và  giá món ăn
+    @NonNull
+    @Override
+    public MonAnAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_mon_an, parent, false);
+        return new ViewHolder(view) ;
+    }
 
-        public FoodViewHolder(View itemView) {
+    public class ViewHolder extends RecyclerView.ViewHolder{
+        ShapeableImageView imgFood;
+        TextView tvTenMon, tvGiaMon;
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            foodImage = itemView.findViewById(R.id.imageViewFood);
-            foodName = itemView.findViewById(R.id.textViewName);
-            foodPrice = itemView.findViewById(R.id.textViewPrice);
+
+            imgFood = itemView.findViewById(R.id.imgFood);
+            tvTenMon = itemView.findViewById(R.id.tvTenMonAn);
+            tvGiaMon = itemView.findViewById(R.id.tvGiaMonAn);
         }
     }
 }
+

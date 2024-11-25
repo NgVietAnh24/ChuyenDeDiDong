@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp"
-    tools:context=".activities.DanhSachChonMon">
+    tools:context=".DanhSachMonAn.DanhSachChonMon">
 
     <!-- Header -->
     <LinearLayout
@@ -71,7 +71,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/listFood"
             android:layout_width="match_parent"
-            android:layout_height="500dp"
+            android:layout_height="450dp"
             android:paddingBottom="10dp" />
 
 
@@ -80,26 +80,26 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="center|bottom"
         android:orientation="horizontal"
         android:padding="10dp">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnMonDaChon"
-            android:layout_width="100dp"
-            android:layout_height="35dp"
+            android:id="@+id/btnDatTruoc"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/rounded_btn"
-            android:text="Món đã chọn"
+            android:text="Đặt trước"
             android:textColor="@color/textColor"
-            android:layout_marginRight="10dp"
             android:textSize="14sp" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnDatTruoc"
-            android:layout_width="100dp"
-            android:layout_height="35dp"
+            android:id="@+id/btnMonDaChon"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
             android:background="@drawable/rounded_btn"
-            android:text="Đặt trước"
+            android:text="Món đã chọn"
             android:textColor="@color/textColor"
             android:textSize="14sp" />
     </LinearLayout>

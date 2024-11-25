@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Ảnh món ăn -->
+            <ImageView
+                android:id="@+id/imgMonAn"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/sample_food_image"
+                android:scaleType="centerCrop"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/placeholder_image"/>
+
+            <!-- Thông tin món ăn -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTenMonAn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tên món ăn"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/tvGiaMonAn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="0 đ"
+                    android:textSize="14sp"
+                    android:textColor="#D43B3B" />
+
+                <TextView
+                    android:id="@+id/tvTrangThai"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Chưa được đặt"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray" />
+            </LinearLayout>
+
+            <!-- Nút Hành động -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical">
+
+                <Button
+                android:id="@+id/btnChonLam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chọn làm"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#D43B3B"
+                android:padding="4dp"
+                android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btnDaLay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đã lấy"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#D43B3B"
+                    android:layout_marginTop="4dp"
+                    android:padding="4dp"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btnXoa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Xóa"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#D43B3B"
+                    android:padding="4dp"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Nút Tăng Giảm Số Lượng -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right"
+            android:layout_marginTop="2dp">
+
+            <Button
+                android:id="@+id/btnGiam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#D43B3B"
+                android:padding="4dp"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/tvSoLuong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"
+                android:textSize="20sp"
+                android:textColor="@android:color/black"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp" />
+
+            <Button
+                android:id="@+id/btnTang"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#D43B3B"
+                android:padding="4dp"
+                android:textSize="22sp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

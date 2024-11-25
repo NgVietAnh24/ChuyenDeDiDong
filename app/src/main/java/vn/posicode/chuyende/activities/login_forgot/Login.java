@@ -3,7 +3,6 @@ package vn.posicode.chuyende.activities.login_forgot;
 import static android.content.ContentValues.TAG;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
@@ -30,7 +29,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import vn.posicode.chuyende.R;
-import vn.posicode.chuyende.activities.homes.HomeQuanLy;
+import vn.posicode.chuyende.TrangThaiDanhSachBan.TableListActivity;
 import vn.posicode.chuyende.activities.Loading;
 import vn.posicode.chuyende.activities.homes.HomeDauBep;
 import vn.posicode.chuyende.activities.homes.HomeNhanVien;
@@ -90,14 +89,13 @@ public class Login extends AppCompatActivity {
                                                         DocumentSnapshot document = task.getResult();
                                                         Log.d(TAG, "Document data: " + document.getData());
                                                         if (document.exists()) {
-                                                            String userName = document.getString("tenNhanVien").toString();
                                                             int role = document.getLong("roles").intValue(); // Lấy role từ Firestore
                                                             loading.cancel();
 
                                                             // Điều hướng người dùng dựa trên role
                                                             switch (role) {
                                                                 case 0:
-                                                                    startActivity(new Intent(Login.this, HomeQuanLy.class));
+                                                                    startActivity(new Intent(Login.this, TableListActivity.class));
                                                                     break;
                                                                 case 1:
                                                                     startActivity(new Intent(Login.this, HomeNhanVien.class));
@@ -113,12 +111,6 @@ public class Login extends AppCompatActivity {
                                                                     showAlert("Tài khoản không đủ quyền truy cập ⚠️");
                                                                     break;
                                                             }
-
-                                                            SharedPreferences preferences = getSharedPreferences("Roles",MODE_PRIVATE);
-                                                            SharedPreferences.Editor editor = preferences.edit();
-                                                            editor.putInt("role", role);
-                                                            editor.putString("userName", userName);
-                                                            editor.apply();
                                                         } else {
                                                             loading.cancel();
                                                             Toast.makeText(Login.this, "Người dùng không tồn tại trong Firestore", Toast.LENGTH_SHORT).show();

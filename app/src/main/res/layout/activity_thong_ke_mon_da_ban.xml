@@ -37,6 +37,16 @@
             android:layout_gravity="center"
             android:background="@drawable/calendar" />
     </LinearLayout>
+    <TextView
+        android:id="@+id/tv_doanhthu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Doanh thu"
+        android:gravity="right"
+        android:padding="10dp"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        />
 <!--    Phần hiển thị -->
     <LinearLayout
         android:layout_width="match_parent"

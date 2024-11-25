@@ -18,11 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
 import vn.posicode.chuyende.R;
 import vn.posicode.chuyende.adapter.MonDaBan_Adapter;
 import vn.posicode.chuyende.models.MonDaBanModels;
@@ -30,14 +33,12 @@ import vn.posicode.chuyende.models.MonDaBanModels;
 public class ThongKeMonDaBan extends AppCompatActivity {
     private RecyclerView recMonDaBan;
     private ImageButton btnCalendar, btnBack;
-    private TextView tv_nullMonDaChon;
+    private TextView tv_nullMonDaChon, tv_doanhthu;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<MonDaBanModels> listMonDaBan = new ArrayList<>();
     private MonDaBan_Adapter monDaBan_adapter;
     private Calendar selectedDate = Calendar.getInstance();
-    private String selectedDateStr;
-    private SharedPreferences prefs;
-
+    private int tongDoanhThuTrongNgay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,16 +46,16 @@ public class ThongKeMonDaBan extends AppCompatActivity {
         setContentView(R.layout.activity_thong_ke_mon_da_ban);
         connectXML();
         monDaBan_adapter = new MonDaBan_Adapter(listMonDaBan);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 1); // 2 cột
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 1);
         recMonDaBan.setLayoutManager(gridLayoutManager);
 
         recMonDaBan.setAdapter(monDaBan_adapter);
         recMonDaBan.setLayoutManager(gridLayoutManager);
         //  docMonDaBan();
-        prefs = getSharedPreferences("ThongKeMonDaBanPrefs", MODE_PRIVATE);
-        selectedDateStr = prefs.getString("selectedDate", null);
-
-        locDanhSach(selectedDateStr);
+//        loc danh sach theo ngày mới nhất
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String currentDateStr = sdf.format(new Date());
+        locDanhSach(currentDateStr);
 //        Mở dialog datetime
         btnCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +76,7 @@ public class ThongKeMonDaBan extends AppCompatActivity {
         btnCalendar = findViewById(R.id.btnCalendar);
         btnBack = findViewById(R.id.btnBack);
         tv_nullMonDaChon = findViewById(R.id.tv_nullMonDaChon);
+        tv_doanhthu = findViewById(R.id.tv_doanhthu);
     }
 
 
@@ -145,9 +147,7 @@ public class ThongKeMonDaBan extends AppCompatActivity {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                     String selectedDateString = sdf.format(selectedDate.getTime());
 //            loc danh sach theo ngay
-                    if (!selectedDateString.equals(selectedDateStr)) {
-                        locDanhSach(selectedDateString);
-                    }
+                    locDanhSach(selectedDateString);
                 }, year, month, day);
 
         datePickerDialog.show();
@@ -156,6 +156,7 @@ public class ThongKeMonDaBan extends AppCompatActivity {
     //    Loc danh sach theo ngay
     private void locDanhSach(String selectedDate) {
         listMonDaBan.clear();
+        tongDoanhThuTrongNgay = 0;
         db.collection("invoices").addSnapshotListener((invoiceSnapshots, error) -> {
             if (error != null) {
                 Log.e("Firestore", "Error fetching invoices: ", error);
@@ -163,11 +164,9 @@ public class ThongKeMonDaBan extends AppCompatActivity {
             }
             if (invoiceSnapshots != null) {
                 boolean check = false;
-
                 for (QueryDocumentSnapshot invoice : invoiceSnapshots) {
                     String hoaDonId = invoice.getId();
                     Date ngayTaoDate = null;
-
                     if (invoice.contains("ngay_tao")) {
                         if (invoice.get("ngay_tao") instanceof String) {
                             String ngayTaoString = invoice.getString("ngay_tao");
@@ -188,7 +187,6 @@ public class ThongKeMonDaBan extends AppCompatActivity {
                     String formattedDate = ngayTaoDate != null ? sdf.format(ngayTaoDate) : "###";
                     if (selectedDate.equals(formattedDate)) {
                         check = true;
-                        prefs.edit().putString("selectedDate", selectedDate).apply();
                         db.collection("invoice_items")
                                 .whereEqualTo("hoa_don_id", hoaDonId)
                                 .addSnapshotListener((itemsSnapshots, itemsError) -> {
@@ -202,15 +200,23 @@ public class ThongKeMonDaBan extends AppCompatActivity {
                                             String tenMon = item.getString("ten_mon_an");
                                             int soLuong = item.getLong("so_luong").intValue();
                                             int gia = item.getLong("gia").intValue();
-                                            capNhatSoLuong(tenMon, soLuong, gia,soLuong * gia, formattedDate);
+                                            //  tinh tong tien da ban trong ngay
+                                            int tongTien = soLuong * gia;
+                                            tongDoanhThuTrongNgay += tongTien;
+                                            capNhatSoLuong(tenMon, soLuong, gia, tongTien, formattedDate);
                                         }
+                                        DecimalFormat deci = new DecimalFormat("#,###");
+                                        String tongDoanhThuDeciMal = deci.format(tongDoanhThuTrongNgay);
+                                        tv_doanhthu.setText("Doanh thu: " + tongDoanhThuDeciMal + "đ");
                                         monDaBan_adapter.notifyDataSetChanged();
                                     }
                                 });
                     }
                 }
                 if (!check) {
+                    tv_doanhthu.setText("Doanh thu: " + 0 + "đ");
                     tv_nullMonDaChon.setVisibility(View.VISIBLE);
+                    tv_nullMonDaChon.setText("Không có dữ liệu cho ngày "+selectedDate);
                     recMonDaBan.setVisibility(View.GONE);
                 } else {
                     tv_nullMonDaChon.setVisibility(View.GONE);
@@ -219,8 +225,9 @@ public class ThongKeMonDaBan extends AppCompatActivity {
             }
         });
     }
+
     //kiem tra mon trung
-    private void capNhatSoLuong(String tenMon, int soLuong, int gia,int tongTien, String ngayBan) {
+    private void capNhatSoLuong(String tenMon, int soLuong, int gia, int tongTien, String ngayBan) {
         for (MonDaBanModels daBanModels : listMonDaBan) {
             if (daBanModels.getTenMon().equals(tenMon) && daBanModels.getNgay().equals(ngayBan)) {
                 daBanModels.setSoLuong(daBanModels.getSoLuong() + soLuong);

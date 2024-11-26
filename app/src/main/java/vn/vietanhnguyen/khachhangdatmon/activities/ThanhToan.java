@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -231,9 +232,8 @@ public class ThanhToan extends AppCompatActivity {
         btnBackHome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ThanhToan.this, Home.class);
-                startActivity(intent);
-                finish();
+                Intent intent1 = new Intent(ThanhToan.this, Home.class);
+                startActivity(intent1);
             }
         });
 
@@ -273,10 +273,9 @@ public class ThanhToan extends AppCompatActivity {
                     DanhSachDaChon.btnHuyDon.setVisibility(View.GONE);
                     DanhSachDaChon.edtGhiChu.setEnabled(false);
                     DanhSachDaChon.overlayView.setVisibility(View.VISIBLE);
-                    DanhSachDaChon.btnBackHome.setVisibility(View.VISIBLE);
+                    btnThanhToan.setVisibility(View.GONE);
                     btnBackHome.setVisibility(View.VISIBLE);
                     DanhSachDaChon.btnBack.setVisibility(View.GONE);
-                    btnThanhToan.setVisibility(View.GONE);
                     dialog.dismiss();
                 });
 
@@ -294,7 +293,7 @@ public class ThanhToan extends AppCompatActivity {
         tvTime = findViewById(R.id.invoiceTimeTextView);
         tvDate = findViewById(R.id.invoiceDateTextView);
         btnThanhToan = findViewById(R.id.paymentButton);
-        btnBackHome = findViewById(R.id.btnBackHome);
+        btnBackHome = findViewById(R.id.BackHome);
         recyclerViewMonAn = findViewById(R.id.itemsListView);
     }
 }

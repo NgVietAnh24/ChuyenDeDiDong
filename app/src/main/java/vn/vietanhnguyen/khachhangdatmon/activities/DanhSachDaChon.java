@@ -148,17 +148,6 @@ public class DanhSachDaChon extends AppCompatActivity {
         {
             capNhatTrangThaiMonDaChon(tableId,"Đang chuẩn bị");
         });
-
-        btnBackHome.setOnClickListener(view -> {
-            Intent intent1 = new Intent(DanhSachDaChon.this, Home.class);
-            startActivity(intent1);
-            btnThanhToan.setVisibility(View.VISIBLE);
-            btnHuyDon.setVisibility(View.VISIBLE);
-            edtGhiChu.setEnabled(true);
-            overlayView.setVisibility(View.GONE);
-            btnBackHome.setVisibility(View.GONE);
-            xoaMonDaChonTheoBanId(tableId);
-        });
     }
 
     private void capNhatTrangThaiMonDaChon(String banId, String trangThai) {
@@ -281,7 +270,7 @@ public class DanhSachDaChon extends AppCompatActivity {
         btnThanhToan = findViewById(R.id.btnThanhToan);
         listChonMon = findViewById(R.id.listChonMon);
         edtGhiChu = findViewById(R.id.edtGhichu);
-        btnBackHome = findViewById(R.id.btnBackHome);
+//        btnBackHome = findViewById(R.id.btnBackHome);
         overlayView = findViewById(R.id.overlayView);
         btnLamAll = findViewById(R.id.btnLamAll);
     }

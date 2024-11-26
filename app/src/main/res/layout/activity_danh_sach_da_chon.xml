@@ -111,7 +111,7 @@
             android:padding="10dp">
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnBackHome"
+                android:id="@+id/btnBackHomeH"
                 android:layout_width="160dp"
                 android:layout_height="35dp"
                 android:layout_margin="10dp"

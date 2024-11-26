@@ -133,7 +133,7 @@ public class ThanhToan extends AppCompatActivity {
                                 ZaloPaySDK.getInstance().payOrder(ThanhToan.this, token, "demozpdk://app", new PayOrderListener() {
                                     @Override
                                     public void onPaymentSucceeded(String s, String s1, String s2) {
-                                        Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
+                                        Intent intent1 = new Intent(ThanhToan.this, ThanhToan.class);
                                         intent1.putExtra("result", "Thanh toán thành công");
                                         startActivity(intent1);
 
@@ -152,14 +152,14 @@ public class ThanhToan extends AppCompatActivity {
 
                                     @Override
                                     public void onPaymentCanceled(String s, String s1) {
-                                        Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
+                                        Intent intent1 = new Intent(ThanhToan.this, ThanhToan.class);
                                         intent1.putExtra("result", "Hủy thanh toán");
                                         startActivity(intent1);
                                     }
 
                                     @Override
                                     public void onPaymentError(ZaloPayError zaloPayError, String s, String s1) {
-                                        Intent intent1 = new Intent(ThanhToan.this, DanhSachDaChon.class);
+                                        Intent intent1 = new Intent(ThanhToan.this, ThanhToan.class);
                                         intent1.putExtra("result", "lỗi thanh toán");
                                         startActivity(intent1);
                                     }

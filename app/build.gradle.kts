@@ -46,7 +46,9 @@ dependencies {
 
     // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
+
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-database:19.6.0")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth:21.0.1")
     implementation ("com.google.android.gms:play-services-auth:19.2.0")

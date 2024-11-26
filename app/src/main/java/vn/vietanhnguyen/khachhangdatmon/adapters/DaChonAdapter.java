@@ -2,6 +2,8 @@ package vn.vietanhnguyen.khachhangdatmon.adapters;
 
 import static android.content.ContentValues.TAG;
 
+import static vn.vietanhnguyen.khachhangdatmon.activities.DanhSachDaChon.edtGhiChu;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,10 +19,12 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import vn.vietanhnguyen.khachhangdatmon.R;
@@ -56,9 +60,9 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
         if (monAn.getSoLuong() == 0) {
             monAn.setSoLuong(1);
         }
-        if (monAn.getStatus().equals("Đang làm") || monAn.getStatus().equals("Đã xong")) {
-            holder.btnHuy.setEnabled(true);
-            holder.btnHuy.setAlpha(1);
+        if (monAn != null && monAn.getStatus() != null && (monAn.getStatus().equals("Đã xong") || monAn.getStatus().equals("Đang làm"))) {
+            holder.btnHuy.setEnabled(false);
+            holder.btnHuy.setAlpha(0.5f);
             holder.btnXoa.setAlpha(0.5f);
             holder.btnXoa.setEnabled(false);
             holder.btnLamMon.setAlpha(0.5f);
@@ -67,22 +71,38 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
             holder.btnTang.setEnabled(false);
             holder.btnGiam.setAlpha(0.5f);
             holder.btnGiam.setEnabled(false);
+            holder.btnDaLay.setAlpha(1);
+            holder.btnDaLay.setEnabled(true);
         } else if (monAn.getStatus().equals("Đang chuẩn bị")) {
-            holder.btnHuy.setEnabled(false);
-            holder.btnHuy.setAlpha(0.5f);
+            holder.btnHuy.setEnabled(true);
+            holder.btnHuy.setAlpha(1);
             holder.btnLamMon.setAlpha(0.5f);
             holder.btnLamMon.setEnabled(false);
             holder.btnTang.setAlpha(0.5f);
             holder.btnTang.setEnabled(false);
             holder.btnGiam.setAlpha(0.5f);
             holder.btnGiam.setEnabled(false);
-        }else {
+            holder.btnDaLay.setAlpha(0.5f);
+            holder.btnDaLay.setEnabled(false);
+        } else {
+            holder.btnLamMon.setAlpha(1);
+            holder.btnLamMon.setEnabled(true);
             holder.btnHuy.setEnabled(false);
             holder.btnHuy.setAlpha(0.5f);
+            holder.btnTang.setAlpha(1);
+            holder.btnTang.setEnabled(true);
+            holder.btnGiam.setAlpha(1);
+            holder.btnGiam.setEnabled(true);
+            holder.btnDaLay.setAlpha(0.5f);
+            holder.btnDaLay.setEnabled(false);
         }
 
+        long price = Long.parseLong(monAn.getPrice());
+        String formattedPrice = NumberFormat.getInstance(Locale.getDefault()).format(price);
+
+        holder.btnDaLay.setText("Đã lấy: " + monAn.getSoLuongDaLay());
         holder.tvTenMon.setText(monAn.getName());
-        holder.tvGia.setText(String.valueOf(monAn.getPrice()));
+        holder.tvGia.setText(formattedPrice+" đ");
         holder.tvSoLuong.setText(String.valueOf(monAn.getSoLuong()));
         holder.tvStatus.setText(monAn.getStatus());
 
@@ -96,7 +116,7 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
             int currentQuantity = monAn.getSoLuong();
             monAn.setSoLuong(currentQuantity + 1);
             holder.tvSoLuong.setText(String.valueOf(monAn.getSoLuong()));
-            suaSoLuongMonAn(tableId, monAn);
+            suaSoLuongMonAn(monAn.getDocumentId(), monAn); // Truyền documentId
             listener.onMonDaChonUpdated(listMonDaChon.size());
         });
 
@@ -106,7 +126,7 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
             if (currentQuantity > 1) {
                 monAn.setSoLuong(currentQuantity - 1);
                 holder.tvSoLuong.setText(String.valueOf(monAn.getSoLuong()));
-                suaSoLuongMonAn(tableId, monAn);
+                suaSoLuongMonAn(monAn.getDocumentId(), monAn); // Truyền documentId
                 listener.onMonDaChonUpdated(listMonDaChon.size());
             }
         });
@@ -121,8 +141,12 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
         });
 
         holder.btnLamMon.setOnClickListener(v -> {
-            lamMonAn(tableId, monAn);
+            String documentId = monAn.getDocumentId();
+            lamMonAn(documentId, "Đang chuẩn bị");
+            Log.d("ChefAdapter", "documentId: " + documentId);
         });
+        String documentId = monAn.getDocumentId();
+        Log.d("ChefAdapter", "documentId: " + documentId);
 
         holder.btnHuy.setOnClickListener(v -> {
             holder.offbg.setVisibility(View.VISIBLE);
@@ -131,6 +155,24 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
             holder.btnLamMon.setEnabled(false);
             holder.btnXoa.setEnabled(false);
             holder.btnDaLay.setEnabled(false);
+        });
+
+        holder.btnDaLay.setOnClickListener(v -> {
+            int soLuongDaLay = monAn.getSoLuongDaLay();
+            monAn.setSoLuongDaLay(soLuongDaLay);
+            suaSoLuongMonAn(monAn.getDocumentId(), monAn); // Truyền documentId
+
+            // Lấy tên và số lượng đã lấy
+            String tenMonAn = monAn.getName();
+            String soLuongDaLayText =": " + monAn.getSoLuongDaLay();
+
+            String ghiChu = edtGhiChu.getText().toString();
+
+            edtGhiChu.setText(ghiChu + tenMonAn + soLuongDaLayText + "\n");
+
+            updateGhiChu(monAn.getDocumentId(), tenMonAn + soLuongDaLayText);
+
+            listener.onMonDaChonUpdated(listMonDaChon.size());
         });
     }
 
@@ -162,42 +204,49 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
         }
     }
 
-    private void lamMonAn(String tableId, MonAn monAn) {
+    private void updateGhiChu(String documentId, String ghiChu) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("ghiChu", ghiChu);
+
+        // Cập nhật trường ghiChu trong tài liệu
+        if (documentId != null) {
+            firestore.collection("selectedFoods")
+                    .document(documentId) // Sử dụng documentId để xác định tài liệu
+                    .update(updates)
+                    .addOnCompleteListener(updateTask -> {
+                        if (updateTask.isSuccessful()) {
+                            Log.d(TAG, "Ghi chú đã được cập nhật thành công.");
+                        } else {
+                            Log.e(TAG, "Lỗi cập nhật ghi chú: ", updateTask.getException());
+                        }
+                    });
+        } else {
+            Log.e(TAG, "documentId không được phép null");
+        }
+    }
+
+    private void lamMonAn(String documentId, String newStatus) {
+        Log.d("BNM", "=====================================================");
+        Log.d("ChefAdapter", "documentId: " + documentId);
         Date now = new Date();
-        SimpleDateFormat time = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat time = new SimpleDateFormat("HH:mm\ndd/MM/yyyy");
         String formattedTime = time.format(now);
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", "Đang chuẩn bị");
         updates.put("time", formattedTime);
 
-        // Tìm tài liệu theo ban_id và id món ăn
-        firestore.collection("selectedFoods")
-                .whereEqualTo("ban_id", tableId)
-                .whereEqualTo("id", monAn.getId())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null && task.getResult().size() > 0) {
-                        for (DocumentSnapshot document : task.getResult()) {
-                            // Cập nhật trạng thái trong tài liệu
-                            firestore.collection("selectedFoods")
-                                    .document(document.getId()) // Lấy ID của tài liệu
-                                    .update(updates)
-                                    .addOnCompleteListener(updateTask -> {
-                                        if (updateTask.isSuccessful()) {
-                                            Log.d(TAG, "Trạng thái món ăn đã được cập nhật thành công.");
-                                            // Cập nhật lại trạng thái trên giao diện nếu cần
-                                            monAn.setStatus("Đang chuẩn bị"); // Cập nhật trạng thái trong đối tượng món ăn
-                                            notifyItemChanged(listMonDaChon.indexOf(monAn)); // Cập nhật lại item trong RecyclerView
-                                        } else {
-                                            Log.e(TAG, "Lỗi cập nhật trạng thái món ăn: ", updateTask.getException());
-                                        }
-                                    });
-                        }
-                    } else {
-                        Log.e(TAG, "Không tìm thấy món ăn để cập nhật trạng thái: ", task.getException());
-                    }
-                });
+
+        if (documentId != null) {
+            // Cập nhật trạng thái trong tài liệu bằng cách sử dụng ID của tài liệu
+            firestore.collection("selectedFoods")
+                    .document(documentId) // Sử dụng ID của tài liệu để xác định tài liệu
+                    .update(updates)
+                    .addOnSuccessListener(aVoid -> Log.d("ChefAdapter", "Món ăn đã được cập nhật trạng thái '" + newStatus + "'"))
+                    .addOnFailureListener(e -> Log.e("ChefAdapter", "Lỗi khi cập nhật trạng thái món ăn: ", e));
+        } else {
+            Log.e(TAG, "documentId không được phép null");
+        }
     }
 
     private void xoaMonAnTuFirestore(String tableId, String monAnId) {
@@ -227,34 +276,24 @@ public class DaChonAdapter extends RecyclerView.Adapter<DaChonAdapter.ViewHolder
                 });
     }
 
-
-    private void suaSoLuongMonAn(String tableId, MonAn monAn) {
+    private void suaSoLuongMonAn(String documentId, MonAn monAn) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("soLuong", monAn.getSoLuong());
 
-        // Cập nhật tài liệu của món ăn
-        firestore.collection("selectedFoods")
-                .whereEqualTo("ban_id", tableId)
-                .whereEqualTo("id", monAn.getId())
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null && task.getResult().size() > 0) {
-                        for (DocumentSnapshot document : task.getResult()) {
-                            // Cập nhật số lượng trong tài liệu
-                            firestore.collection("selectedFoods")
-                                    .document(document.getId()) // Lấy ID của tài liệu
-                                    .update(updates)
-                                    .addOnCompleteListener(updateTask -> {
-                                        if (updateTask.isSuccessful()) {
-                                            Log.d(TAG, "Số lượng món ăn đã được cập nhật thành công.");
-                                        } else {
-                                            Log.e(TAG, "Lỗi cập nhật số lượng món ăn: ", updateTask.getException());
-                                        }
-                                    });
+        // Cập nhật tài liệu của món ăn theo documentId
+        if (documentId != null) {
+            firestore.collection("selectedFoods")
+                    .document(documentId) // Sử dụng documentId để xác định tài liệu
+                    .update(updates)
+                    .addOnCompleteListener(updateTask -> {
+                        if (updateTask.isSuccessful()) {
+                            Log.d(TAG, "Số lượng món ăn đã được cập nhật thành công.");
+                        } else {
+                            Log.e(TAG, "Lỗi cập nhật số lượng món ăn: ", updateTask.getException());
                         }
-                    } else {
-                        Log.e(TAG, "Không tìm thấy món ăn để cập nhật số lượng: ", task.getException());
-                    }
-                });
+                    });
+        } else {
+            Log.e(TAG, "documentId không được phép null");
+        }
     }
 }

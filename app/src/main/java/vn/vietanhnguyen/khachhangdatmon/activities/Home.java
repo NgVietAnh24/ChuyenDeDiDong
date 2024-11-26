@@ -69,7 +69,7 @@ public class Home extends AppCompatActivity {
                 intent.putExtra("name", ban.getName());
                 startActivity(intent);
             }
-        });
+        }, this);
         listTable.setAdapter(banAdapter);
         Log.d("JJ", "getData: " + list);
         docDulieu();

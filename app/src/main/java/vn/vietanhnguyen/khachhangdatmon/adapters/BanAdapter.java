@@ -28,9 +28,10 @@ public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
         void onItemClick(Ban ban);
     }
 
-    public BanAdapter(List<Ban> list, OnItemClickListener onItemClickListener) {
+    public BanAdapter(List<Ban> list, OnItemClickListener onItemClickListener, Context context) {
         this.list = list;
         this.onItemClickListener = onItemClickListener;
+        this.context = context;
     }
 
     @Override
@@ -67,7 +68,7 @@ public class BanAdapter extends RecyclerView.Adapter<BanAdapter.ViewHolder> {
                 if(ban.getStatus().equals("Trống")) {
                     onItemClickListener.onItemClick(ban);
                 }else {
-//                    showAlert("Đã có khách");
+                    showAlert("Đã có khách");
 //                    Toast.makeText(Home.this,"c", Toast.LENGTH_LONG).show();
                 }
             }

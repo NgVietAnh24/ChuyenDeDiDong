@@ -46,14 +46,15 @@
             android:exported="false" />
         <activity
             android:name=".activities.login_signup_forgot.ForgotPass"
-            android:exported="false" /> <!-- <activity -->
-        <!-- android:name=".activities.Home" -->
-        <!-- android:exported="false" /> -->
+            android:exported="false" />
+<!--         <activity-->
+<!--         android:name=".activities.Home"-->
+<!--         android:exported="false" />-->
         <activity
             android:name=".activities.login_signup_forgot.SignUp"
             android:exported="false" />
         <activity
-            android:name=".activities.HomeDauBep"
+            android:name=".activities.Home"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

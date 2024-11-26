@@ -8,7 +8,9 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import vn.vietanhnguyen.khachhangdatmon.R;
 import vn.vietanhnguyen.khachhangdatmon.models.MonAn;
@@ -31,8 +33,12 @@ public class MonAnThanhToanAdapter extends RecyclerView.Adapter<MonAnThanhToanAd
     @Override
     public void onBindViewHolder(MonAnViewHolder holder, int position) {
         MonAn monAn = monAnList.get(position);
+
+        long price = Long.parseLong(monAn.getPrice());
+        String formattedPrice = NumberFormat.getInstance(Locale.getDefault()).format(price);
+
         holder.name.setText(monAn.getName());
-        holder.price.setText(monAn.getPrice() + " VND");
+        holder.price.setText(formattedPrice + " VND");
         holder.quantity.setText("Số lượng: " + monAn.getSoLuong());
         Log.d("K","kkkkkkkkkkkkkkkkkk"+monAn.getSoLuong());
     }

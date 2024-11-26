@@ -95,7 +95,7 @@ public class HomeDauBep extends AppCompatActivity {
                         listMonAnDaChon.clear(); // Xóa danh sách cũ trước khi thêm dữ liệu mới
                         for (DocumentSnapshot document : value.getDocuments()) {
                             MonAn monAn = document.toObject(MonAn.class); // Chuyển đổi tài liệu thành đối tượng MonAn
-                            if (monAn != null && monAn.getStatus().equals("Đang chuẩn bị") || monAn.getStatus().equals("Đang làm")) {
+                            if (monAn != null && monAn.getStatus() != null && (monAn.getStatus().equals("Đang chuẩn bị") || monAn.getStatus().equals("Đang làm"))) {
                                 // Lấy ban_id và id từ tài liệu
                                 String banId = document.getString("ban_id");
                                 String id = document.getId(); // Lấy ID của tài liệu
@@ -104,7 +104,8 @@ public class HomeDauBep extends AppCompatActivity {
                                 Log.d(TAG, "Lấy được ban_id: " + banId + ", id: " + id);
 
                                 // Lưu ID của tài liệu vào đối tượng MonAn
-                                monAn.setDocumentId(id); // Lưu ID của tài liệu
+                                monAn.setDocumentId(id);
+                                Log.d("DOC","}}}}}}}}}}}}}}}}}}}}}"+monAn.getDocumentId());// Lưu ID của tài liệu
                                 listMonAnDaChon.add(monAn); // Thêm vào danh sách món ăn đã chọn
                             }
                         }

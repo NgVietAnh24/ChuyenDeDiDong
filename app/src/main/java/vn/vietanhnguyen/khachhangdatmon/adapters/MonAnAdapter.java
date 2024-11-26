@@ -18,8 +18,10 @@ import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import vn.vietanhnguyen.khachhangdatmon.R;
@@ -47,8 +49,12 @@ public class MonAnAdapter extends RecyclerView.Adapter<MonAnAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MonAn monAn = list.get(position);
+
+        long price = Long.parseLong(monAn.getPrice());
+        String formattedPrice = NumberFormat.getInstance(Locale.getDefault()).format(price);
+
         holder.tvTenMon.setText(monAn.getName());
-        holder.tvGiaMon.setText(monAn.getPrice() + " VND");
+        holder.tvGiaMon.setText(formattedPrice + " VND");
         Glide.with(holder.itemView.getContext())
                 .load(monAn.getImage())
                 .placeholder(R.drawable.image_error)

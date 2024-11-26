@@ -23,6 +23,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
@@ -31,7 +36,9 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +48,15 @@ import vn.vietanhnguyen.khachhangdatmon.adapters.DaChonAdapter;
 import vn.vietanhnguyen.khachhangdatmon.models.MonAn;
 
 public class DanhSachDaChon extends AppCompatActivity {
-    public static ImageView btnBack;
-    public static AppCompatButton btnHuyDon, btnThanhToan, btnBackHome;
+    public static ImageView btnBack, btnInvoice;
+    public static AppCompatButton btnHuyDon, btnThanhToan, btnBackHome, btnLamAll;
     public static RecyclerView listChonMon;
     public static EditText edtGhiChu;
     public static View overlayView;
     private TextView txtDanhSachMon;
 
     private FirebaseFirestore firestore;
+    private DatabaseReference databaseReference;
     private DaChonAdapter daChonAdapter;
     private List<MonAn> listMonAnDaChon;
 
@@ -88,7 +96,9 @@ public class DanhSachDaChon extends AppCompatActivity {
 
         listChonMon.setAdapter(daChonAdapter);
 
-        // Xử lý sự kiện cho nút Hủy đơn
+       layGhiChuTheoBanId(tableId);
+
+        // Xử lý sự kiện cho nút Hủy đơ
         btnHuyDon.setOnClickListener(v -> {
             // Thực hiện hành động hủy đơn tại đây
             Toast.makeText(this, "Đơn đã bị hủy", Toast.LENGTH_SHORT).show();
@@ -99,12 +109,15 @@ public class DanhSachDaChon extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             // Cập nhật thành công
+                            Log.d("DanhSachDaChon", "Trạng thái bàn đã được cập nhật thành 'Trống'");
+
+                            // Gọi phương thức xóa tất cả món đã chọn sau khi cập nhật trạng thái bàn thành công
+                            xoaMonDaChonTheoBanId(tableId);
+
+                            // Chuyển đến màn hình Home
                             Intent intent1 = new Intent(DanhSachDaChon.this, Home.class);
                             startActivity(intent1);
                             DanhSachChonMon.btnBack.setVisibility(View.VISIBLE);
-                            xoaTatCaMonDaChon(tableId);
-                            Log.d("DanhSachDaChon", "Trạng thái bàn đã được cập nhật thành 'Trống'");
-                            // Có thể thêm logic nếu muốn thông báo cho người dùng hoặc cập nhật UI.
                         } else {
                             // Lỗi khi cập nhật trạng thái bàn
                             Log.d("DanhSachDaChon", "Lỗi khi cập nhật trạng thái bàn: ", task.getException());
@@ -131,6 +144,11 @@ public class DanhSachDaChon extends AppCompatActivity {
             finish();
         });
 
+        btnLamAll.setOnClickListener(v ->
+        {
+            capNhatTrangThaiMonDaChon(tableId,"Đang chuẩn bị");
+        });
+
         btnBackHome.setOnClickListener(view -> {
             Intent intent1 = new Intent(DanhSachDaChon.this, Home.class);
             startActivity(intent1);
@@ -139,18 +157,85 @@ public class DanhSachDaChon extends AppCompatActivity {
             edtGhiChu.setEnabled(true);
             overlayView.setVisibility(View.GONE);
             btnBackHome.setVisibility(View.GONE);
-            xoaTatCaMonDaChon(tableId);
+            xoaMonDaChonTheoBanId(tableId);
         });
     }
 
-    private void xoaTatCaMonDaChon(String tableId) {
-        firestore.collection("selectedFoods").document(tableId)
-                .update("selectedFoods", FieldValue.delete())
+    private void capNhatTrangThaiMonDaChon(String banId, String trangThai) {
+
+        Date now = new Date();
+        SimpleDateFormat time = new SimpleDateFormat("HH:mm\ndd/MM/yyyy");
+        String formattedTime = time.format(now);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", "Đang chuẩn bị");
+        updates.put("time", formattedTime);
+
+        firestore.collection("selectedFoods")
+                .whereEqualTo("ban_id", banId)
+                .whereEqualTo("status", "")
+                .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Log.d("ThanhToan", "Đã xóa tất cả các món đã chọn khỏi Firestore.");
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            // Cập nhật trạng thái cho từng món ăn
+                            firestore.collection("selectedFoods").document(document.getId())
+                                    .update(updates)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d("CapNhatTrangThai", "Đã cập nhật trạng thái cho món: " + document.getId());
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.w("CapNhatTrangThai", "Lỗi khi cập nhật trạng thái cho món: ", e);
+                                    });
+                        }
+                        Toast.makeText(DanhSachDaChon.this, "Đã cập nhật tất cả món ăn thành 'Đang chuẩn bị'", Toast.LENGTH_SHORT).show();
                     } else {
-                        Log.d("ThanhToan", "Lỗi khi xóa món đã chọn khỏi Firestore: ", task.getException());
+                        Log.w("CapNhatTrangThai", "Lỗi khi lấy danh sách món đã chọn: ", task.getException());
+                    }
+                });
+    }
+
+    private void layGhiChuTheoBanId(String banId) {
+        firestore.collection("selectedFoods")
+                .whereEqualTo("ban_id", banId)
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        Log.w("GhiChuError", "Lỗi khi lấy ghi chú: ", e);
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots != null) {
+                        StringBuilder ghiChuBuilder = new StringBuilder();
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                            String ghiChu = document.getString("ghiChu");
+                            if (ghiChu != null) {
+                                ghiChuBuilder.append(ghiChu).append("\n");
+                            }
+                        }
+                        edtGhiChu.setText(ghiChuBuilder.toString());
+                    }
+                });
+    }
+
+    private void xoaMonDaChonTheoBanId(String banId) {
+        firestore.collection("selectedFoods")
+                .whereEqualTo("ban_id", banId) // Filter by ban_id
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            // Delete each document that matches the query
+                            firestore.collection("selectedFoods").document(document.getId())
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d("XoaMonDaChon", "Đã xóa món: " + document.getId());
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.w("XoaMonDaChon", "Lỗi khi xóa món: ", e);
+                                    });
+                        }
+                    } else {
+                        Log.w("XoaMonDaChon", "Lỗi khi lấy danh sách món đã chọn: ", task.getException());
                     }
                 });
     }
@@ -170,7 +255,9 @@ public class DanhSachDaChon extends AppCompatActivity {
                         if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
                             listMonAnDaChon.clear(); // Xóa danh sách hiện tại
                             for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                                MonAn monAn = document.toObject(MonAn.class); // Chuyển đổi tài liệu thành đối tượng MonAn
+                                String id = document.getId();
+                                MonAn monAn = document.toObject(MonAn.class);
+                                monAn.setDocumentId(id);// Chuyển đổi tài liệu thành đối tượng MonAn
                                 listMonAnDaChon.add(monAn); // Thêm món ăn vào danh sách
                             }
                             daChonAdapter.notifyDataSetChanged(); // Cập nhật adapter
@@ -196,5 +283,6 @@ public class DanhSachDaChon extends AppCompatActivity {
         edtGhiChu = findViewById(R.id.edtGhichu);
         btnBackHome = findViewById(R.id.btnBackHome);
         overlayView = findViewById(R.id.overlayView);
+        btnLamAll = findViewById(R.id.btnLamAll);
     }
 }

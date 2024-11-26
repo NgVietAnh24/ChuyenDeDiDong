@@ -6,8 +6,8 @@ import android.os.Parcelable;
 import java.util.Objects;
 
 public class MonAn implements Parcelable {
-    private String id, name, price, image, category_id, category_name, status, time, ban_id, documentId;
-    private int soLuong;
+    private String id, name, price, image, category_id, category_name, status, time, ban_id, documentId, statusHuy, ghiChu;
+    private int soLuong, soLuongDaLay;
 
     public MonAn() {
     }
@@ -33,6 +33,9 @@ public class MonAn implements Parcelable {
         time = in.readString();
         ban_id = in.readString();
         documentId = in.readString();
+        statusHuy = in.readString();
+        ghiChu = in.readString();
+        soLuongDaLay = in.readInt();
     }
 
 
@@ -57,17 +60,20 @@ public class MonAn implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id != null ? id : "");
-        dest.writeString(name != null ? name : "");
-        dest.writeString(price != null ? price : "");
-        dest.writeString(image != null ? image : "");
-        dest.writeString(category_id != null ? category_id : "");
-        dest.writeString(category_name != null ? category_name : "");
-        dest.writeString(status != null ? status : "");
-        dest.writeString(time != null ? time : "");
-        dest.writeString(ban_id != null ? ban_id : "");
-        dest.writeString(documentId != null ? documentId : "");
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeString(price);
+        dest.writeString(image);
+        dest.writeString(category_id);
+        dest.writeString(category_name);
+        dest.writeString(status);
         dest.writeInt(soLuong);
+        dest.writeString(time);
+        dest.writeString(ban_id);
+        dest.writeString(documentId);
+        dest.writeString(statusHuy);
+        dest.writeString(ghiChu);
+        dest.writeInt(soLuongDaLay);
     }
 
     // Ghi đè equals và hashCode để so sánh các đối tượng MonAn
@@ -86,6 +92,30 @@ public class MonAn implements Parcelable {
 
     // Các phương thức getter và setter
 
+
+    public String getGhiChu() {
+        return ghiChu;
+    }
+
+    public void setGhiChu(String ghiChu) {
+        this.ghiChu = ghiChu;
+    }
+
+    public String getStatusHuy() {
+        return statusHuy;
+    }
+
+    public void setStatusHuy(String statusHuy) {
+        this.statusHuy = statusHuy;
+    }
+
+    public int getSoLuongDaLay() {
+        return soLuongDaLay;
+    }
+
+    public void setSoLuongDaLay(int soLuongDaLay) {
+        this.soLuongDaLay = soLuongDaLay;
+    }
 
     public String getDocumentId() {
         return documentId;

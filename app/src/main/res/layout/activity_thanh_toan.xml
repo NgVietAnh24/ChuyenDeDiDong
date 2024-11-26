@@ -43,10 +43,6 @@
                 android:textStyle="bold"
                 android:textColor="#D43B3B"
                 android:gravity="center" />
-
-            <Space
-                android:layout_width="40dp"
-                android:layout_height="wrap_content" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

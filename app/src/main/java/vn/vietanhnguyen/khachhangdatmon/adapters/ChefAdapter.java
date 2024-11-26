@@ -73,8 +73,9 @@ public class ChefAdapter extends RecyclerView.Adapter<ChefAdapter.ViewHolder> {
 
         // Xử lý nút "Đang làm"
         holder.btnDangLam.setOnClickListener(v -> {
-            String documentId = monAn.getDocumentId(); // Giả sử bạn đã lưu documentId trong lớp MonAn
+            String documentId = monAn.getDocumentId();
             updateFoodStatus(documentId, "Đang làm");
+            Log.d("DOC", "documentId: " + documentId);
         });
 
         // Xử lý nút "Đã xong"

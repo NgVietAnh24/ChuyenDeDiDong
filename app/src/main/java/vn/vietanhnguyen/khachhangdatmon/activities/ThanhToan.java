@@ -47,7 +47,7 @@ import vn.zalopay.sdk.listeners.PayOrderListener;
 public class ThanhToan extends AppCompatActivity {
     private ImageButton btnBack;
     private TextView tvMaHD, tvTenKH, tvSoDT, tvGhiChu, tvTongTien, tvTime, tvDate;
-    private Button btnThanhToan;
+    private Button btnThanhToan, btnBackHome;
     private RecyclerView recyclerViewMonAn;
 
     private FirebaseFirestore firestore;
@@ -225,10 +225,18 @@ public class ThanhToan extends AppCompatActivity {
 
         // Xử lý nút quay lại
         btnBack.setOnClickListener(v ->
-        {
-            finish();
+                finish()
+        );
 
+        btnBackHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ThanhToan.this, Home.class);
+                startActivity(intent);
+                finish();
+            }
         });
+
 
 
     }
@@ -266,7 +274,7 @@ public class ThanhToan extends AppCompatActivity {
                     DanhSachDaChon.edtGhiChu.setEnabled(false);
                     DanhSachDaChon.overlayView.setVisibility(View.VISIBLE);
                     DanhSachDaChon.btnBackHome.setVisibility(View.VISIBLE);
-//                    DanhSachDaChon.btnInvoice.setVisibility(View.VISIBLE);
+                    btnBackHome.setVisibility(View.VISIBLE);
                     DanhSachDaChon.btnBack.setVisibility(View.GONE);
                     btnThanhToan.setVisibility(View.GONE);
                     dialog.dismiss();
@@ -286,6 +294,7 @@ public class ThanhToan extends AppCompatActivity {
         tvTime = findViewById(R.id.invoiceTimeTextView);
         tvDate = findViewById(R.id.invoiceDateTextView);
         btnThanhToan = findViewById(R.id.paymentButton);
-        recyclerViewMonAn = findViewById(R.id.itemsListView); // Đảm bảo RecyclerView có id là itemsRecyclerView
+        btnBackHome = findViewById(R.id.btnBackHome);
+        recyclerViewMonAn = findViewById(R.id.itemsListView);
     }
 }

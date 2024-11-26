@@ -129,6 +129,16 @@
         android:textColor="#FFFFFF"
         android:layout_marginTop="16dp"
         android:padding="12dp" />
+    <Button
+        android:id="@+id/BạckHome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Về trang chủ"
+        android:backgroundTint="#D43B3B"
+        android:textColor="#FFFFFF"
+        android:visibility="gone"
+        android:layout_marginTop="16dp"
+        android:padding="12dp" />
 
     <LinearLayout
         android:layout_width="match_parent"

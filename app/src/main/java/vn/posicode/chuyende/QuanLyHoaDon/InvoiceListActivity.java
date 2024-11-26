@@ -189,12 +189,7 @@ public class InvoiceListActivity extends AppCompatActivity {
                 try {
                     Invoice invoice = Invoice.fromFirestore(document);
                     if (invoice != null) {
-                        String hoaDonId = document.getString("hoa_don_id");
-                        if (hoaDonId == null || hoaDonId.isEmpty()) {
-                            hoaDonId = "HD" + System.currentTimeMillis();
-                            updateHoaDonId(document.getId(), hoaDonId);
-                        }
-                        invoice.setHoaDonId(hoaDonId);
+                        // Loại bỏ các kiểm tra và cập nhật hoaDonId
                         invoiceList.add(invoice);
                         loadTableInfo(invoice);
                         Log.d(TAG, "Added invoice : " + invoice.toString());
@@ -213,17 +208,6 @@ public class InvoiceListActivity extends AppCompatActivity {
             Log.e(TAG, "Error getting documents: ", task.getException());
             Toast.makeText(this, "Lỗi khi tải danh sách hóa đơn", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void updateHoaDonId(String documentId, String hoaDonId) {
-        db.collection("invoices").document(documentId)
-                .update("hoa_don_id", hoaDonId)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "hoa_don_id updated successfully");
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error updating hoa_don_id", e);
-                });
     }
 
     private void loadTableInfo(Invoice invoice) {

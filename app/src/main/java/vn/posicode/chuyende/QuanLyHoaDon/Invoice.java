@@ -1,17 +1,17 @@
 package vn.posicode.chuyende.QuanLyHoaDon;
 
 import android.util.Log;
-
 import com.google.firebase.firestore.DocumentSnapshot;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class Invoice implements Serializable {
     private String id;
-    private String hoaDonId; // Trường mới thêm
+    private String hoaDonId;
     private String title;
     private String time;
     private String date;
@@ -29,6 +29,10 @@ public class Invoice implements Serializable {
     private String tableName;
 
     public Invoice() {
+        initializeDefaults();
+    }
+
+    private void initializeDefaults() {
         this.items = new ArrayList<>();
         this.total = 0;
         this.amountReceived = 0;
@@ -37,9 +41,10 @@ public class Invoice implements Serializable {
     }
 
     public Invoice(String id, String title, String time, String date, List<InvoiceItem> items,
-                   String customerName, String customerPhone, String note, String tableId, String staffId) {
+                   String customerName, String customerPhone, String note,
+                   String tableId, String staffId) {
         this.id = id;
-        this.hoaDonId = id; // Khởi tạo hoaDonId
+        this.hoaDonId = id;
         this.title = title;
         this.time = time;
         this.date = date;
@@ -56,159 +61,144 @@ public class Invoice implements Serializable {
     }
 
     public static Invoice fromFirestore(DocumentSnapshot document) {
-        Log.d("Invoice", "Converting document to Invoice: " + document.getId());
         Invoice invoice = new Invoice();
 
-        Log.d("Invoice", "Document data: " + document.getData());
+        // Luôn đặt ID và hoaDonId
+        String documentId = document.getId();
+        invoice.setId(documentId);
 
-        invoice.setId(document.getId());
-        invoice.setHoaDonId(document.getString("hoa_don_id")); // Đọc hoa_don_id
-        invoice.setTitle("Hóa đơn #" + document.getId().substring(0, 8));
+        // Ưu tiên sử dụng hoaDonId từ tài liệu
+        String storedHoaDonId = document.getString("hoa_don_id");
+        invoice.setHoaDonId(storedHoaDonId != null ? storedHoaDonId : documentId);
 
-        Object ngayTaoObj = document.get("ngay_tao");
-        String ngayTao = "";
-        if (ngayTaoObj != null) {
-            if (ngayTaoObj instanceof com.google.firebase.Timestamp) {
-                com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) ngayTaoObj;
-                java.util.Date date = timestamp.toDate();
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy");
-                ngayTao = sdf.format(date);
-            } else {
-                ngayTao = String.valueOf(ngayTaoObj);
-            }
-        }
+        // Tiêu đề hóa đơn
+        invoice.setTitle("Hóa đơn #" + documentId.substring(0, 8));
 
-        Object gioTaoObj = document.get("gio_tao");
-        String gioTao = "";
-        if (gioTaoObj != null) {
-            if (gioTaoObj instanceof com.google.firebase.Timestamp) {
-                com.google.firebase.Timestamp timestamp = (com.google.firebase.Timestamp) gioTaoObj;
-                java.util.Date date = timestamp.toDate();
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm:ss");
-                gioTao = sdf.format(date);
-            } else {
-                gioTao = String.valueOf(gioTaoObj);
-            }
-        }
+        // Xử lý ngày tạo
+        invoice.setDate(parseDate(document.get("ngay_tao")));
+        invoice.setTime(parseTime(document.get("gio_tao")));
 
-        invoice.setDate(ngayTao.isEmpty() ? "N/A" : ngayTao);
-        invoice.setTime(gioTao.isEmpty() ? "N/A" : gioTao);
+        // Xử lý tổng tiền
+        invoice.setTotal(parseDouble(document.get("tong_tien"), 0.0));
 
-        Object tongTienObj = document.get("tong_tien");
-        if (tongTienObj != null) {
-            if (tongTienObj instanceof Double) {
-                invoice.setTotal((Double) tongTienObj);
-            } else if (tongTienObj instanceof Long) {
-                invoice.setTotal(((Long) tongTienObj).doubleValue());
-            } else {
-                try {
-                    invoice.setTotal(Double.parseDouble(String.valueOf(tongTienObj)));
-                } catch (NumberFormatException e) {
-                    invoice.setTotal(0.0);
-                }
-            }
-        } else {
-            invoice.setTotal(0.0);
-        }
+        // Trạng thái thanh toán
+        invoice.setPaymentStatus(parseString(document.get("tinh_trang"), "Chưa thanh toán"));
 
-        Object tinhTrangObj = document.get("tinh_trang");
-        if (tinhTrangObj != null) {
-            invoice.setPaymentStatus(String.valueOf(tinhTrangObj));
-        } else {
-            invoice.setPaymentStatus("Chưa thanh toán");
-        }
+        // Các thông tin khác
+        invoice.setBanId(parseString(document.get("ban_id"), null));
+        invoice.setCustomerName(parseString(document.get("ten_khach_hang"), null));
+        invoice.setCustomerPhone(parseString(document.get("so_dt"), null));
+        invoice.setNote(parseString(document.get("ghi_chu"), null));
+        invoice.setStaffId(parseString(document.get("nv_id"), null));
+        invoice.setAmountReceived(parseDouble(document.get("tien_thu"), 0.0));
 
-        Object banIdObj = document.get("ban_id");
-        if (banIdObj != null) {
-            invoice.setBanId(String.valueOf(banIdObj));
-        }
-
-        Object tenKhachHangObj = document.get("ten_khach_hang");
-        if (tenKhachHangObj != null) {
-            invoice.setCustomerName(String.valueOf(tenKhachHangObj));
-        }
-
-        Object soDtObj = document.get("so_dt");
-        if (soDtObj != null) {
-            invoice.setCustomerPhone(String.valueOf(soDtObj));
-        }
-
-        Object ghiChuObj = document.get("ghi_chu");
-        if (ghiChuObj != null) {
-            invoice.setNote(String.valueOf(ghiChuObj));
-        }
-
-        Object nvIdObj = document.get("nv_id");
-        if (nvIdObj != null) {
-            invoice.setStaffId(String.valueOf(nvIdObj));
-        }
-
-        Object tienThuObj = document.get("tien_thu");
-        if (tienThuObj != null) {
-            if (tienThuObj instanceof Double) {
-                invoice.setAmountReceived((Double) tienThuObj);
-            } else if (tienThuObj instanceof Long) {
-                invoice.setAmountReceived(((Long) tienThuObj).doubleValue());
-            } else {
-                try {
-                    invoice.setAmountReceived(Double.parseDouble(String.valueOf(tienThuObj)));
-                } catch (NumberFormatException e) {
-                    invoice.setAmountReceived(0.0);
-                }
-            }
-        }
-
+        // Xử lý danh sách các mặt hàng
         List<Map<String, Object>> itemsData = (List<Map<String, Object>>) document.get("items");
         if (itemsData != null) {
             List<InvoiceItem> items = new ArrayList<>();
             for (Map<String, Object> itemData : itemsData) {
-                InvoiceItem item = new InvoiceItem();
-
-                if (itemData.containsKey("name")) {
-                    item.setName(String.valueOf(itemData.get("name")));
-                }
-
-                if (itemData.containsKey("quantity")) {
-                    Object quantityObj = itemData.get("quantity");
-                    if (quantityObj instanceof Long) {
-                        item.setQuantity(((Long) quantityObj).intValue());
-                    } else if (quantityObj instanceof Integer) {
-                        item.setQuantity((Integer) quantityObj);
-                    } else {
-                        try {
-                            item.setQuantity(Integer.parseInt(String.valueOf(quantityObj)));
-                        } catch (NumberFormatException e) {
-                            item. setQuantity(0);
-                        }
-                    }
-                }
-
-                if (itemData.containsKey("price")) {
-                    Object priceObj = itemData.get("price");
-                    if (priceObj instanceof Double) {
-                        item.setPrice((Double) priceObj);
-                    } else if (priceObj instanceof Long) {
-                        item.setPrice(((Long) priceObj).doubleValue());
-                    } else {
-                        try {
-                            item.setPrice(Double.parseDouble(String.valueOf(priceObj)));
-                        } catch (NumberFormatException e) {
-                            item.setPrice(0.0);
-                        }
-                    }
-                }
-
-                if (itemData.containsKey("note")) {
-                    item.setNote(String.valueOf(itemData.get("note")));
-                }
-
+                InvoiceItem item = parseInvoiceItem(itemData);
                 items.add(item);
             }
             invoice.setItems(items);
         }
 
-        Log.d("Invoice", "Converted Invoice: " + invoice.toString());
         return invoice;
+    }
+
+    // Các phương thức hỗ trợ parse
+    private static String parseDate(Object dateObj) {
+        if (dateObj == null) return "N/A";
+
+        if (dateObj instanceof com.google.firebase.Timestamp) {
+            java.util.Date date = ((com.google.firebase.Timestamp) dateObj).toDate();
+            return new java.text.SimpleDateFormat("dd/MM/yyyy").format(date);
+        }
+
+        return String.valueOf(dateObj);
+    }
+
+    private static String parseTime(Object timeObj) {
+        if (timeObj == null) return "N/A";
+
+        if (timeObj instanceof com.google.firebase.Timestamp) {
+            java.util.Date date = ((com.google.firebase.Timestamp) timeObj).toDate();
+            return new java.text.SimpleDateFormat("HH:mm:ss").format(date);
+        }
+
+        return String.valueOf(timeObj);
+    }
+
+    private static double parseDouble(Object obj, double defaultValue) {
+        if (obj == null) return defaultValue;
+
+        try {
+            if (obj instanceof Double) return (Double) obj;
+            if (obj instanceof Long) return ((Long) obj).doubleValue();
+            return Double.parseDouble(String.valueOf(obj));
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private static String parseString(Object obj, String defaultValue) {
+        return obj != null ? String.valueOf(obj) : defaultValue;
+    }
+
+    private static InvoiceItem parseInvoiceItem(Map<String, Object> itemData) {
+        InvoiceItem item = new InvoiceItem();
+
+        item.setName(parseString(itemData.get("name"), ""));
+        item.setNote(parseString(itemData.get("note"), ""));
+
+        // Parse quantity
+        Object quantityObj = itemData.get("quantity");
+        item.setQuantity(quantityObj instanceof Number ?
+                ((Number) quantityObj).intValue() :
+                Integer.parseInt(String.valueOf(quantityObj)));
+
+        // Parse price
+        Object priceObj = itemData.get("price");
+        item.setPrice(priceObj instanceof Number ?
+                ((Number) priceObj).doubleValue() :
+                Double.parseDouble(String.valueOf(priceObj)));
+
+        return item;
+    }
+
+    // Phương thức chuẩn bị dữ liệu trước khi lưu
+    public Map<String, Object> toFirestoreMap() {
+        Map<String, Object> map = new HashMap<>();
+
+        // Đảm bảo hoaDonId luôn được set
+        if (hoaDonId == null || hoaDonId.isEmpty()) {
+            hoaDonId = id;
+        }
+
+        // Các trường cơ bản
+        map.put("hoa_don_id", hoaDonId);
+        map.put("tong_tien", total);
+        map.put("tinh_trang", paymentStatus);
+        map.put("ban_id", banId);
+        map.put("ten_khach_hang", customerName);
+        map.put("so_dt", customerPhone);
+        map.put("ghi_chu", note);
+        map.put("nv_id", staffId);
+        map.put("tien_thu", amountReceived);
+
+        // Xử lý danh sách mặt hàng
+        List<Map<String, Object>> itemsData = new ArrayList<>();
+        for (InvoiceItem item : items) {
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("name", item.getName());
+            itemMap.put("quantity", item.getQuantity());
+            itemMap.put("price", item.getPrice());
+            itemMap.put("note", item.getNote());
+            itemsData.add(itemMap);
+        }
+        map.put("items", itemsData);
+
+        return map;
     }
 
     private double calculateTotal() {
@@ -315,7 +305,6 @@ public class Invoice implements Serializable {
     }
 
     @Override
-
     public String toString() {
         return "Invoice{" +
                 "id='" + id + '\'' +

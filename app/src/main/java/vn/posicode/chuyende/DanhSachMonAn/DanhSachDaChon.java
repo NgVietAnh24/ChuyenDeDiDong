@@ -179,13 +179,25 @@ public class DanhSachDaChon extends AppCompatActivity {
                 .addOnSuccessListener(documentReference -> {
                     String invoiceId = documentReference.getId();
 
-                    // Thêm các item của hóa đơn
-                    addInvoiceItems(invoiceId, listMonAnDaChon);
+                    // Cập nhật hoa_don_id
+                    Map<String, Object> updateData = new HashMap<>();
+                    updateData.put("hoa_don_id", invoiceId); // Gán hoa_don_id trùng với ID
 
-                    // Chuyển sang CreateInvoiceActivity
-                    Intent intent = new Intent(this, CreateInvoiceActivity.class);
-                    intent.putExtra("invoiceId", invoiceId);
-                    startActivity(intent);
+                    // Cập nhật hóa đơn với hoa_don_id
+                    firestore.collection("invoices").document(invoiceId)
+                            .update(updateData)
+                            .addOnSuccessListener(aVoid -> {
+                                // Thêm các item của hóa đơn
+                                addInvoiceItems(invoiceId, listMonAnDaChon);
+
+                                // Chuyển sang CreateInvoiceActivity
+                                Intent intent = new Intent(this, CreateInvoiceActivity.class);
+                                intent.putExtra("invoiceId", invoiceId);
+                                startActivity(intent);
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Lỗi khi cập nhật hoa_don_id", Toast.LENGTH_SHORT).show();
+                            });
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Lỗi khi tạo hóa đơn", Toast.LENGTH_SHORT).show();
@@ -195,7 +207,7 @@ public class DanhSachDaChon extends AppCompatActivity {
     private void addInvoiceItems(String invoiceId, List<Food> listMonAnDaChon) {
         for (Food food : listMonAnDaChon) {
             Map<String, Object> itemData = new HashMap<>();
-            itemData.put("hoa_don_id", invoiceId);
+            itemData.put("hoa_don_id", invoiceId); // Sử dụng invoiceId đã tạo
             itemData.put("ten_mon_an", food.getName());
             itemData.put("so_luong", food.getSoLuong());
             itemData.put("gia", Double.parseDouble(food.getPrice()));

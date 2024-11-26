@@ -267,20 +267,25 @@ public class ThanhToan extends AppCompatActivity {
     private void showAlert(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message)
-                .setPositiveButton("OK", (dialog, id) ->
-                {
-                    DanhSachDaChon.btnThanhToan.setVisibility(View.GONE);
-                    DanhSachDaChon.btnHuyDon.setVisibility(View.GONE);
-                    DanhSachDaChon.edtGhiChu.setEnabled(false);
-                    DanhSachDaChon.overlayView.setVisibility(View.VISIBLE);
-                    btnThanhToan.setVisibility(View.GONE);
-                    btnBackHome.setVisibility(View.VISIBLE);
-                    DanhSachDaChon.btnBack.setVisibility(View.GONE);
+                .setPositiveButton("OK", (dialog, id) -> {
+                    // Gọi phương thức để cập nhật UI
+                    updateUIAfterPayment();
                     dialog.dismiss();
                 });
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void updateUIAfterPayment() {
+        // Cập nhật UI sau khi thanh toán thành công
+        DanhSachDaChon.btnThanhToan.setVisibility(View.GONE);
+        DanhSachDaChon.btnHuyDon.setVisibility(View.GONE);
+        DanhSachDaChon.edtGhiChu.setEnabled(false);
+        DanhSachDaChon.overlayView.setVisibility(View.VISIBLE);
+        btnThanhToan.setVisibility(View.GONE);
+        btnBackHome.setVisibility(View.VISIBLE);
+        DanhSachDaChon.btnBack.setVisibility(View.GONE);
     }
 
     private void Event() {

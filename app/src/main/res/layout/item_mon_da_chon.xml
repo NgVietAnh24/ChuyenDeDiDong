@@ -97,6 +97,7 @@
                             android:layout_height="30dp"
                             android:background="@drawable/rounded_btn"
                             android:text="hủy"
+                            android:visibility="gone"
                             android:textColor="@color/textColor" />
 
                     </LinearLayout>

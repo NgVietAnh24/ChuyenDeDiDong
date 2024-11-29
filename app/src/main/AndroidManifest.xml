@@ -15,9 +15,9 @@
         <activity
             android:name=".activities.LichSuDauBep"
             android:exported="false" />
-        <!-- <activity -->
-        <!-- android:name=".activities.HomeDauBep" -->
-        <!-- android:exported="false" /> -->
+         <activity
+         android:name=".activities.HomeDauBep"
+         android:exported="false" />
         <activity
             android:name=".activities.ThanhToan"
             android:exported="true"
